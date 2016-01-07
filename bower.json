@@ -11,11 +11,11 @@
     "angular-route": "^1.4.0",
     "angular-sanitize": "^1.4.0",
     "angular-touch": "^1.4.0",
-    "angular-file-upload": "~2.2.0"
+    "ng-file-upload": "~11.0.2",
+    "ng-file-upload-shim": "~11.0.2"
   },
   "devDependencies": {
-    "angular-mocks": "^1.4.0",
-    "angular-file-upload": "~2.2.0"
+    "angular-mocks": "^1.4.0"
   },
   "appPath": "app",
   "moduleName": "frontEndApp",
