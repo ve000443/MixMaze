@@ -35,6 +35,7 @@ angular
         templateUrl: 'views/loadSong.html',
         controller: 'LoadSongCtrl',
         controllerAs: 'loadSong'
+      })
       .when('/upload', {
         templateUrl: 'views/upload.html',
         controller: 'UploadCtrl',
