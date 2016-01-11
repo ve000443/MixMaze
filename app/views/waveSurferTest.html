@@ -1,4 +1,5 @@
 <div id="wave"></div>
+
 <button class="btn btn-primary" ng-click="waveSurferTest.playPause()">
   <i class="glyphicon glyphicon-play"></i>
   Play
@@ -6,3 +7,12 @@
   <i class="glyphicon glyphicon-pause"></i>
   Pause
 </button>
+
+<button class="btn btn-primary" ng-click="waveSurferTest.stop()">
+  <i class="glyphicon glyphicon-stop"></i>
+  Stop
+</button>
+
+<div>
+  volume <input ng-change="waveSurferTest.updateVolume()" ng-model="waveSurferTest.volume">
+</div>
