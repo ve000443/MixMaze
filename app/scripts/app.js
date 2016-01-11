@@ -16,8 +16,7 @@ angular
     'ngResource',
     'ngRoute',
     'ngSanitize',
-    'ngTouch',
-    'angularFileUpload'
+    'ngTouch'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -35,6 +34,7 @@ angular
         templateUrl: 'views/loadSong.html',
         controller: 'LoadSongCtrl',
         controllerAs: 'loadSong'
+      })
       .when('/upload', {
         templateUrl: 'views/upload.html',
         controller: 'UploadCtrl',

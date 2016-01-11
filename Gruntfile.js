@@ -28,6 +28,34 @@ module.exports = function (grunt) {
   // Define the configuration for all the tasks
   grunt.initConfig({
 
+    app: {
+      // Application variables
+      scripts: [
+        // JS files to be included by includeSource task into index.html
+        'scripts/app/app.js',
+        'scripts/app/app.constants.js',
+        'scripts/components/**/*.js',
+        'scripts/app/**/*.js'
+      ]
+    },
+
+    includeSource: {
+      // Task to include files into index.html
+      options: {
+        //basePath: 'src/main/webapp',
+        basePath: 'app',
+        baseUrl: '',
+        ordering: 'top-down'
+      },
+      app: {
+        files: {
+          //'src/main/webapp/index.html': 'src/main/webapp/index.html'
+          'app/index.html': 'app/index.html'
+          // you can add karma config as well here if want inject to karma as well
+        }
+      }
+    },
+
     // Project settings
     yeoman: appConfig,
 
@@ -64,6 +92,15 @@ module.exports = function (grunt) {
           '.tmp/styles/{,*/}*.css',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
+      },
+      includeSource: {
+        // Watch for added and deleted scripts to update index.html
+        //files: 'src/main/webapp/scripts/**/*.js',
+        files: 'app/scripts/**/*.js',
+        tasks: ['includeSource'],
+        options: {
+          event: ['added', 'deleted']
+        }
       }
     },
 
@@ -220,7 +257,7 @@ module.exports = function (grunt) {
             }
           }
       }
-    }, 
+    },
 
     // Renames files for browser caching purposes
     filerev: {
@@ -262,6 +299,7 @@ module.exports = function (grunt) {
         assetsDirs: [
           '<%= yeoman.dist %>',
           '<%= yeoman.dist %>/images',
+          '<%= yeoman.dist %>/resources',
           '<%= yeoman.dist %>/styles'
         ],
         patterns: {
@@ -435,6 +473,7 @@ module.exports = function (grunt) {
     grunt.task.run([
       'clean:server',
       'wiredep',
+      'includeSource',
       'concurrent:server',
       'postcss:server',
       'connect:livereload',
@@ -459,6 +498,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:dist',
     'wiredep',
+    'includeSource',
     'useminPrepare',
     'concurrent:dist',
     'postcss',
