@@ -40,6 +40,11 @@ angular
         controller: 'UploadCtrl',
         controllerAs: 'upload'
       })
+      .when('/waveSurferTest', {
+        templateUrl: 'views/wavesurfertest.html',
+        controller: 'WaveSurferTestCtrl',
+        controllerAs: 'waveSurferTest'
+      })
       .otherwise({
         redirectTo: '/'
       });
