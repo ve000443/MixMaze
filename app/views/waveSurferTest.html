@@ -1,18 +1,46 @@
-<div id="wave"></div>
-
-<button class="btn btn-primary" ng-click="waveSurferTest.playPause()">
-  <i class="glyphicon glyphicon-play"></i>
-  Play
-  /
-  <i class="glyphicon glyphicon-pause"></i>
-  Pause
-</button>
-
-<button class="btn btn-primary" ng-click="waveSurferTest.stop()">
-  <i class="glyphicon glyphicon-stop"></i>
-  Stop
-</button>
-
+<!-- Play/Pause Stop & Record -->
 <div>
-  volume <input ng-change="waveSurferTest.updateVolume()" ng-model="waveSurferTest.volume">
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="waveSurferTest.playPause()">
+    <i class="glyphicon glyphicon-play"></i>
+    Play
+    /
+    <i class="glyphicon glyphicon-pause"></i>
+    Pause
+  </button>
+
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="waveSurferTest.stop()">
+    <i class="glyphicon glyphicon-stop"></i>
+    Stop
+  </button>
 </div>
+
+<hr>
+
+
+<!-- Panoramique -->
+<div>
+  <input data-action="pan" type="range" min="-45" max="45" value="0" style="width: 35px" />
+</div>
+
+
+<!-- Volume sliders -->
+<div>
+  <canvas nx="slider" min="0" max="100"></canvas>
+</div>
+
+
+<!-- Solo & Mute -->
+<div>
+  <canvas id="solo" nx="toggle" width="16" height="16"></canvas>
+  <canvas id="mute" nx="toggle" width="16" height="16"></canvas>
+</div>
+
+<hr>
+
+
+<!-- WaveForm -->
+<div id="wave">Track 1</div>
+
+<hr>
+
+<canvas nx="dial" min="0" max="100" label="freq"></canvas>

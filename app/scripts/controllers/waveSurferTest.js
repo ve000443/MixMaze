@@ -12,38 +12,73 @@ angular.module('frontEndApp')
     ];
     vm.volume = 1;
 
-
-
-    var wavesurfer = WaveSurfer.create({
+    vm.wavesurfer = WaveSurfer.create({
       container: '#wave',
-      waveColor: 'grey',
-      progressColor: 'black'
+      waveColor: '#bbb',
+      progressColor: '#347'
     });
 
-    /*wavesurfer.init({
-      container: document.querySelector('#wave'),
-      backend: 'MediaElement'
-    });
-
-    document.querySelector('#slider').oninput = function () {
-      wavesurfer.zoom(Number(this.value));
-    };*/
-
-    wavesurfer.on('ready', function () {
+    vm.wavesurfer.on('ready', function () {
       console.log("song ready");
     });
 
-    wavesurfer.load('instru_stronger_than_me.mp3');
+    vm.wavesurfer.load('instru_stronger_than_me.mp3');
 
     vm.playPause = function(){
-      wavesurfer.playPause();
+      vm.wavesurfer.playPause();
     };
 
     vm.stop = function(){
-      wavesurfer.stop();
+      vm.wavesurfer.stop();
     };
 
-    vm.updateVolume = function(){
-      wavesurfer.setVolume(vm.volume);
+    vm.updateVolume = function(track, value){
+      vm.wavesurfer.setVolume(value);
     };
+
+
+    // Panner
+    (function () {
+      // Add panner
+      vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+
+      // Bind panner slider
+      // @see http://stackoverflow.com/a/14412601/352796
+      var onChange = function () {
+        var xDeg = parseInt(slider.value);
+        var x = Math.sin(xDeg * (Math.PI / 180));
+        vm.wavesurfer.panner.setPosition(x, 0, 0);
+      };
+      var slider = document.querySelector('[data-action="pan"]');
+      slider.addEventListener('input', onChange);
+      slider.addEventListener('change', onChange);
+      onChange();
+    }());
+
+
+
+    nx.onload = function() {
+
+      nx.colorize("accent", "#347");
+      nx.colorize("border", "#bbb");
+      nx.colorize("fill", "#eee");
+
+      slider1.on('*', function (data) {
+        var value = data.value / 100;
+        vm.updateVolume(1, value);
+      });
+      slider1.set({
+        value: 80
+      });
+
+      solo.on('*', function (data) {
+        console.log(data.value);
+      });
+
+      mute.on('*', function (data) {
+        console.log(data.value);
+      });
+
+    }
   });
