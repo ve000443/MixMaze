@@ -2,7 +2,7 @@
 
 
 angular.module('frontEndApp')
-  .controller('WaveSurferTestCtrl', function ($rootScope) {
+  .controller('WaveSurferTestCtrl', function () {
 
     var vm = this;
 
@@ -81,4 +81,16 @@ angular.module('frontEndApp')
       });
 
     }
+
+
+
+    var knobs = document.getElementsByTagName('webaudio-knob');
+    for (var i = 0; i < knobs.length; i++) {
+      var knob = knobs[i];
+      knob.addEventListener('change', function(e) {
+        console.log(e.target.value);
+      });
+    }
+
+
   });
