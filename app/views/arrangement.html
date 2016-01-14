@@ -3,7 +3,7 @@
 
 <!-- Play/Pause Stop & Record -->
 <div>
-  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playPause()">
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
     <i class="glyphicon glyphicon-play"></i>
     Play
     /
@@ -11,7 +11,7 @@
     Pause
   </button>
 
-  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.stop()">
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
     <i class="glyphicon glyphicon-stop"></i>
     Stop
   </button>
@@ -34,9 +34,14 @@
 
 <!-- Solo & Mute -->
 <div>
-  <canvas id="solo" nx="toggle" width="16" height="16"></canvas>
-  <canvas id="mute" nx="toggle" width="16" height="16"></canvas>
+  <button id="solo">solo</button>
+  <button id="mute">mute</button>
 </div>
+
+
+<hr>
+
+
 
 <div>
   <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
@@ -44,12 +49,28 @@
 
 <hr>
 
+<div ng-repeat="track in arrangement.listOfSound">
+  <!-- Panoramique -->
+  <div>
+    <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+  </div>
 
-<!-- WaveForm -->
-<div id="wave">Track 1</div>
 
-<hr>
+  <!-- Volume sliders -->
+  <div>
+    <webaudio-knob id="slider{{$index}}" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
+  </div>
 
+
+  <!-- Solo & Mute -->
+  <div>
+    <button id="solo{{$index}}">solo</button>
+    <button id="mute{{$index}}">mute</button>
+  </div>
+
+  <!-- WaveForm -->
+  <div id="wave{{$index}}">{{$index}}</div>
+</div>
 
 
 <!--

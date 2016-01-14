@@ -2,27 +2,56 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function () {
+  .controller('ArrangementCtrl', function ($timeout) {
 
     var vm = this;
 
     vm.listOfSound = [
-      'cloud_beat.wav',
-      'instru_stronger_than_me.mp3'
+      'tracks/synth.mp3',
+      'tracks/vocal.mp3',
+      'tracks/drums.mp3'
     ];
+
+    vm.listOfWaves = [];
+
     vm.volume = 1;
 
-    vm.wavesurfer = WaveSurfer.create({
-      container: '#wave',
-      waveColor: '#bbb',
-      progressColor: '#347'
-    });
+    vm.initWaves = function() {
+      for (var i = 0; i < vm.listOfSound.length; i++) {
+        var cont = '#wave' + i;
+        vm.wavesurfer = WaveSurfer.create({
+          container: cont,
+          waveColor: '#bbb',
+          progressColor: '#347'
+        });
 
-    vm.wavesurfer.on('ready', function () {
-      console.log("song ready");
-    });
+        vm.wavesurfer.on('ready', function () {
+          console.log("song ready");
+        });
 
-    vm.wavesurfer.load('instru_stronger_than_me.mp3');
+        vm.wavesurfer.load(vm.listOfSound[i]);
+
+        vm.listOfWaves.push(vm.wavesurfer);
+      }
+    };
+
+
+    vm.playAllTracks = function(){
+      for(var i = 0; i < vm.listOfWaves.length; i++){
+        vm.listOfWaves[i].playPause();
+      }
+    };
+
+    vm.stopAllTracks = function(){
+      for(var i = 0; i < vm.listOfWaves.length; i++){
+        vm.listOfWaves[i].stop();
+      }
+    };
+
+    vm.displayWaves = function(){
+      $timeout(vm.initWaves, 0)
+    };
+    vm.displayWaves();
 
     vm.playPause = function(){
       vm.wavesurfer.playPause();
@@ -100,7 +129,7 @@ angular.module('frontEndApp')
     });
 
     // Add panner
-    vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
     var pan1 = document.getElementById('pan1');
@@ -109,6 +138,6 @@ angular.module('frontEndApp')
       var xDeg = parseInt(pan1.value);
       var x = Math.sin(xDeg * (Math.PI / 180));
       vm.wavesurfer.panner.setPosition(x, 0, 0);
-    });
+    });*/
 
   });
