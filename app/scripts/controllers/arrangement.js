@@ -98,4 +98,17 @@ angular.module('frontEndApp')
       var value = e.target.value / 100;
       vm.updateVolume(1, value);
     });
+
+    // Add panner
+    vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+    vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+
+    var pan1 = document.getElementById('pan1');
+    pan1.addEventListener('change', function(e){
+      console.log(e.target.value);
+      var xDeg = parseInt(pan1.value);
+      var x = Math.sin(xDeg * (Math.PI / 180));
+      vm.wavesurfer.panner.setPosition(x, 0, 0);
+    });
+
   });
