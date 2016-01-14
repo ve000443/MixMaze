@@ -45,6 +45,11 @@ angular
         controller: 'WaveSurferTestCtrl',
         controllerAs: 'waveSurferTest'
       })
+      .when('/arrangement', {
+        templateUrl: 'views/arrangement.html',
+        controller: 'ArrangementCtrl',
+        controllerAs: 'arrangement'
+      })
       .otherwise({
         redirectTo: '/'
       });

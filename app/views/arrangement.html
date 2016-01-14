@@ -1,0 +1,56 @@
+<!-- Needed pour faire marcher les web components de cwilso -->
+<link rel="import" href="../scripts/components/controls.html" >
+
+<!-- Play/Pause Stop & Record -->
+<div>
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playPause()">
+    <i class="glyphicon glyphicon-play"></i>
+    Play
+    /
+    <i class="glyphicon glyphicon-pause"></i>
+    Pause
+  </button>
+
+  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.stop()">
+    <i class="glyphicon glyphicon-stop"></i>
+    Stop
+  </button>
+</div>
+
+<hr>
+
+
+<!-- Panoramique -->
+<div>
+  <webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>
+</div>
+
+
+<!-- Volume sliders -->
+<div>
+  <webaudio-knob id="slider1" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
+</div>
+
+
+<!-- Solo & Mute -->
+<div>
+  <canvas id="solo" nx="toggle" width="16" height="16"></canvas>
+  <canvas id="mute" nx="toggle" width="16" height="16"></canvas>
+</div>
+
+<hr>
+
+
+<!-- WaveForm -->
+<div id="wave">Track 1</div>
+
+<hr>
+
+
+
+<webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
+<webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>
+<webaudio-slider src="img/hsliderbody.png"></webaudio-slider>
+<webaudio-switch src="img/switch_toggle.png" width="32" height="32"></webaudio-switch>
+<webaudio-param src="" link="knob-1"></webaudio-param>
+<webaudio-keyboard keys="25" ></webaudio-keyboard>
