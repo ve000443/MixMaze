@@ -29,12 +29,20 @@ angular.module('frontEndApp')
           console.log("song ready");
         });
 
+        vm.wavesurfer.on('seek', function(progress){
+          if (vm.seeking === true) return;
+          vm.seeking = true;
+          vm.listOfWaves.forEach(function(wave){
+            wave.seekTo(progress);
+          });
+          vm.seeking = false;
+        });
+
         vm.wavesurfer.load(vm.listOfSound[i]);
 
         vm.listOfWaves.push(vm.wavesurfer);
       }
     };
-
 
     vm.playAllTracks = function(){
       for(var i = 0; i < vm.listOfWaves.length; i++){

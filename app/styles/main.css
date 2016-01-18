@@ -85,4 +85,5 @@ body {
 .container{
   max-width: 100%;
   margin:10px;
+  width: 100%;
 }
