@@ -73,7 +73,10 @@ angular.module('frontEndApp')
 
     vm.mute = function(track){
       vm.listOfWaves[track].toggleMute();
+
     };
+
+    vm.solist={};
 
     vm.solo = function(track){
       for(var i = 0; i < vm.listOfWaves.length; i++){

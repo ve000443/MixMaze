@@ -59,8 +59,8 @@
 
     <!-- Solo & Mute -->
     <div class="col-lg-12">
-        <button id="solo{{$index}}" class="btn btn-xs"  ng-click="arrangement.solo($index)">solo</button>
-        <button id="mute{{$index}}" class="btn btn-xs"ng-click="arrangement.mute($index)">mute</button>
+      <button id="solo{{$index}}" class="btn btn-xs" ng-class="{'btn-info':arrangement.solist[$index]}" ng-click="arrangement.solo($index); arrangement.solist[$index]=!arrangement.solist[$index]">s</button>
+      <button id="mute{{$index}}" class="btn btn-xs" ng-class="{'btn-info':arrangement.muted[$index]}" ng-click="arrangement.mute($index); arrangement.muted[$index]=!arrangement.muted[$index]">m</button>
     </div>
   </div>
 
