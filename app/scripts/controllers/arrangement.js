@@ -48,6 +48,12 @@ angular.module('frontEndApp')
       }
     };
 
+    vm.updateAllTracksVolume = function(value){
+      for(var i = 0; i < vm.listOfWaves.length; i++){
+        // gerer le volume
+      }
+    };
+
     vm.displayWaves = function(){
       $timeout(vm.initWaves, 0)
     };
@@ -65,6 +71,37 @@ angular.module('frontEndApp')
       vm.wavesurfer.setVolume(value);
     };
 
+    vm.mute = function(track){
+      vm.listOfWaves[track].toggleMute();
+    };
+
+    vm.solo = function(track){
+      for(var i = 0; i < vm.listOfWaves.length; i++){
+        if(i != track){
+          vm.listOfWaves[i].toggleMute();
+        }
+      }
+    };
+
+    vm.updatePan = function(track, value){
+
+      console.log("updatePan(" + track + "," + value + ")");
+      /*// Add panner
+      vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+
+      // Bind panner slider
+      // @see http://stackoverflow.com/a/14412601/352796
+      var onChange = function () {
+        var xDeg = parseInt(slider.value);
+        var x = Math.sin(xDeg * (Math.PI / 180));
+        vm.wavesurfer.panner.setPosition(x, 0, 0);
+      };
+      var slider = document.querySelector('[data-action="pan"]');
+      slider.addEventListener('input', onChange);
+      slider.addEventListener('change', onChange);
+      onChange();*/
+    };
 
     // Panner
     /*(function () {
@@ -121,11 +158,11 @@ angular.module('frontEndApp')
       });
     }
 
-    var slider1 = document.getElementById('slider1');
-    slider1.addEventListener('change', function(e) {
-      console.log(e.target.value);
+    var sliderGeneral = document.getElementById('sliderGeneral');
+    sliderGeneral.addEventListener('change', function(e) {
+      console.log("volume general : " + e.target.value);
       var value = e.target.value / 100;
-      vm.updateVolume(1, value);
+      vm.updateAllTracksVolume(value);
     });
 
     // Add panner

@@ -22,20 +22,13 @@
 
 <!-- Panoramique -->
 <div>
-  <webaudio-knob id="pan1" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+  <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
 </div>
 
 
 <!-- Volume sliders -->
 <div>
-  <webaudio-knob id="slider1" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
-</div>
-
-
-<!-- Solo & Mute -->
-<div>
-  <button id="solo">solo</button>
-  <button id="mute">mute</button>
+  <webaudio-knob id="sliderGeneral" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
 </div>
 
 
@@ -50,8 +43,14 @@
 <hr>
 
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
+<<<<<<< HEAD
   <!-- Panoramique -->
   <div class="col-lg-1">
+=======
+  <hr>
+  <div class="col-lg-1">
+    <!-- Panoramique -->
+>>>>>>> d8d559bbb5608dd1763374e75b7cbcad37e04b59
     <div class="col-lg-12">
       <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
     </div>
@@ -65,11 +64,10 @@
 
     <!-- Solo & Mute -->
     <div class="col-lg-12">
-        <button id="solo{{$index}}" class="btn btn-xs">s</button>
-        <button id="mute{{$index}}" class="btn btn-xs">m</button>
+        <button id="solo{{$index}}" class="btn btn-xs"  ng-click="arrangement.solo($index)">solo</button>
+        <button id="mute{{$index}}" class="btn btn-xs"ng-click="arrangement.mute($index)">mute</button>
     </div>
   </div>
-
 
   <!-- WaveForm -->
   <div id="wave{{$index}}" class="col-lg-11" style="padding:0">{{$index}}</div>
