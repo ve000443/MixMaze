@@ -51,7 +51,7 @@
 
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
   <!-- Panoramique -->
-  <div class="col-lg-3">
+  <div class="col-lg-1">
     <div class="col-lg-12">
       <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
     </div>
@@ -65,14 +65,14 @@
 
     <!-- Solo & Mute -->
     <div class="col-lg-12">
-        <button id="solo{{$index}}">solo</button>
-        <button id="mute{{$index}}">mute</button>
+        <button id="solo{{$index}}" class="btn btn-xs">s</button>
+        <button id="mute{{$index}}" class="btn btn-xs">m</button>
     </div>
   </div>
 
 
   <!-- WaveForm -->
-  <div id="wave{{$index}}" class="col-lg-9" style="padding:0">{{$index}}</div>
+  <div id="wave{{$index}}" class="col-lg-11" style="padding:0">{{$index}}</div>
 
 </div>
 
