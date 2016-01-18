@@ -5,6 +5,7 @@ angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($timeout) {
 
     var vm = this;
+    vm.generalVolume = 80;
 
     vm.listOfSound = [
       'tracks/synth.mp3',
@@ -32,8 +33,13 @@ angular.module('frontEndApp')
         vm.wavesurfer.on('seek', function(progress){
           if (vm.seeking === true) return;
           vm.seeking = true;
+          var willPlay = false;
+          vm.listOfWaves.forEach(function(wave){
+            willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
+          });
           vm.listOfWaves.forEach(function(wave){
             wave.seekTo(progress);
+            if(willPlay) wave.play();
           });
           vm.seeking = false;
         });
@@ -56,9 +62,18 @@ angular.module('frontEndApp')
       }
     };
 
+    vm.updateTrackVolume = function(index){
+      //console.log(vm.generalVolume/100);
+      //console.log(vm.sliders['slider'+index]);
+      //console.log(vm.sliders['slider'+index] * vm.generalVolume/100);
+      vm.listOfWaves[index].setVolume(vm.sliders['slider'+index] * vm.generalVolume/100);
+    };
+
     vm.updateAllTracksVolume = function(value){
+      vm.generalVolume = value;
       for(var i = 0; i < vm.listOfWaves.length; i++){
         // gerer le volume
+        vm.updateTrackVolume(i);
       }
     };
 
@@ -157,7 +172,7 @@ angular.module('frontEndApp')
         console.log(data.value);
       });*/
 
-    }
+    };
 
 
 
@@ -165,14 +180,14 @@ angular.module('frontEndApp')
     for (var i = 0; i < knobs.length; i++) {
       var knob = knobs[i];
       knob.addEventListener('change', function(e) {
-        console.log(e.target.value);
+        //console.log(e.target.value);
       });
     }
 
     var sliderGeneral = document.getElementById('sliderGeneral');
     sliderGeneral.addEventListener('change', function(e) {
-      console.log("volume general : " + e.target.value);
-      var value = e.target.value / 100;
+      //console.log("volume general : " + e.target.value);
+      var value = e.target.value;
       vm.updateAllTracksVolume(value);
     });
 
@@ -188,4 +203,27 @@ angular.module('frontEndApp')
       vm.wavesurfer.panner.setPosition(x, 0, 0);
     });*/
 
+    vm.sliders = {};
+
+    vm.volumeStart = function(){
+      //console.log("toto : " + vm.sliders);
+      if(vm.slidersInitialized) return;
+      vm.slidersInitialized = true;
+
+      var keys = Object.keys(vm.sliders);
+
+      keys.forEach(function(key){
+        document.getElementById(key).addEventListener('change', function(e){
+          vm.sliders[key] = e.target.value/100;
+          //console.log(key + "(" + key.split('r')[1] + ") = " + e.target.value);
+          vm.updateTrackVolume(key.split('r')[1]);
+        });
+      });
+      //vm.sliders.forEach(function(value){
+      //  document.getElementById(value).addEventListener('change', function(e){
+      //    vm.listOfWaves[value.split('r')[1]].setVolume(e.target.value/100);
+      //  });
+      //});
+      //console.log(value);
+    };
   });

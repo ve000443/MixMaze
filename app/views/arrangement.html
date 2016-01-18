@@ -28,7 +28,7 @@
     </div>
     <!-- Volume sliders -->
     <div>
-      <webaudio-knob id="sliderGeneral" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
+      <webaudio-knob id="sliderGeneral" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="{{arrangement.generalVolume}}" width="25" height="150"></webaudio-knob>
     </div>
 
   </div>
@@ -50,7 +50,7 @@
 
     <!-- Volume sliders -->
     <div class="col-lg-12">
-      <webaudio-knob id="slider{{$index}}" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150"></webaudio-knob>
+      <webaudio-knob id="slider{{$index}}" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="80" width="25" height="150" ng-init="arrangement.sliders['slider' + $index] = 0.80" ng-mousedown="arrangement.volumeStart()"></webaudio-knob>
     </div>
 
 
@@ -65,6 +65,8 @@
   <div id="wave{{$index}}" class="col-lg-11" style="padding:0">{{$index}}</div>
 
 </div>
+
+{{arrangement.sliders}}
 
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
