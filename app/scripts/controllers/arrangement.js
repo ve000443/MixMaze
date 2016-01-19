@@ -106,7 +106,6 @@ angular.module('frontEndApp')
     };
 
     vm.updateSm = function(track, value){
-      console.log(track + ", " + value);
       if(value == 'solo' && vm.nbSolo == 0 && vm.smState[track] != 'solo'){
         vm.smState[track] = 'solo';
         vm.nbSolo++;
@@ -136,6 +135,13 @@ angular.module('frontEndApp')
         vm.smState[track] = 'mute';
       } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == 'mute'){
         vm.smState[track] = null;
+      }
+    };
+
+    vm.reinitSm = function(){
+      for(var i = 0; i < vm.smState.length; i++){
+        vm.smState[i] = null;
+        vm.nbSolo = 0;
       }
     };
 
