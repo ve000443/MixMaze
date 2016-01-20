@@ -106,6 +106,7 @@ angular.module('frontEndApp')
     };
 
     vm.updateSm = function(track, value){
+      console.log(vm.listOfWaves[track].isMuted);
       if(value == 'solo' && vm.nbSolo == 0 && vm.smState[track] != 'solo'){
         vm.smState[track] = 'solo';
         vm.nbSolo++;
@@ -136,12 +137,25 @@ angular.module('frontEndApp')
       } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == 'mute'){
         vm.smState[track] = null;
       }
+      vm.manageSoloMute(vm.smState);
     };
 
     vm.reinitSm = function(){
       for(var i = 0; i < vm.smState.length; i++){
         vm.smState[i] = null;
         vm.nbSolo = 0;
+      }
+      vm.manageSoloMute(vm.smState);
+    };
+
+    vm.manageSoloMute = function(smState){
+      for(var i = 0; i < smState.length; i++){
+        if(smState[i] == 'mute' && vm.listOfWaves[i].isMuted != true){
+          vm.listOfWaves[i].toggleMute();
+        } else if(smState[i] == 'solo' && vm.listOfWaves[i].isMuted == true
+        || smState[i] == null && vm.listOfWaves[i].isMuted == true){
+          vm.listOfWaves[i].toggleMute();
+        }
       }
     };
 
