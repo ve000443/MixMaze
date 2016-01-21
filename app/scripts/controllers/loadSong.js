@@ -1,7 +1,22 @@
 'use strict';
 
 angular.module('frontEndApp')
-  .controller('LoadSongCtrl', function () {
+  .controller('LoadSongCtrl', function ($http) {
+
+    /**
+     * CONNECTION WITH MONGO DB API
+     */
+    $http.get("http://xythe.xyz:8080").then(
+
+      function successCallback(response){
+        console.log(response.data);
+        // this callback will be called asynchronously
+        // when the response is available
+      }, function errorCallback(response) {
+        console.error;
+        // called asynchronously if an error occurs
+        // or server returns response with an error status
+    });
 
     var vm = this;
 
@@ -9,8 +24,8 @@ angular.module('frontEndApp')
     var ctx;
 
     var listOfSoundSamplesURLs = [
-      'http://mainline.i3s.unice.fr/mooc/shoot1.mp3',
-      'http://mainline.i3s.unice.fr/mooc/shoot2.mp3'
+      'http://5.39.81.217/mixmaze/musics/DireStraits/voix.mp3',
+      'http://5.39.81.217/mixmaze/musics/DireStraits/guitare.mp3'
     ];
 
     this.loadSamples = function(){
