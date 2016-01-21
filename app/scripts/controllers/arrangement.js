@@ -17,6 +17,16 @@ angular.module('frontEndApp')
 
     vm.volume = 1;
 
+    vm.smState = [];
+    vm.nbSolo = 0;
+
+    vm.init = function(){
+      vm.displayWaves();
+      for(var i = 0; i < vm.listOfSound.length; i++){
+        vm.smState[i] = null;
+      }
+    };
+
     vm.initWaves = function() {
       for (var i = 0; i < vm.listOfSound.length; i++) {
         var cont = '#wave' + i;
@@ -77,7 +87,6 @@ angular.module('frontEndApp')
     vm.displayWaves = function(){
       $timeout(vm.initWaves, 0)
     };
-    vm.displayWaves();
 
     vm.playPause = function(){
       vm.wavesurfer.playPause();
@@ -96,7 +105,59 @@ angular.module('frontEndApp')
 
     };
 
-    vm.solist={};
+    vm.updateSm = function(track, value){
+      console.log(vm.listOfWaves[track].isMuted);
+      if(value == 'solo' && vm.nbSolo == 0 && vm.smState[track] != 'solo'){
+        vm.smState[track] = 'solo';
+        vm.nbSolo++;
+        for(var i = 0; i < vm.smState.length; i++){
+          if(i != track){
+            vm.smState[i] = 'mute';
+          }
+        }
+      } else if(value == 'solo' && vm.nbSolo > 0 && vm.smState[track] != 'solo'){
+        vm.smState[track] = 'solo';
+        vm.nbSolo++;
+      } else if(value == 'mute' && vm.nbSolo > 0 && vm.smState[track] == 'mute'){
+        vm.smState[track] = 'solo';
+        vm.nbSolo++;
+      } else if(value == 'mute' && vm.smState[track] == 'solo'){
+        vm.smState[track] = 'mute';
+        vm.nbSolo--;
+      } else if(value == 'solo' && vm.smState[track] == 'solo' && vm.nbSolo > 1){
+        vm.smState[track] = 'mute';
+        vm.nbSolo--;
+      } else if(value == 'solo' && vm.smState[track] == 'solo' && vm.nbSolo == 1){
+        for(var i = 0; i < vm.smState.length; i++) {
+          vm.smState[i] = null;
+        }
+        vm.nbSolo--;
+      } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == null){
+        vm.smState[track] = 'mute';
+      } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == 'mute'){
+        vm.smState[track] = null;
+      }
+      vm.manageSoloMute(vm.smState);
+    };
+
+    vm.reinitSm = function(){
+      for(var i = 0; i < vm.smState.length; i++){
+        vm.smState[i] = null;
+        vm.nbSolo = 0;
+      }
+      vm.manageSoloMute(vm.smState);
+    };
+
+    vm.manageSoloMute = function(smState){
+      for(var i = 0; i < smState.length; i++){
+        if(smState[i] == 'mute' && vm.listOfWaves[i].isMuted != true){
+          vm.listOfWaves[i].toggleMute();
+        } else if(smState[i] == 'solo' && vm.listOfWaves[i].isMuted == true
+        || smState[i] == null && vm.listOfWaves[i].isMuted == true){
+          vm.listOfWaves[i].toggleMute();
+        }
+      }
+    };
 
     vm.solo = function(track){
       for(var i = 0; i < vm.listOfWaves.length; i++){
@@ -215,4 +276,6 @@ angular.module('frontEndApp')
         });
       });
     };
+
+    vm.init();
   });
