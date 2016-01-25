@@ -73,6 +73,9 @@ angular.module('frontEndApp')
     };
 
     vm.updateTrackVolume = function(index){
+      if(vm.smState[index] == "mute"){
+        vm.smState[index] = null;
+      }
       vm.listOfWaves[index].setVolume(vm.sliders['slider'+index]/100 * vm.generalVolume/100);
     };
 
