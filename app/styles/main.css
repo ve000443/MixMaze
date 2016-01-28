@@ -88,7 +88,11 @@ body {
   width: 100%;
 }
 
-.footer{
+.player{
   z-index:1000;
   background-color: lightcyan;
+}
+
+.topmost{
+  z-index:1000;
 }
