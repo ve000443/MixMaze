@@ -48,10 +48,12 @@
 <webaudio-keyboard keys="25" ></webaudio-keyboard>
 -->
 
+
 <div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegion">
-  {{selectedRegion}} : {{arrangement.effects[selectedRegion]['mute']}}
+  {{selectedRegion}} : {{arrangement.effects[selectedRegion]}}
   <br>
   <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['mute']=!arrangement.effects[selectedRegion]['mute']">Mute</button>
+  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['fadein']=!arrangement.effects[selectedRegion]['fadein']">Fade in</button>
 </div>
 
 <div class="col-lg-12 jumbotron player" style="padding:0;margin:0;position:fixed;bottom:0;left:0;right:0">

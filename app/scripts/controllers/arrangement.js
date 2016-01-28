@@ -18,7 +18,6 @@ angular.module('frontEndApp')
           ~~(Math.random() * 255),
           alpha || 1
         ] + ')';
-
     }
 
     vm.generalVolume = 80;
@@ -155,6 +154,8 @@ angular.module('frontEndApp')
 
     vm.effects = {};
 
+    vm.activeEffects = {};
+
     vm.listOfWaves = [];
 
     vm.volume = 1;
@@ -170,12 +171,15 @@ angular.module('frontEndApp')
     };
 
     function activateEffects(region) {
+      var effects = vm.effects[region.id];
       if(vm.effects[region.id].mute && !region.wavesurfer.isMuted){
         region.wavesurfer.toggleMute();
       }
       else if (!vm.effects[region.id].mute && region.wavesurfer.isMuted){
         region.wavesurfer.toggleMute();
       }
+
+      if(effects.fadein) vm.activeEffects[region.id] = {fadein:true};
     }
 
     function deactivateEffects(region) {
@@ -188,9 +192,17 @@ angular.module('frontEndApp')
         region.wavesurfer.toggleMute();
       }
 
+      delete vm.activeEffects[region.id];
 
       if(vm.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
       else if(vm.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+    }
+
+    function evolveEffects(){
+      var keys = Object.keys(vm.activeEffects);
+      keys.forEach(function(key){
+        console.log(key);
+      });
     }
 
     vm.initWaves = function() {
@@ -202,6 +214,10 @@ angular.module('frontEndApp')
           waveColor: '#bbb',
           progressColor: '#347'
         }));
+
+        if(i === 0){
+          vm.listOfWaves[i].on('audioprocess', evolveEffects);
+        }
 
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
