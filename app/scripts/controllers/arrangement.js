@@ -17,10 +17,9 @@ angular.module('frontEndApp')
 
     }
 
-
     var vm = this;
     vm.generalVolume = 80;
-    $rootScope.selectedRegion = {};
+    $rootScope.selectedRegion = "";
 
     vm.listOfSound = [
       'tracks/synth.mp3',
@@ -44,14 +43,33 @@ angular.module('frontEndApp')
       }
     };
 
+    function activateEffects(region) {
+      if(vm.effects[region.id].mute && !region.wavesurfer.isMuted){
+        region.wavesurfer.toggleMute();
+      }
+      else if (!vm.effects[region.id].mute && region.wavesurfer.isMuted){
+        region.wavesurfer.toggleMute();
+      }
+    }
+
+    function deactivateEffects(region) {
+      var waveId = region.wavesurfer.container.id.split("wave")[1];
+
+      if(vm.effects[region.id].mute && region.wavesurfer.isMuted){
+        region.wavesurfer.toggleMute();
+      }
+      else if (!vm.effects[region.id].mute && !region.wavesurfer.isMuted){
+        region.wavesurfer.toggleMute();
+      }
+
+
+      if(vm.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+      else if(vm.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+    }
+
     vm.initWaves = function() {
       for (var i = 0; i < vm.listOfSound.length; i++) {
         var cont = '#wave' + i;
-        //vm.wavesurfer = WaveSurfer.create({
-        //  container: cont,
-        //  waveColor: '#bbb',
-        //  progressColor: '#347'
-        //});
 
         vm.listOfWaves.push(WaveSurfer.create({
           container: cont,
@@ -92,10 +110,14 @@ angular.module('frontEndApp')
 
         vm.listOfWaves[i].on('region-created', function(region, e){
           $rootScope.selectedRegion = region.id;
+          vm.effects[region.id] = {mute:false};
           $rootScope.$digest();
           //console.log(region.wavesurfer);
           //console.log(wave.regions.list);
         });
+
+        vm.listOfWaves[i].on('region-in', activateEffects);
+        vm.listOfWaves[i].on('region-out', deactivateEffects);
 
         //vm.wavesurfer.on('region-removed', saveRegions);
         //vm.wavesurfer.on('region-in', showNote);

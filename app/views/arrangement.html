@@ -28,9 +28,6 @@
 
 </div>
 
-{{arrangement.smState}}
-{{arrangement.nbSolo}}
-
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
 <webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>
@@ -40,7 +37,13 @@
 <webaudio-keyboard keys="25" ></webaudio-keyboard>
 -->
 
-<div class="col-lg-12 jumbotron footer" style="padding:0;margin:0;position:fixed;bottom:0;left:0;">
+<div class="col-lg-3 jumbotron" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegion">
+  {{selectedRegion}} : {{arrangement.effects[selectedRegion]['mute']}}
+  <br>
+  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['mute']=!arrangement.effects[selectedRegion]['mute']">Mute</button>
+</div>
+
+<div class="col-lg-12 jumbotron footer" style="padding:0;margin:0;position:fixed;bottom:0;left:0;right:0">
   <div class="col-lg-4">
     <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
       <i class="glyphicon glyphicon-play"></i>
@@ -61,7 +64,7 @@
   </div>
   <!-- Volume Knob -->
   <div class="col-lg-2">
-    <webaudio-knob id="sliderGeneral" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="{{arrangement.generalVolume}}" width="64" height="64" ng-mousemove=""></webaudio-knob>
+    <webaudio-knob id="sliderGeneral" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="{{arrangement.generalVolume}}" ng-init="arrangement.generalVolume = 80" width="64" height="64" ng-mousemove=""></webaudio-knob>
   </div>
 
   <div class="col-lg-4">
