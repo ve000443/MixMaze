@@ -2,7 +2,11 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($timeout, $rootScope) {
+  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope) {
+    var vm = this;
+    vm.listOfSound = [];
+    var bufferLoader;
+    var ctx;
 
     /**
      * Random RGBA color.
@@ -17,15 +21,137 @@ angular.module('frontEndApp')
 
     }
 
-    var vm = this;
     vm.generalVolume = 80;
     $rootScope.selectedRegion = "";
 
-    vm.listOfSound = [
-      'tracks/synth.mp3',
-      'tracks/vocal.mp3',
-      'tracks/drums.mp3'
-    ];
+    $http.get("http://xythe.xyz:8080/musics").then(
+
+      function successCallback(response){
+        $rootScope.musics = response.data;
+        $rootScope.musics.forEach(function(o){
+        });
+
+        // this callback will be called asynchronously
+        // when the response is available
+      }, function errorCallback(response) {
+        console.error;
+        // called asynchronously if an error occurs
+        // or server returns response with an error status
+      });
+
+
+
+    vm.loadSamples = function(){
+      $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
+        function successCallback(response){
+          console.log(response.data);
+          $rootScope.pistes = response.data.musicFiles;
+
+          $rootScope.pistes.forEach(function(p){
+            vm.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+            console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+          });
+          //=========================================A enlever quand on veut vraiment lire depuis serv======================================
+          vm.listOfSound=[
+            'tracks/synth.mp3',
+            'tracks/vocal.mp3',
+            'tracks/drums.mp3',
+          ];
+          //======================================================================================================================
+
+          var audioContext = window.AudioContext || window.webkitAudioContext;
+
+          ctx = new audioContext();
+
+          loadAllSoundSamples();
+          // this callback will be called asynchronously
+          // when the response is available
+        }, function errorCallback(response) {
+          console.error;
+          // called asynchronously if an error occurs
+          // or server returns response with an error status
+        });
+
+    };
+
+    function loadAllSoundSamples() {
+      // onSamplesDecoded will be called when all samples
+      // have been loaded and decoded, and the decoded sample will
+      // be its only parameter (see function above)
+      bufferLoader = new BufferLoader(
+        ctx,
+        vm.listOfSound
+      );
+
+      // start loading and decoding the files
+      bufferLoader.load();
+    }
+
+    function BufferLoader(context, urlList) {
+      this.context = context;
+      this.urlList = urlList;
+      this.bufferList = [];
+      this.loadCount = 0;
+    }
+
+    BufferLoader.prototype.loadBuffer = function(url, index) {
+      // Load buffer asynchronously
+      console.log('file : ' + url + " loading and decoding");
+
+      var request = new XMLHttpRequest();
+      request.open("GET", url, true);
+
+      request.responseType = "arraybuffer";
+
+      var loader = this;
+
+      request.onload = function() {
+
+        // Asynchronously decode the audio file data in request.response
+        loader.context.decodeAudioData(
+          request.response,
+          function(buffer) {
+            console.log("Loaded and decoded track " + (loader.loadCount+1) +
+              "/" +  loader.urlList.length + "...");
+
+            if (!buffer) {
+              alert('error decoding file data: ' + url);
+              return;
+            }
+            loader.bufferList[index] = buffer;
+
+            if (++loader.loadCount == loader.urlList.length)
+              vm.init();
+
+          },
+          function(error) {
+            console.error('decodeAudioData error', error);
+          }
+        );
+      };
+
+      request.onprogress = function(e) {
+        if(e.total !== 0) {
+          var percent = (e.loaded * 100) / e.total;
+
+          console.log("loaded " + percent  + " % of file " + index);
+        }
+      };
+
+      request.onerror = function() {
+        alert('BufferLoader: XHR error');
+      };
+
+      request.send();
+    };
+
+    BufferLoader.prototype.load = function() {
+      console.log("Loading " + this.urlList.length + "track(s)... please wait...");
+      for (var i = 0; i < this.urlList.length; ++i)
+        this.loadBuffer(this.urlList[i], i);
+    };
+
+    vm.generalVolume = 80;
 
     vm.effects = {};
 
@@ -37,7 +163,7 @@ angular.module('frontEndApp')
     vm.nbSolo = 0;
 
     vm.init = function(){
-      vm.displayWaves();
+      vm.initWaves();
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
@@ -154,10 +280,6 @@ angular.module('frontEndApp')
       }
     };
 
-    vm.displayWaves = function(){
-      $timeout(vm.initWaves, 0)
-    };
-
     vm.playPause = function(){
       vm.wavesurfer.playPause();
     };
@@ -223,7 +345,7 @@ angular.module('frontEndApp')
         if(smState[i] == 'mute' && vm.listOfWaves[i].isMuted != true){
           vm.listOfWaves[i].toggleMute();
         } else if(smState[i] == 'solo' && vm.listOfWaves[i].isMuted == true
-        || smState[i] == null && vm.listOfWaves[i].isMuted == true){
+          || smState[i] == null && vm.listOfWaves[i].isMuted == true){
           vm.listOfWaves[i].toggleMute();
         }
       }
@@ -241,40 +363,40 @@ angular.module('frontEndApp')
 
       console.log("updatePan(" + track + "," + value + ")");
       /*// Add panner
-      vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+       vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+       vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
-      // Bind panner slider
-      // @see http://stackoverflow.com/a/14412601/352796
-      var onChange = function () {
-        var xDeg = parseInt(slider.value);
-        var x = Math.sin(xDeg * (Math.PI / 180));
-        vm.wavesurfer.panner.setPosition(x, 0, 0);
-      };
-      var slider = document.querySelector('[data-action="pan"]');
-      slider.addEventListener('input', onChange);
-      slider.addEventListener('change', onChange);
-      onChange();*/
+       // Bind panner slider
+       // @see http://stackoverflow.com/a/14412601/352796
+       var onChange = function () {
+       var xDeg = parseInt(slider.value);
+       var x = Math.sin(xDeg * (Math.PI / 180));
+       vm.wavesurfer.panner.setPosition(x, 0, 0);
+       };
+       var slider = document.querySelector('[data-action="pan"]');
+       slider.addEventListener('input', onChange);
+       slider.addEventListener('change', onChange);
+       onChange();*/
     };
 
     // Panner
     /*(function () {
-      // Add panner
-      vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+     // Add panner
+     vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
-      // Bind panner slider
-      // @see http://stackoverflow.com/a/14412601/352796
-      var onChange = function () {
-        var xDeg = parseInt(slider.value);
-        var x = Math.sin(xDeg * (Math.PI / 180));
-        vm.wavesurfer.panner.setPosition(x, 0, 0);
-      };
-      var slider = document.querySelector('[data-action="pan"]');
-      slider.addEventListener('input', onChange);
-      slider.addEventListener('change', onChange);
-      onChange();
-    }());*/
+     // Bind panner slider
+     // @see http://stackoverflow.com/a/14412601/352796
+     var onChange = function () {
+     var xDeg = parseInt(slider.value);
+     var x = Math.sin(xDeg * (Math.PI / 180));
+     vm.wavesurfer.panner.setPosition(x, 0, 0);
+     };
+     var slider = document.querySelector('[data-action="pan"]');
+     slider.addEventListener('input', onChange);
+     slider.addEventListener('change', onChange);
+     onChange();
+     }());*/
 
 
 
@@ -285,20 +407,20 @@ angular.module('frontEndApp')
       nx.colorize("fill", "#eee");
 
       /*slider1.on('*', function (data) {
-        var value = data.value / 100;
-        vm.updateVolume(1, value);
-      });
-      slider1.set({
-        value: 80
-      });
+       var value = data.value / 100;
+       vm.updateVolume(1, value);
+       });
+       slider1.set({
+       value: 80
+       });
 
-      solo.on('*', function (data) {
-        console.log(data.value);
-      });
+       solo.on('*', function (data) {
+       console.log(data.value);
+       });
 
-      mute.on('*', function (data) {
-        console.log(data.value);
-      });*/
+       mute.on('*', function (data) {
+       console.log(data.value);
+       });*/
 
     };
 
@@ -319,17 +441,17 @@ angular.module('frontEndApp')
       vm.updateAllTracksVolume(value);
     });
 
-      // Add panner
-      /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+    // Add panner
+    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
-      var pan1 = document.getElementById('pan1');
-      pan1.addEventListener('change', function(e){
-        console.log(e.target.value);
-        var xDeg = parseInt(pan1.value);
-        var x = Math.sin(xDeg * (Math.PI / 180));
-        vm.wavesurfer.panner.setPosition(x, 0, 0);
-      });*/
+     var pan1 = document.getElementById('pan1');
+     pan1.addEventListener('change', function(e){
+     console.log(e.target.value);
+     var xDeg = parseInt(pan1.value);
+     var x = Math.sin(xDeg * (Math.PI / 180));
+     vm.wavesurfer.panner.setPosition(x, 0, 0);
+     });*/
 
     vm.sliders = {};
 
@@ -346,6 +468,4 @@ angular.module('frontEndApp')
         });
       });
     };
-
-    vm.init();
   });
