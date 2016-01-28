@@ -484,4 +484,10 @@ angular.module('frontEndApp')
         });
       });
     };
+
+    vm.nameRecover = function(str){
+      var splitted = str.split("/")
+      return splitted[splitted.length - 1].split(".")[0];
+    };
+
   });
