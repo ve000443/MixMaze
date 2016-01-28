@@ -2,16 +2,33 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($timeout) {
+  .controller('ArrangementCtrl', function ($timeout, $rootScope) {
+
+    /**
+     * Random RGBA color.
+     */
+    function randomColor(alpha) {
+      return 'rgba(' + [
+          ~~(Math.random() * 255),
+          ~~(Math.random() * 255),
+          ~~(Math.random() * 255),
+          alpha || 1
+        ] + ')';
+
+    }
+
 
     var vm = this;
     vm.generalVolume = 80;
+    $rootScope.selectedRegion = {};
 
     vm.listOfSound = [
       'tracks/synth.mp3',
       'tracks/vocal.mp3',
       'tracks/drums.mp3'
     ];
+
+    vm.effects = {};
 
     vm.listOfWaves = [];
 
@@ -30,17 +47,23 @@ angular.module('frontEndApp')
     vm.initWaves = function() {
       for (var i = 0; i < vm.listOfSound.length; i++) {
         var cont = '#wave' + i;
-        vm.wavesurfer = WaveSurfer.create({
+        //vm.wavesurfer = WaveSurfer.create({
+        //  container: cont,
+        //  waveColor: '#bbb',
+        //  progressColor: '#347'
+        //});
+
+        vm.listOfWaves.push(WaveSurfer.create({
           container: cont,
           waveColor: '#bbb',
           progressColor: '#347'
-        });
+        }));
 
-        vm.wavesurfer.on('ready', function () {
+        vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
         });
 
-        vm.wavesurfer.on('seek', function(progress){
+        vm.listOfWaves[i].on('seek', function(progress){
           if (vm.seeking === true) return;
           vm.seeking = true;
           var willPlay = false;
@@ -54,9 +77,32 @@ angular.module('frontEndApp')
           vm.seeking = false;
         });
 
-        vm.wavesurfer.load(vm.listOfSound[i]);
+        vm.listOfWaves[i].enableDragSelection({
+          color: randomColor(0.6)
+        });
 
-        vm.listOfWaves.push(vm.wavesurfer);
+        vm.listOfWaves[i].on('region-click', function (region, e) {
+          e.stopPropagation();
+          $rootScope.selectedRegion = region.id;
+          $rootScope.$digest();
+          // Play on click, loop on shift click
+          //e.shiftKey ? region.playLoop() : region.play();
+        });
+        //vm.wavesurfer.on('region-click', editAnnotation);
+
+        vm.listOfWaves[i].on('region-created', function(region, e){
+          $rootScope.selectedRegion = region.id;
+          $rootScope.$digest();
+          //console.log(region.wavesurfer);
+          //console.log(wave.regions.list);
+        });
+
+        //vm.wavesurfer.on('region-removed', saveRegions);
+        //vm.wavesurfer.on('region-in', showNote);
+
+        vm.listOfWaves[i].load(vm.listOfSound[i]);
+
+        //vm.listOfWaves.push(vm.wavesurfer);
       }
     };
 
@@ -252,17 +298,17 @@ angular.module('frontEndApp')
       vm.updateAllTracksVolume(value);
     });
 
-    // Add panner
-    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-    vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+      // Add panner
+      /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+      vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
-    var pan1 = document.getElementById('pan1');
-    pan1.addEventListener('change', function(e){
-      console.log(e.target.value);
-      var xDeg = parseInt(pan1.value);
-      var x = Math.sin(xDeg * (Math.PI / 180));
-      vm.wavesurfer.panner.setPosition(x, 0, 0);
-    });*/
+      var pan1 = document.getElementById('pan1');
+      pan1.addEventListener('change', function(e){
+        console.log(e.target.value);
+        var xDeg = parseInt(pan1.value);
+        var x = Math.sin(xDeg * (Math.PI / 180));
+        vm.wavesurfer.panner.setPosition(x, 0, 0);
+      });*/
 
     vm.sliders = {};
 

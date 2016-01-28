@@ -1,48 +1,6 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
-<!-- Play/Pause Stop & Record -->
-<div>
-  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
-    <i class="glyphicon glyphicon-play"></i>
-    Play
-    /
-    <i class="glyphicon glyphicon-pause"></i>
-    Pause
-  </button>
-
-  <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
-    <i class="glyphicon glyphicon-stop"></i>
-    Stop
-  </button>
-</div>
-
-<hr class="col-lg-12">
-
-<div class="col-lg-12">
-
-  <div class="col-lg-1">
-    <!-- Panoramique -->
-    <div>
-      <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-    <!-- Volume sliders -->
-    <div>
-      <webaudio-knob id="sliderGeneral" title="Volume" src="img/verticalFaderBlue.png" sprites="200" min="0" max="100" value="{{arrangement.generalVolume}}" width="25" height="150" ng-mousemove=""></webaudio-knob>
-    </div>
-
-  </div>
-
-  <div class="col-lg-1">
-    <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
-  </div>
-
-  <div>
-    <button ng-click="arrangement.reinitSm()">reinit Solo/Mute</button>
-  </div>
-
-</div>
-
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
   <hr>
   <div class="col-lg-1">
@@ -81,3 +39,37 @@
 <webaudio-param src="" link="knob-1"></webaudio-param>
 <webaudio-keyboard keys="25" ></webaudio-keyboard>
 -->
+
+<div class="col-lg-12 jumbotron footer" style="padding:0;margin:0;position:fixed;bottom:0;left:0;">
+  <div class="col-lg-4">
+    <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
+      <i class="glyphicon glyphicon-play"></i>
+      Play
+      /
+      <i class="glyphicon glyphicon-pause"></i>
+      Pause
+    </button>
+
+    <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
+      <i class="glyphicon glyphicon-stop"></i>
+      Stop
+    </button>
+  </div>
+  <!-- Panoramique -->
+  <div class="col-lg-1">
+    <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+  </div>
+  <!-- Volume Knob -->
+  <div class="col-lg-2">
+    <webaudio-knob id="sliderGeneral" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="{{arrangement.generalVolume}}" width="64" height="64" ng-mousemove=""></webaudio-knob>
+  </div>
+
+  <div class="col-lg-4">
+    <button ng-click="arrangement.reinitSm()">reinit Solo/Mute</button>
+  </div>
+
+  <div class="col-lg-1">
+    <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
+  </div>
+
+</div>
