@@ -1,6 +1,17 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+<select id="selectedMusic">
+  <option ng-repeat="music in musics">
+    {{music.musicName}}
+  </option>
+</select>
+
+<div>
+  <button id="loadSamples" ng-click="arrangement.loadSamples()">Load Samples</button>
+</div>
+
+
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
   <hr>
   <div class="col-lg-1">
