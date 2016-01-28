@@ -1,6 +1,15 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+<select id="selectedMusic">
+  <option ng-repeat="music in musics">
+    {{music.musicName}}
+  </option>
+</select>
+
+<div>
+  <button id="loadSamples" ng-click="arrangement.loadSamples()">Load Samples</button>
+</div>
 <!-- Play/Pause Stop & Record -->
 <div>
   <button class="btn btn-primary" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">

@@ -1,15 +1,20 @@
 'use strict';
 
 angular.module('frontEndApp')
-  .controller('LoadSongCtrl', function ($http) {
+  .controller('LoadSongCtrl', function ($http, $rootScope) {
 
     /**
      * CONNECTION WITH MONGO DB API
      */
-    $http.get("http://xythe.xyz:8080").then(
+    $http.get("http://xythe.xyz:8080/musics").then(
 
       function successCallback(response){
         console.log(response.data);
+        $rootScope.musics = response.data;
+        $rootScope.musics.forEach(function(o){
+          console.log(o.musicPath + o.musicFiles[0].file);
+        });
+
         // this callback will be called asynchronously
         // when the response is available
       }, function errorCallback(response) {
@@ -152,14 +157,6 @@ angular.module('frontEndApp')
         this.loadBuffer(this.urlList[i], i);
     };
 
-
-
-
-
-
-
-
-
     this.decodedAudioBuffer;
     this.peaks;
     this.canvas;
@@ -276,5 +273,7 @@ angular.module('frontEndApp')
         }
       }
     }
+
+
 
   });

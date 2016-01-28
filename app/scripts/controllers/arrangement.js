@@ -2,16 +2,134 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($timeout) {
-
+  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope) {
     var vm = this;
-    vm.generalVolume = 80;
+    vm.listOfSound = [];
+    var bufferLoader;
+    var ctx;
 
-    vm.listOfSound = [
-      'tracks/synth.mp3',
-      'tracks/vocal.mp3',
-      'tracks/drums.mp3'
-    ];
+    $http.get("http://xythe.xyz:8080/musics").then(
+
+      function successCallback(response){
+        $rootScope.musics = response.data;
+        $rootScope.musics.forEach(function(o){
+        });
+
+        // this callback will be called asynchronously
+        // when the response is available
+      }, function errorCallback(response) {
+        console.error;
+        // called asynchronously if an error occurs
+        // or server returns response with an error status
+      });
+
+
+
+    vm.loadSamples = function(){
+      $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
+        function successCallback(response){
+          console.log(response.data);
+          $rootScope.pistes = response.data.musicFiles;
+
+          $rootScope.pistes.forEach(function(p){
+            vm.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+            console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+          });
+          // To make it work even on browsers like Safari, that still
+          // do not recognize the non prefixed version of AudioContext
+          var audioContext = window.AudioContext || window.webkitAudioContext;
+
+          ctx = new audioContext();
+
+          loadAllSoundSamples();
+          // this callback will be called asynchronously
+          // when the response is available
+        }, function errorCallback(response) {
+          console.error;
+          // called asynchronously if an error occurs
+          // or server returns response with an error status
+        });
+
+    };
+
+    function loadAllSoundSamples() {
+      // onSamplesDecoded will be called when all samples
+      // have been loaded and decoded, and the decoded sample will
+      // be its only parameter (see function above)
+      bufferLoader = new BufferLoader(
+        ctx,
+        vm.listOfSound
+      );
+
+      // start loading and decoding the files
+      bufferLoader.load();
+    }
+
+    function BufferLoader(context, urlList) {
+      this.context = context;
+      this.urlList = urlList;
+      this.bufferList = [];
+      this.loadCount = 0;
+    }
+
+    BufferLoader.prototype.loadBuffer = function(url, index) {
+      // Load buffer asynchronously
+      console.log('file : ' + url + " loading and decoding");
+
+      var request = new XMLHttpRequest();
+      request.open("GET", url, true);
+
+      request.responseType = "arraybuffer";
+
+      var loader = this;
+
+      request.onload = function() {
+
+        // Asynchronously decode the audio file data in request.response
+        loader.context.decodeAudioData(
+          request.response,
+          function(buffer) {
+            console.log("Loaded and decoded track " + (loader.loadCount+1) +
+              "/" +  loader.urlList.length + "...");
+
+            if (!buffer) {
+              alert('error decoding file data: ' + url);
+              return;
+            }
+            loader.bufferList[index] = buffer;
+
+            if (++loader.loadCount == loader.urlList.length)
+            vm.init();
+
+          },
+          function(error) {
+            console.error('decodeAudioData error', error);
+          }
+        );
+      };
+
+      request.onprogress = function(e) {
+        if(e.total !== 0) {
+          var percent = (e.loaded * 100) / e.total;
+
+          console.log("loaded " + percent  + " % of file " + index);
+        }
+      };
+
+      request.onerror = function() {
+        alert('BufferLoader: XHR error');
+      };
+
+      request.send();
+    };
+
+    BufferLoader.prototype.load = function() {
+      console.log("Loading " + this.urlList.length + "track(s)... please wait...");
+      for (var i = 0; i < this.urlList.length; ++i)
+        this.loadBuffer(this.urlList[i], i);
+    };
+
+    vm.generalVolume = 80;
 
     vm.listOfWaves = [];
 
@@ -21,7 +139,7 @@ angular.module('frontEndApp')
     vm.nbSolo = 0;
 
     vm.init = function(){
-      vm.displayWaves();
+      vm.initWaves();
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
@@ -85,10 +203,6 @@ angular.module('frontEndApp')
         // gerer le volume
         vm.updateTrackVolume(i);
       }
-    };
-
-    vm.displayWaves = function(){
-      $timeout(vm.initWaves, 0)
     };
 
     vm.playPause = function(){
@@ -279,6 +393,4 @@ angular.module('frontEndApp')
         });
       });
     };
-
-    vm.init();
   });
