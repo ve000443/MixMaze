@@ -108,12 +108,11 @@ angular.module('frontEndApp')
         });
         //vm.wavesurfer.on('region-click', editAnnotation);
 
-        vm.listOfWaves[i].on('region-created', function(region, e){
+        vm.listOfWaves[i].on('region-updated', function(region, e){
+          if(region.end - region.start < 0.5) return;
           $rootScope.selectedRegion = region.id;
-          vm.effects[region.id] = {mute:false};
+          vm.effects[region.id] = {};
           $rootScope.$digest();
-          //console.log(region.wavesurfer);
-          //console.log(wave.regions.list);
         });
 
         vm.listOfWaves[i].on('region-in', activateEffects);
