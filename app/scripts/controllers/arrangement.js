@@ -52,11 +52,11 @@ angular.module('frontEndApp')
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
           //=========================================A enlever quand on veut vraiment lire depuis serv======================================
-          vm.listOfSound=[
+          /*vm.listOfSound=[
             'tracks/synth.mp3',
             'tracks/vocal.mp3',
             'tracks/drums.mp3',
-          ];
+          ];*/
           //======================================================================================================================
 
           var audioContext = window.AudioContext || window.webkitAudioContext;
@@ -468,4 +468,10 @@ angular.module('frontEndApp')
         });
       });
     };
+
+    vm.nameRecover = function(str){
+      var splitted = str.split("/")
+      return splitted[splitted.length - 1].split(".")[0];
+    };
+
   });
