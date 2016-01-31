@@ -172,14 +172,23 @@ angular.module('frontEndApp')
 
     function activateEffects(region) {
       var effects = vm.effects[region.id];
-      if(vm.effects[region.id].mute && !region.wavesurfer.isMuted){
-        region.wavesurfer.toggleMute();
-      }
-      else if (!vm.effects[region.id].mute && region.wavesurfer.isMuted){
-        region.wavesurfer.toggleMute();
-      }
-
-      if(effects.fadein) vm.activeEffects[region.id] = {fadein:true};
+      var keys = Object.keys(effects);
+      var effect = {region: region};
+      keys.forEach(function(key){
+        switch(key){
+          case 'mute':
+                if(vm.effects[region.id].mute && !region.wavesurfer.isMuted){
+                  region.wavesurfer.toggleMute();
+                }
+                else if (!vm.effects[region.id].mute && region.wavesurfer.isMuted){
+                  region.wavesurfer.toggleMute();
+                }
+                break;
+          default:
+            effect[key] = effects[key];
+        }
+      });
+      vm.activeEffects[region.id] = effect;
     }
 
     function deactivateEffects(region) {
@@ -196,12 +205,39 @@ angular.module('frontEndApp')
 
       if(vm.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
       else if(vm.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+
+      if(vm.effects[region.id].fadeout) {
+        region.wavesurfer.setVolume(vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100);
+      }
     }
 
-    function evolveEffects(){
+    function evolveEffects(progress){
       var keys = Object.keys(vm.activeEffects);
+      var region;
       keys.forEach(function(key){
-        console.log(key);
+        region = vm.activeEffects[key].region;
+        var subKeys = Object.keys(vm.activeEffects[key]);
+        subKeys.forEach(function(subKey){
+          switch(subKey){
+            case "fadein":
+                  var start = region.start;
+                  var end = region.end;
+                  var volume = vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100;
+                  var res = Math.min((progress - start) * volume / (end - start), volume);
+                  region.wavesurfer.setVolume(res);
+                  break;
+            case "fadeout":
+                  var start = region.start;
+                  var end = region.end;
+                  var volume = vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100;
+                  var res = Math.max(volume - volume * ((progress - start) / (end - start)), 0);
+                  region.wavesurfer.setVolume(res);
+                  break;
+            default:
+          }
+          //console.log("toto");
+        });
+        //console.log(vm.activeEffects[key]);
       });
     }
 
