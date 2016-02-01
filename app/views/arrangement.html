@@ -1,6 +1,10 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+<button class="btn btn-primary" ng-click="saveRegions()">Save Region</button>
+<button class="btn btn-primary" ng-click="loadRegions()">Load Region</button>
+<br>
+
 <select id="selectedMusic">
   <option ng-repeat="music in musics">
     {{music.musicName}}
@@ -47,7 +51,6 @@
 <webaudio-param src="" link="knob-1"></webaudio-param>
 <webaudio-keyboard keys="25" ></webaudio-keyboard>
 -->
-
 
 <div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegion">
   {{selectedRegion}} : {{arrangement.effects[selectedRegion]}}

@@ -43,6 +43,7 @@ angular.module('frontEndApp')
     vm.loadSamples = function(){
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
+          vm.songName = $("#selectedMusic option:selected").text().trim();
           console.log(response.data);
           $rootScope.pistes = response.data.musicFiles;
 
@@ -162,6 +163,8 @@ angular.module('frontEndApp')
 
     vm.smState = [];
     vm.nbSolo = 0;
+
+    vm.songName = "";
 
     vm.init = function(){
       vm.initWaves();
@@ -523,8 +526,49 @@ angular.module('frontEndApp')
     };
 
     vm.nameRecover = function(str){
-      var splitted = str.split("/")
+      var splitted = str.split("/");
       return splitted[splitted.length - 1].split(".")[0];
     };
 
+    /**
+     * Save regions to localStorage.
+     */
+    $rootScope.saveRegions = function() {
+      var res = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
+          var region = wavesurfer.regions.list[id];
+          return {
+            start: region.start,
+            end: region.end,
+            attributes: region.attributes,
+            data: region.data,
+            effects: vm.effects[region.id]
+          };
+        });
+      });
+      localStorage[vm.songName] = JSON.stringify(res);
+      console.log(localStorage[vm.songName]);
+    };
+
+    /**
+     * Load regions from localStorage.
+     */
+    $rootScope.loadRegions = function(regions) {
+      if(localStorage[vm.songName] === undefined) return;
+      regions = JSON.parse(localStorage[vm.songName]);
+      //vm.effects = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        wavesurfer.clearRegions();
+        var piste = vm.nameRecover(vm.listOfSound[index]);
+        regions[piste].forEach(function(region){
+          region.color = randomColor(0.5);
+          wavesurfer.addRegion(region);
+        });
+      });
+      //regions.forEach(function (region) {
+      //  region.color = randomColor(0.1);
+      //  wavesurfer.addRegion(region);
+      //});
+    }
   });
