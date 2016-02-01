@@ -1,6 +1,10 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+<button class="btn btn-primary" ng-click="saveRegions()">Save Region</button>
+<button class="btn btn-primary" ng-click="loadRegions()">Load Region</button>
+<br>
+
 <select id="selectedMusic">
   <option ng-repeat="music in musics">
     {{music.musicName}}
@@ -14,13 +18,32 @@
 </div>
 
 
-
-<div class="col-lg-12">
-  <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+<!-- delay -->
+<div class="col-lg-2" style="border: double">
+  <div class="col-lg-6">
+    delay
+    <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+  </div>
+  <div class="col-lg-6">
+    feedback
+    <webaudio-knob id="feedbackGain" title="feedback gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+  </div>
 </div>
 
-<div class="col-lg-12">
-  <webaudio-knob id="feedbackGain" title="feedback gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+<!-- filter -->
+<div class="col-lg-3" style="border: double">
+  <div class="col-lg-4">
+    detune
+    <webaudio-knob id="filterDetune" title="feedback gain" value="{{arrangement.filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+  </div>
+  <div class="col-lg-4">
+    frequency
+    <webaudio-knob id="filterFrequency" title="feedback gain" value="{{arrangement.filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+  </div>
+  <div class="col-lg-4">
+    gain
+    <webaudio-knob id="filterGain" title="feedback gain" value="{{arrangement.filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+  </div>
 </div>
 
 <br>
@@ -67,7 +90,6 @@
 <webaudio-param src="" link="knob-1"></webaudio-param>
 <webaudio-keyboard keys="25" ></webaudio-keyboard>
 -->
-
 
 <div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegion">
   {{selectedRegion}} : {{arrangement.effects[selectedRegion]}}

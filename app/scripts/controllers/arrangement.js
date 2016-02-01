@@ -11,6 +11,9 @@ angular.module('frontEndApp')
 
     vm.delayTime = 0;
     vm.feedbackGain = 0;
+    vm.filterDetune = 0;
+    vm.filterDrequency = 0;
+    vm.filterGain = 0;
 
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
@@ -36,6 +39,42 @@ angular.module('frontEndApp')
       delay.connect(feedback);
       feedback.connect(delay);
       vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFilterDetune = document.getElementById('filterDetune');
+    knobFilterDetune.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterDetune = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterFrequency = document.getElementById('filterFrequency');
+    knobFilterFrequency.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterFrequency = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterGain = document.getElementById('filterGain');
+    knobFilterGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterGain = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
     /**
@@ -74,6 +113,7 @@ angular.module('frontEndApp')
       vm.listOfSound = [];
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
+          vm.songName = $("#selectedMusic option:selected").text().trim();
           console.log(response.data);
           $rootScope.pistes = response.data.musicFiles;
 
@@ -194,6 +234,8 @@ angular.module('frontEndApp')
     vm.smState = [];
     vm.nbSolo = 0;
 
+    vm.songName = "";
+
     vm.init = function(){
       vm.initWaves();
       for(var i = 0; i < vm.listOfSound.length; i++){
@@ -297,7 +339,6 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
           vm.nbReadyTracks = vm.nbReadyTracks + 1;
-          console.log(vm.nbReadyTracks / vm.listOfSound.length)
           $(".progress-bar").attr("style","width:" + ((vm.nbReadyTracks / vm.listOfSound.length) * 100) + "%");
           $rootScope.$digest();
         });
@@ -566,8 +607,49 @@ angular.module('frontEndApp')
     };
 
     vm.nameRecover = function(str){
-      var splitted = str.split("/")
+      var splitted = str.split("/");
       return splitted[splitted.length - 1].split(".")[0];
     };
 
+    /**
+     * Save regions to localStorage.
+     */
+    $rootScope.saveRegions = function() {
+      var res = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
+          var region = wavesurfer.regions.list[id];
+          return {
+            start: region.start,
+            end: region.end,
+            attributes: region.attributes,
+            data: region.data,
+            effects: vm.effects[region.id]
+          };
+        });
+      });
+      localStorage[vm.songName] = JSON.stringify(res);
+      console.log(localStorage[vm.songName]);
+    };
+
+    /**
+     * Load regions from localStorage.
+     */
+    $rootScope.loadRegions = function(regions) {
+      if(localStorage[vm.songName] === undefined) return;
+      regions = JSON.parse(localStorage[vm.songName]);
+      //vm.effects = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        wavesurfer.clearRegions();
+        var piste = vm.nameRecover(vm.listOfSound[index]);
+        regions[piste].forEach(function(region){
+          region.color = randomColor(0.5);
+          wavesurfer.addRegion(region);
+        });
+      });
+      //regions.forEach(function (region) {
+      //  region.color = randomColor(0.1);
+      //  wavesurfer.addRegion(region);
+      //});
+    }
   });
