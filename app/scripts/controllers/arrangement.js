@@ -7,6 +7,75 @@ angular.module('frontEndApp')
     vm.listOfSound = [];
     var bufferLoader;
     var ctx;
+    vm.nbReadyTracks = 0;
+
+    vm.delayTime = 0;
+    vm.feedbackGain = 0;
+    vm.filterDetune = 0;
+    vm.filterDrequency = 0;
+    vm.filterGain = 0;
+
+    var knobDelayTime = document.getElementById('delayTime');
+    knobDelayTime.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.delayTime = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFeedbackGain = document.getElementById('feedbackGain');
+    knobFeedbackGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.feedbackGain = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFilterDetune = document.getElementById('filterDetune');
+    knobFilterDetune.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterDetune = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterFrequency = document.getElementById('filterFrequency');
+    knobFilterFrequency.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterFrequency = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterGain = document.getElementById('filterGain');
+    knobFilterGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterGain = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
 
     /**
      * Random RGBA color.
@@ -41,6 +110,7 @@ angular.module('frontEndApp')
 
 
     vm.loadSamples = function(){
+      vm.listOfSound = [];
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
           vm.songName = $("#selectedMusic option:selected").text().trim();
@@ -171,6 +241,14 @@ angular.module('frontEndApp')
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
+      console.log(vm.listOfWaves[1]);
+
+      /*var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = 1000;
+      biquadFilter.gain.value = 25;
+      console.log(biquadFilter);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
     function activateEffects(region) {
@@ -260,6 +338,8 @@ angular.module('frontEndApp')
 
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
+          vm.nbReadyTracks = vm.nbReadyTracks + 1;
+          $rootScope.$digest();
         });
 
         vm.listOfWaves[i].on('seek', function(progress){
