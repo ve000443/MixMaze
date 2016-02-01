@@ -11,6 +11,9 @@ angular.module('frontEndApp')
 
     vm.delayTime = 0;
     vm.feedbackGain = 0;
+    vm.filterDetune = 0;
+    vm.filterDrequency = 0;
+    vm.filterGain = 0;
 
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
@@ -36,6 +39,45 @@ angular.module('frontEndApp')
       delay.connect(feedback);
       feedback.connect(delay);
       vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFilterDetune = document.getElementById('filterDetune');
+    knobFilterDetune.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterDetune = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      console.log(biquadFilter.detune.value);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterFrequency = document.getElementById('filterFrequency');
+    knobFilterFrequency.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterFrequency = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      console.log(biquadFilter.detune.value);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+    });
+
+    var knobFilterGain = document.getElementById('filterGain');
+    knobFilterGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.filterGain = value;
+      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = vm.filterFrequency;
+      biquadFilter.gain.value = vm.filterGain;
+      biquadFilter.detune.value = vm.filterDetune;
+      console.log(biquadFilter.detune.value);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
     /**
