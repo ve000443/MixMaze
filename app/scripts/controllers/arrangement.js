@@ -7,6 +7,7 @@ angular.module('frontEndApp')
     vm.listOfSound = [];
     var bufferLoader;
     var ctx;
+    vm.nbReadyTracks = 0;
 
     /**
      * Random RGBA color.
@@ -41,6 +42,7 @@ angular.module('frontEndApp')
 
 
     vm.loadSamples = function(){
+      vm.listOfSound = [];
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
           console.log(response.data);
@@ -257,6 +259,8 @@ angular.module('frontEndApp')
 
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
+          vm.nbReadyTracks = vm.nbReadyTracks + 1;
+          $rootScope.$digest();
         });
 
         vm.listOfWaves[i].on('seek', function(progress){
