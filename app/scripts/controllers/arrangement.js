@@ -8,6 +8,35 @@ angular.module('frontEndApp')
     var bufferLoader;
     var ctx;
 
+    vm.delayTime = 0;
+    vm.feedbackGain = 0;
+
+    var knobDelayTime = document.getElementById('delayTime');
+    knobDelayTime.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.delayTime = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFeedbackGain = document.getElementById('feedbackGain');
+    knobFeedbackGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.feedbackGain = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
     /**
      * Random RGBA color.
      */
@@ -168,6 +197,14 @@ angular.module('frontEndApp')
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
+      console.log(vm.listOfWaves[1]);
+
+      /*var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = 1000;
+      biquadFilter.gain.value = 25;
+      console.log(biquadFilter);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
     function activateEffects(region) {
