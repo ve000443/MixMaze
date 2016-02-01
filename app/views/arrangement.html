@@ -7,9 +7,13 @@
   </option>
 </select>
 
+
+
 <div>
   <button id="loadSamples" ng-click="arrangement.loadSamples()">Load Samples</button>
 </div>
+
+
 
 <div class="col-lg-12">
   <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
@@ -19,6 +23,14 @@
   <webaudio-knob id="feedbackGain" title="feedback gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
 </div>
 
+<br>
+
+<div class="progress col-lg-12" style="padding: 0" ng-show="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0">
+  <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+    <span class="sr-only">0% Complete</span>
+  </div>
+</div>
+<div>
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
   <hr>
   <div class="col-lg-1">
@@ -44,6 +56,7 @@
   <!-- WaveForm -->
   <div id="wave{{$index}}" class="col-lg-11" style="padding:0">{{arrangement.nameRecover(track)}}</div>
 
+</div>
 </div>
 
 <!--

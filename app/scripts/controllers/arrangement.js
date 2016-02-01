@@ -297,6 +297,8 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
           vm.nbReadyTracks = vm.nbReadyTracks + 1;
+          console.log(vm.nbReadyTracks / vm.listOfSound.length)
+          $(".progress-bar").attr("style","width:" + ((vm.nbReadyTracks / vm.listOfSound.length) * 100) + "%");
           $rootScope.$digest();
         });
 
