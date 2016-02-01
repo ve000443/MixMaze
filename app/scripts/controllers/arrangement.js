@@ -50,7 +50,7 @@ angular.module('frontEndApp')
             vm.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
-          //=========================================A enlever quand on veut vraiment lire depuis serv======================================
+          //====================================A enlever quand on veut vraiment lire depuis serv=================================
           vm.listOfSound=[
             'tracks/synth.mp3',
             'tracks/vocal.mp3',
@@ -289,7 +289,8 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].on('region-updated', function(region, e){
           if(region.end - region.start < 0.5) return;
           $rootScope.selectedRegion = region.id;
-          vm.effects[region.id] = {};
+          if(vm.effects[region.id] === undefined)
+            vm.effects[region.id] = {};
           $rootScope.$digest();
         });
 
