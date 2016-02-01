@@ -104,3 +104,8 @@ select{
   -webkit-appearance: menulist !important;
   width:auto !important;
 }
+
+.selected{
+  border: 5px solid green;
+  border-radius: 10px;
+}

@@ -109,12 +109,12 @@
 
 </div>
 
-<div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegion">
-  {{selectedRegion}} : {{arrangement.effects[selectedRegion]}}
+<div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegionName">
+  {{selectedRegionName}} : {{arrangement.effects[selectedRegionName]}}
   <br>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['mute']=!arrangement.effects[selectedRegion]['mute']">Mute</button>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['fadein']=!arrangement.effects[selectedRegion]['fadein']">Fade in</button>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegion]['fadeout']=!arrangement.effects[selectedRegion]['fadeout']">Fade out</button>
+  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['mute']=!arrangement.effects[selectedRegionName]['mute']">Mute</button>
+  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['fadein']=!arrangement.effects[selectedRegionName]['fadein']">Fade in</button>
+  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['fadeout']=!arrangement.effects[selectedRegionName]['fadeout']">Fade out</button>
 </div>
 
 

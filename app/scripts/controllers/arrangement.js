@@ -15,6 +15,17 @@ angular.module('frontEndApp')
     vm.filterDrequency = 0;
     vm.filterGain = 0;
 
+    vm.generalVolume = 80;
+    vm.effects = {};
+    vm.activeEffects = {};
+    vm.listOfWaves = [];
+    vm.smState = [];
+    vm.nbSolo = 0;
+    vm.songName = "";
+
+    $rootScope.selectedRegionName = "";
+    $rootScope.selectedRegion = null;
+
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
@@ -89,8 +100,6 @@ angular.module('frontEndApp')
         ] + ')';
     }
 
-    vm.generalVolume = 80;
-    $rootScope.selectedRegion = "";
 
     $http.get("http://xythe.xyz:8080/musics").then(
 
@@ -221,21 +230,6 @@ angular.module('frontEndApp')
         this.loadBuffer(this.urlList[i], i);
     };
 
-    vm.generalVolume = 80;
-
-    vm.effects = {};
-
-    vm.activeEffects = {};
-
-    vm.listOfWaves = [];
-
-    vm.volume = 1;
-
-    vm.smState = [];
-    vm.nbSolo = 0;
-
-    vm.songName = "";
-
     vm.init = function(){
       vm.initWaves();
       for(var i = 0; i < vm.listOfSound.length; i++){
@@ -363,7 +357,7 @@ angular.module('frontEndApp')
 
         vm.listOfWaves[i].on('region-click', function (region, e) {
           e.stopPropagation();
-          $rootScope.selectedRegion = region.id;
+          selectRegion(region);
           $rootScope.$digest();
           // Play on click, loop on shift click
           //e.shiftKey ? region.playLoop() : region.play();
@@ -372,7 +366,7 @@ angular.module('frontEndApp')
 
         vm.listOfWaves[i].on('region-updated', function(region, e){
           if(region.end - region.start < 0.5) return;
-          $rootScope.selectedRegion = region.id;
+          selectRegion(region);
           if(vm.effects[region.id] === undefined)
             vm.effects[region.id] = {};
           $rootScope.$digest();
@@ -389,6 +383,21 @@ angular.module('frontEndApp')
         //vm.listOfWaves.push(vm.wavesurfer);
       }
     };
+
+    function selectRegion(region){
+      if($rootScope.selectedRegion !== null){
+        //$rootScope.selectedRegion.element.style['border'] = "";
+        //$rootScope.selectedRegion.element.style['border-radius'] = "";
+        //$rootScope.selectedRegion.element.style['box-shadow'] = "";
+        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+      }
+      $rootScope.selectedRegion = region;
+      $rootScope.selectedRegionName = region.id;
+      //$rootScope.selectedRegion.element.style['border'] = "5px solid green";
+      //$rootScope.selectedRegion.element.style['border-radius'] = "10px";
+      //$rootScope.selectedRegion.element.style['box-shadow'] = "5px 5px 5px #888888";
+      region.element.className += " selected";
+    }
 
     vm.playAllTracks = function(){
       for(var i = 0; i < vm.listOfWaves.length; i++){
