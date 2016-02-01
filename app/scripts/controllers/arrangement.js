@@ -50,7 +50,6 @@ angular.module('frontEndApp')
       biquadFilter.frequency.value = vm.filterFrequency;
       biquadFilter.gain.value = vm.filterGain;
       biquadFilter.detune.value = vm.filterDetune;
-      console.log(biquadFilter.detune.value);
       vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
@@ -63,7 +62,6 @@ angular.module('frontEndApp')
       biquadFilter.frequency.value = vm.filterFrequency;
       biquadFilter.gain.value = vm.filterGain;
       biquadFilter.detune.value = vm.filterDetune;
-      console.log(biquadFilter.detune.value);
       vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
@@ -76,7 +74,6 @@ angular.module('frontEndApp')
       biquadFilter.frequency.value = vm.filterFrequency;
       biquadFilter.gain.value = vm.filterGain;
       biquadFilter.detune.value = vm.filterDetune;
-      console.log(biquadFilter.detune.value);
       vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
