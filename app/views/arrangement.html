@@ -11,6 +11,13 @@
   <button id="loadSamples" ng-click="arrangement.loadSamples()">Load Samples</button>
 </div>
 
+<div class="col-lg-12">
+  <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+</div>
+
+<div class="col-lg-12">
+  <webaudio-knob id="feedbackGain" title="feedback gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+</div>
 
 <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
   <hr>

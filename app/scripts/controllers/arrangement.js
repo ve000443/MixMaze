@@ -9,6 +9,35 @@ angular.module('frontEndApp')
     var ctx;
     vm.nbReadyTracks = 0;
 
+    vm.delayTime = 0;
+    vm.feedbackGain = 0;
+
+    var knobDelayTime = document.getElementById('delayTime');
+    knobDelayTime.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.delayTime = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
+    var knobFeedbackGain = document.getElementById('feedbackGain');
+    knobFeedbackGain.addEventListener('change', function(e) {
+      var value = e.target.value;
+      vm.feedbackGain = value;
+      var delay = vm.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = vm.delayTime;
+      var feedback = vm.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = vm.feedbackGain;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      vm.listOfWaves[1].backend.setFilter(delay);
+    });
+
     /**
      * Random RGBA color.
      */
@@ -52,7 +81,7 @@ angular.module('frontEndApp')
             vm.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
-          //=========================================A enlever quand on veut vraiment lire depuis serv======================================
+          //====================================A enlever quand on veut vraiment lire depuis serv=================================
           vm.listOfSound=[
             'tracks/synth.mp3',
             'tracks/vocal.mp3',
@@ -170,6 +199,14 @@ angular.module('frontEndApp')
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
+      console.log(vm.listOfWaves[1]);
+
+      /*var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      biquadFilter.type = "lowshelf";
+      biquadFilter.frequency.value = 1000;
+      biquadFilter.gain.value = 25;
+      console.log(biquadFilter);
+      vm.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
     function activateEffects(region) {
@@ -293,7 +330,8 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].on('region-updated', function(region, e){
           if(region.end - region.start < 0.5) return;
           $rootScope.selectedRegion = region.id;
-          vm.effects[region.id] = {};
+          if(vm.effects[region.id] === undefined)
+            vm.effects[region.id] = {};
           $rootScope.$digest();
         });
 
