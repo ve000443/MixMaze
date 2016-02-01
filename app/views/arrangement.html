@@ -1,6 +1,7 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+<!-- HEADER -->
 <div class="col-lg-12" style="height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
   <div class="col-lg-7">
@@ -45,7 +46,8 @@
   </div>
 </div>
 
-<div class="col-lg-12" style="overflow: auto; height:80%;position: fixed;top:10%;">
+<!-- WAVES -->
+<div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">
   <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
     <div class="col-lg-1">
       <!-- Panoramique -->
@@ -73,6 +75,31 @@
   </div>
 </div>
 
+<!-- EFFECTS -->
+<div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="selectedRegion !== null">
+  <div class="col-lg-12">&nbsp</div>
+  <div class="col-lg-3">
+    <div class="btn btn-primary" ng-click="deselectRegion()">Deselect</div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['mute']}"
+         ng-click="arrangement.effects[selectedRegionName]['mute']=!arrangement.effects[selectedRegionName]['mute']">
+      Mute
+    </div>
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['fadein']}"
+         ng-click="arrangement.effects[selectedRegionName]['fadein']=!arrangement.effects[selectedRegionName]['fadein']">
+      Fade In
+    </div>
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['fadeout']}"
+         ng-click="arrangement.effects[selectedRegionName]['fadeout']=!arrangement.effects[selectedRegionName]['fadeout']">
+      Fade Out
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
 <div class="col-lg-12" style="height:10%;position:fixed;bottom:0;background-color: lightgray;">
   <div class="col-lg-4">
     <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
@@ -107,14 +134,6 @@
     </div>
   </div>
 
-</div>
-
-<div class="col-lg-3 jumbotron topmost" style="padding:0;margin:0;position: fixed;top:0;right:25px;" ng-if="selectedRegionName">
-  {{selectedRegionName}} : {{arrangement.effects[selectedRegionName]}}
-  <br>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['mute']=!arrangement.effects[selectedRegionName]['mute']">Mute</button>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['fadein']=!arrangement.effects[selectedRegionName]['fadein']">Fade in</button>
-  <button class="btn btn-primary" ng-click="arrangement.effects[selectedRegionName]['fadeout']=!arrangement.effects[selectedRegionName]['fadeout']">Fade out</button>
 </div>
 
 

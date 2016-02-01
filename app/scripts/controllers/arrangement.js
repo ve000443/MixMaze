@@ -316,6 +316,14 @@ angular.module('frontEndApp')
       });
     }
 
+    function checkReadiness(){
+      if(vm.nbReadyTracks === vm.listOfSound.length){
+        vm.listOfWaves.forEach(function(wave){
+          wave.toggleInteraction();
+        });
+      }
+    }
+
     vm.initWaves = function() {
       for (var i = 0; i < vm.listOfSound.length; i++) {
         var cont = '#wave' + i;
@@ -325,6 +333,7 @@ angular.module('frontEndApp')
           waveColor: '#bbb',
           progressColor: '#347'
         }));
+        vm.listOfWaves[i].toggleInteraction();
 
         if(i === 0){
           vm.listOfWaves[i].on('audioprocess', evolveEffects);
@@ -333,6 +342,7 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].on('ready', function () {
           console.log("song ready");
           vm.nbReadyTracks = vm.nbReadyTracks + 1;
+          checkReadiness();
           $(".progress-bar").attr("style","width:" + ((vm.nbReadyTracks / vm.listOfSound.length) * 100) + "%");
           $rootScope.$digest();
         });
@@ -385,19 +395,19 @@ angular.module('frontEndApp')
     };
 
     function selectRegion(region){
-      if($rootScope.selectedRegion !== null){
-        //$rootScope.selectedRegion.element.style['border'] = "";
-        //$rootScope.selectedRegion.element.style['border-radius'] = "";
-        //$rootScope.selectedRegion.element.style['box-shadow'] = "";
-        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-      }
+      $rootScope.deselectRegion();
       $rootScope.selectedRegion = region;
       $rootScope.selectedRegionName = region.id;
-      //$rootScope.selectedRegion.element.style['border'] = "5px solid green";
-      //$rootScope.selectedRegion.element.style['border-radius'] = "10px";
-      //$rootScope.selectedRegion.element.style['box-shadow'] = "5px 5px 5px #888888";
       region.element.className += " selected";
     }
+
+    $rootScope.deselectRegion = function(){
+      if($rootScope.selectedRegion !== null){
+        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+        $rootScope.selectedRegion = null;
+        $rootScope.selectedRegionName = "";
+      }
+    };
 
     vm.playAllTracks = function(){
       for(var i = 0; i < vm.listOfWaves.length; i++){
