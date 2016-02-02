@@ -23,9 +23,16 @@ angular.module('frontEndApp')
     vm.nbSolo = 0;
     vm.songName = "";
 
+    vm.sliders = {};
+
+    // HISTORIC
+    vm.previous = [];
+    vm.next = [];
+
     $rootScope.selectedRegionName = "";
     $rootScope.selectedRegion = null;
 
+    // SHORTCUTS
     document.addEventListener("keydown",function(evt){
       //console.log(evt.keyCode);
       switch (evt.keyCode){
@@ -35,10 +42,17 @@ angular.module('frontEndApp')
         case 27:
               $rootScope.deselectRegion();
               break;
+        case 90:
+              if(evt.ctrlKey && evt.shiftKey) redo();
+              else if(evt.ctrlKey) undo();
+              break;
+        default:
+              //console.log(evt.keyCode);
       }
       $rootScope.$digest();
     });
 
+    // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
@@ -100,6 +114,7 @@ angular.module('frontEndApp')
       biquadFilter.detune.value = vm.filterDetune;
       vm.listOfWaves[1].backend.setFilter(biquadFilter);
     });
+    // </editor-fold>
 
     /**
      * Random RGBA color.
@@ -114,6 +129,7 @@ angular.module('frontEndApp')
     }
 
 
+    // <editor-fold desc="MUSIC LOADER">
     $http.get("http://xythe.xyz:8080/musics").then(
 
       function successCallback(response){
@@ -128,8 +144,6 @@ angular.module('frontEndApp')
         // called asynchronously if an error occurs
         // or server returns response with an error status
       });
-
-
 
     vm.loadSamples = function(){
       vm.listOfSound = [];
@@ -242,6 +256,7 @@ angular.module('frontEndApp')
       for (var i = 0; i < this.urlList.length; ++i)
         this.loadBuffer(this.urlList[i], i);
     };
+    // </editor-fold>
 
     vm.init = function(){
       vm.initWaves();
@@ -257,6 +272,7 @@ angular.module('frontEndApp')
       vm.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
+    // <editor-fold desc="EFFECTS">
     function activateEffects(region) {
       var effects = vm.effects[region.id];
       var keys = Object.keys(effects);
@@ -327,6 +343,112 @@ angular.module('frontEndApp')
         //console.log(vm.activeEffects[key]);
       });
     }
+    // </editor-fold>
+
+    // <editor-fold desc="REGIONS">
+    function undo(){
+      if(vm.previous.length === 0) return;
+      $rootScope.deselectRegion();
+      vm.next.push(jsonifyRegions());
+      var previousState = vm.previous.pop();
+      $rootScope.loadRegions(previousState);
+    }
+
+    function redo(){
+      if(vm.next.length === 0) return;
+      $rootScope.deselectRegion();
+      vm.previous.push(jsonifyRegions());
+      var nextState = vm.next.pop();
+      $rootScope.loadRegions(nextState);
+    }
+
+    function selectRegion(region){
+      $rootScope.deselectRegion();
+      $rootScope.selectedRegion = region;
+      $rootScope.selectedRegionName = region.id;
+      region.element.className += " selected";
+    }
+
+    $rootScope.deselectRegion = function(){
+      if($rootScope.selectedRegion !== null){
+        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+        $rootScope.selectedRegion = null;
+        $rootScope.selectedRegionName = "";
+      }
+    };
+
+    $rootScope.deleteRegion = function(){
+      vm.previous.push(jsonifyRegions());
+      if($rootScope.selectedRegion !== null){
+        delete vm.effects[$rootScope.selectedRegionName];
+        $rootScope.selectedRegion.remove();
+        $rootScope.selectedRegion = null;
+        $rootScope.selectedRegionName = "";
+      }
+    };
+
+    $rootScope.toggleEffect = function(effect){
+      vm.previous.push(jsonifyRegions());
+      console.log(vm.previous);
+      vm.effects[$rootScope.selectedRegionName][effect] = !vm.effects[$rootScope.selectedRegionName][effect];
+    };
+
+    $rootScope.hasEffect = function(effect){
+      return vm.effects[$rootScope.selectedRegionName][effect] === true;
+    };
+
+    function jsonifyRegions(){
+      var res = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
+          var region = wavesurfer.regions.list[id];
+          var effects = {};
+          Object.keys(vm.effects[region.id]).forEach(function(key){
+            effects[key] = vm.effects[region.id][key];
+          });
+          return {
+            start: region.start,
+            end: region.end,
+            attributes: region.attributes,
+            data: region.data,
+            effects: effects
+          };
+        });
+      });
+      return res;
+    }
+
+    /**
+     * Save regions to localStorage.
+     */
+    $rootScope.saveRegions = function() {
+      localStorage[vm.songName] = JSON.stringify(jsonifyRegions());
+    };
+
+    /**
+     * Load regions from localStorage.
+     */
+    $rootScope.loadRegions = function(regions) {
+      if(regions === undefined) {
+        if (localStorage[vm.songName] === undefined) return;
+        $rootScope.deselectRegion();
+        regions = JSON.parse(localStorage[vm.songName]);
+      }
+      vm.effects = {};
+      vm.listOfWaves.forEach(function(wavesurfer, index){
+        wavesurfer.clearRegions();
+        var piste = vm.nameRecover(vm.listOfSound[index]);
+        var color = randomColor(0.5);
+        regions[piste].forEach(function(region){
+          region.color = color;
+          wavesurfer.addRegion(region);
+          var keys = Object.keys(wavesurfer.regions.list);
+          var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
+          vm.effects[newRegion.id] = region.effects;
+        });
+      });
+    };
+    // </editor-fold>
 
     function checkReadiness(){
       if(vm.nbReadyTracks === vm.listOfSound.length){
@@ -394,9 +516,9 @@ angular.module('frontEndApp')
           $rootScope.$digest();
         });
 
-        //vm.listOfWaves[i].on('region-created', function(region, e){
-        //  console.log(region);
-        //});
+        vm.listOfWaves[i].on('region-created', function(region, e){
+          vm.previous.push(jsonifyRegions());
+        });
 
         vm.listOfWaves[i].on('region-in', activateEffects);
         vm.listOfWaves[i].on('region-out', deactivateEffects);
@@ -407,30 +529,6 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].load(vm.listOfSound[i]);
 
         //vm.listOfWaves.push(vm.wavesurfer);
-      }
-    };
-
-    function selectRegion(region){
-      $rootScope.deselectRegion();
-      $rootScope.selectedRegion = region;
-      $rootScope.selectedRegionName = region.id;
-      region.element.className += " selected";
-    }
-
-    $rootScope.deselectRegion = function(){
-      if($rootScope.selectedRegion !== null){
-        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-        $rootScope.selectedRegion = null;
-        $rootScope.selectedRegionName = "";
-      }
-    };
-
-    $rootScope.deleteRegion = function(){
-      if($rootScope.selectedRegion !== null){
-        delete vm.effects[$rootScope.selectedRegionName];
-        $rootScope.selectedRegion.remove();
-        $rootScope.selectedRegion = null;
-        $rootScope.selectedRegionName = "";
       }
     };
 
@@ -473,6 +571,7 @@ angular.module('frontEndApp')
       vm.wavesurfer.setVolume(value);
     };
 
+    // <editor-fold desc="SOLO/MUTE">
     vm.mute = function(track){
       vm.listOfWaves[track].toggleMute();
 
@@ -539,7 +638,9 @@ angular.module('frontEndApp')
         }
       }
     };
+    // </editor-fold>
 
+    // <editor-fold desc="PANNER">
     vm.updatePan = function(track, value){
 
       console.log("updatePan(" + track + "," + value + ")");
@@ -579,7 +680,17 @@ angular.module('frontEndApp')
      onChange();
      }());*/
 
+    // Add panner
+    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
+     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
 
+     var pan1 = document.getElementById('pan1');
+     pan1.addEventListener('change', function(e){
+     console.log(e.target.value);
+     var xDeg = parseInt(pan1.value);
+     var x = Math.sin(xDeg * (Math.PI / 180));
+     vm.wavesurfer.panner.setPosition(x, 0, 0);
+     });*/
 
     nx.onload = function() {
 
@@ -604,8 +715,7 @@ angular.module('frontEndApp')
        });*/
 
     };
-
-
+    // </editor-fold>
 
     var knobs = document.getElementsByTagName('webaudio-knob');
     for (var i = 0; i < knobs.length; i++) {
@@ -621,20 +731,6 @@ angular.module('frontEndApp')
       var value = e.target.value;
       vm.updateAllTracksVolume(value);
     });
-
-    // Add panner
-    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
-
-     var pan1 = document.getElementById('pan1');
-     pan1.addEventListener('change', function(e){
-     console.log(e.target.value);
-     var xDeg = parseInt(pan1.value);
-     var x = Math.sin(xDeg * (Math.PI / 180));
-     vm.wavesurfer.panner.setPosition(x, 0, 0);
-     });*/
-
-    vm.sliders = {};
 
     vm.volumeStart = function(){
       if(vm.slidersInitialized) return;
@@ -654,51 +750,4 @@ angular.module('frontEndApp')
       var splitted = str.split("/");
       return splitted[splitted.length - 1].split(".")[0];
     };
-
-    /**
-     * Save regions to localStorage.
-     */
-    $rootScope.saveRegions = function() {
-      var res = {};
-      vm.listOfWaves.forEach(function(wavesurfer, index){
-        res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
-          var region = wavesurfer.regions.list[id];
-          return {
-            start: region.start,
-            end: region.end,
-            attributes: region.attributes,
-            data: region.data,
-            effects: vm.effects[region.id]
-          };
-        });
-      });
-      localStorage[vm.songName] = JSON.stringify(res);
-      //console.log(localStorage[vm.songName]);
-    };
-
-    /**
-     * Load regions from localStorage.
-     */
-    $rootScope.loadRegions = function(regions) {
-      if(localStorage[vm.songName] === undefined) return;
-      $rootScope.deselectRegion();
-      regions = JSON.parse(localStorage[vm.songName]);
-      vm.effects = {};
-      vm.listOfWaves.forEach(function(wavesurfer, index){
-        wavesurfer.clearRegions();
-        var piste = vm.nameRecover(vm.listOfSound[index]);
-        var color = randomColor(0.5);
-        regions[piste].forEach(function(region){
-          region.color = color;
-          wavesurfer.addRegion(region);
-          var keys = Object.keys(wavesurfer.regions.list);
-          var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
-          vm.effects[newRegion.id] = region.effects;
-        });
-      });
-      //regions.forEach(function (region) {
-      //  region.color = randomColor(0.1);
-      //  wavesurfer.addRegion(region);
-      //});
-    }
   });

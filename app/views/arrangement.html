@@ -18,8 +18,8 @@
   </div>
 
   <!-- delay -->
-  <div class="col-lg-2" style="border: double">
-    <div class="col-lg-6">
+  <div class="col-lg-2" style="border: double;">
+    <div class="col-lg-6" style="overflow: hidden">
       delay
       <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
     </div>
@@ -87,16 +87,16 @@
   </div>
 
   <div class="col-lg-3">
-    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['mute']}"
-         ng-click="arrangement.effects[selectedRegionName]['mute']=!arrangement.effects[selectedRegionName]['mute']">
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':hasEffect('mute')}"
+         ng-click="toggleEffect('mute')">
       Mute
     </div>
-    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['fadein']}"
-         ng-click="arrangement.effects[selectedRegionName]['fadein']=!arrangement.effects[selectedRegionName]['fadein']">
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':hasEffect('fadein')}"
+         ng-click="toggleEffect('fadein')">
       Fade In
     </div>
-    <div class="col-lg-4 btn btn-primary" ng-class="{'active':arrangement.effects[selectedRegionName]['fadeout']}"
-         ng-click="arrangement.effects[selectedRegionName]['fadeout']=!arrangement.effects[selectedRegionName]['fadeout']">
+    <div class="col-lg-4 btn btn-primary" ng-class="{'active':hasEffect('fadeout')}"
+         ng-click="toggleEffect('fadeout')">
       Fade Out
     </div>
   </div>
