@@ -72,6 +72,27 @@ angular.module('frontEndApp')
     });
 
     // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
+    var knobLimiter = document.getElementById('filterLimiter');
+    knobLimiter.addEventListener('change', function(e) {
+      vm.filterLimiter = e.target.value;
+
+      var source = vm.listOfWaves[1].backend.source;
+
+      if(vm.preGain == null && vm.limiter == null) {
+        vm.preGain = vm.listOfWaves[1].backend.ac.createGain();
+        vm.limiter = vm.listOfWaves[1].backend.ac.createDynamicsCompressor();
+      }
+      vm.limiter.threshold.value = 0; // this is the pitfall, leave some headroom
+      vm.limiter.knee.value = 0.0; // brute force
+      vm.limiter.ratio.value = 20.0; // max compression
+      vm.limiter.attack.value = 0.005; // 5ms attack
+      vm.limiter.release.value = 0.050; // 50ms release
+      vm.preGain.gain.value = vm.filterLimiter;
+      source.connect(vm.preGain);
+      vm.preGain.connect(vm.limiter);
+      vm.limiter.connect(vm.listOfWaves[1].backend.ac.destination);
+    });
+
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
