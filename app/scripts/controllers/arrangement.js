@@ -599,6 +599,7 @@ angular.module('frontEndApp')
       for(var i = 0; i < vm.listOfWaves.length; i++){
         vm.listOfWaves[i].stop();
       }
+      console.log(vm.listOfWaves[1]);
     };
 
     vm.updateTrackVolume = function(index){
