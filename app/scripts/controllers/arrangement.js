@@ -235,7 +235,6 @@ angular.module('frontEndApp')
       for(var i = 0; i < vm.listOfSound.length; i++){
         vm.smState[i] = null;
       }
-      console.log(vm.listOfWaves[1]);
 
       /*var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
@@ -382,6 +381,10 @@ angular.module('frontEndApp')
           $rootScope.$digest();
         });
 
+        //vm.listOfWaves[i].on('region-created', function(region, e){
+        //  console.log(region);
+        //});
+
         vm.listOfWaves[i].on('region-in', activateEffects);
         vm.listOfWaves[i].on('region-out', deactivateEffects);
 
@@ -404,6 +407,15 @@ angular.module('frontEndApp')
     $rootScope.deselectRegion = function(){
       if($rootScope.selectedRegion !== null){
         $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+        $rootScope.selectedRegion = null;
+        $rootScope.selectedRegionName = "";
+      }
+    };
+
+    $rootScope.deleteRegion = function(){
+      if($rootScope.selectedRegion !== null){
+        delete vm.effects[$rootScope.selectedRegionName];
+        $rootScope.selectedRegion.remove();
         $rootScope.selectedRegion = null;
         $rootScope.selectedRegionName = "";
       }
@@ -648,7 +660,7 @@ angular.module('frontEndApp')
         });
       });
       localStorage[vm.songName] = JSON.stringify(res);
-      console.log(localStorage[vm.songName]);
+      //console.log(localStorage[vm.songName]);
     };
 
     /**
@@ -656,14 +668,19 @@ angular.module('frontEndApp')
      */
     $rootScope.loadRegions = function(regions) {
       if(localStorage[vm.songName] === undefined) return;
+      $rootScope.deselectRegion();
       regions = JSON.parse(localStorage[vm.songName]);
-      //vm.effects = {};
+      vm.effects = {};
       vm.listOfWaves.forEach(function(wavesurfer, index){
         wavesurfer.clearRegions();
         var piste = vm.nameRecover(vm.listOfSound[index]);
+        var color = randomColor(0.5);
         regions[piste].forEach(function(region){
-          region.color = randomColor(0.5);
+          region.color = color;
           wavesurfer.addRegion(region);
+          var keys = Object.keys(wavesurfer.regions.list);
+          var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
+          vm.effects[newRegion.id] = region.effects;
         });
       });
       //regions.forEach(function (region) {
