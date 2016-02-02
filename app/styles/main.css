@@ -109,3 +109,7 @@ select{
   border: 5px solid green;
   border-radius: 10px;
 }
+
+div {
+  overflow: hidden;
+}

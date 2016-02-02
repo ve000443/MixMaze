@@ -1,12 +1,36 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
+  <script type="text/ng-template" id="myModalContent.html">
+    <div class="modal-header">
+      <h3 class="modal-title">I'm a modal!</h3>
+    </div>
+    <div class="modal-body">
+      <ul>
+        <li ng-repeat="item in items">
+          <a href="#" ng-click="$event.preventDefault(); selected.item = item">{{ item }}</a>
+        </li>
+      </ul>
+      Selected: <b>{{ selected.item }}</b>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </script>
+
+  <!--<button type="button" class="btn btn-default" ng-click="open()">Open me!</button>-->
+  <!--<button type="button" class="btn btn-default" ng-click="open('lg')">Large modal</button>-->
+  <!--<button type="button" class="btn btn-default" ng-click="open('sm')">Small modal</button>-->
+  <!--<button type="button" class="btn btn-default" ng-click="toggleAnimation()">Toggle Animation ({{ animationsEnabled }})</button>-->
+  <div ng-show="selected">Selection from a modal: {{ selected }}</div>
+
 <!-- HEADER -->
 <div class="col-lg-12" style="height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
   <div class="col-lg-7">
-    <button class="btn btn-primary" ng-click="saveRegions()">Save Region</button>
-    <button class="btn btn-primary" ng-click="loadRegions()">Load Region</button>
+    <button class="btn btn-primary" ng-click="saveRegions()"><i class="glyphicon glyphicon-floppy-open"></i></button>
+    <button class="btn btn-primary" ng-click="loadRegions()"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
     <select id="selectedMusic">
       <option ng-repeat="music in musics">
@@ -15,6 +39,21 @@
     </select>
 
     <button class="btn btn-primary" id="loadSamples" ng-click="arrangement.loadSamples()">Load Samples</button>
+
+    <!-- Split button -->
+    <div class="btn-group" uib-dropdown dropdown-append-to-body>
+      <button id="split-button" type="button" class="btn btn-danger" ng-click="open()">
+        <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as ...
+      </button>
+      <button type="button" class="btn btn-danger" uib-dropdown-toggle>
+        <span class="caret"></span>
+        <span class="sr-only">Split button!</span>
+      </button>
+      <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
+        <li role="menuitem" ng-click="open()">Save as ...</li>
+        <li role="menuitem">Save</li>
+      </ul>
+    </div>
   </div>
 
   <!-- delay -->

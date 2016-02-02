@@ -2,7 +2,7 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope) {
+  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log) {
     var vm = this;
     vm.listOfSound = [];
     var bufferLoader;
@@ -36,18 +36,37 @@ angular.module('frontEndApp')
     document.addEventListener("keydown",function(evt){
       //console.log(evt.keyCode);
       switch (evt.keyCode){
+        // DELETE
         case 46:
               $rootScope.deleteRegion();
               break;
+        // ESCAPE
         case 27:
               $rootScope.deselectRegion();
               break;
+        // S
+        case 83:
+              if(evt.ctrlKey && evt.shiftKey) {
+                console.log('save as');
+                evt.preventDefault();
+              }
+              else if(evt.ctrlKey) {
+                console.log('save');
+                evt.preventDefault();
+              }
+              break;
+        // Z
         case 90:
               if(evt.ctrlKey && evt.shiftKey) redo();
               else if(evt.ctrlKey) undo();
               break;
+        // BACKSPACE
+        case 8:
+              undo();
+              evt.preventDefault();
+              break;
         default:
-              //console.log(evt.keyCode);
+              console.log(evt.keyCode);
       }
       $rootScope.$digest();
     });
@@ -132,6 +151,16 @@ angular.module('frontEndApp')
       vm.listOfWaves.forEach(function(wave){
         wave.zoom(zoomLevel);
       });
+    };
+
+    $rootScope.toggled = function(open) {
+      $log.log('Dropdown is now: ', open);
+    };
+
+    $rootScope.toggleDropdown = function($event) {
+      $event.preventDefault();
+      $event.stopPropagation();
+      $rootScope.status.isopen = !$rootScope.status.isopen;
     };
 
     // <editor-fold desc="MUSIC LOADER">
@@ -757,4 +786,45 @@ angular.module('frontEndApp')
       var splitted = str.split("/");
       return splitted[splitted.length - 1].split(".")[0];
     };
+
+    // <editor-fold desc="SAVE MODAL">
+
+    $rootScope.items = ['item1', 'item2', 'item3'];
+    $rootScope.open = function (size) {
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'myModalContent.html',
+        controller: 'ModalInstanceCtrl',
+        size: size,
+        resolve: {
+          items: function () {
+            return $rootScope.items;
+          }
+        }
+      });
+
+      modalInstance.result.then(function (selectedItem) {
+        $rootScope.selected = selectedItem;
+      }, function () {
+        $log.info('Modal dismissed at: ' + new Date());
+      });
+    };
+    // </editor-fold>
   });
+
+angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
+
+  $scope.items = items;
+  $scope.selected = {
+    item: $scope.items[0]
+  };
+
+  $scope.ok = function () {
+    $uibModalInstance.close($scope.selected.item);
+  };
+
+  $scope.cancel = function () {
+    $uibModalInstance.dismiss('cancel');
+  };
+});
