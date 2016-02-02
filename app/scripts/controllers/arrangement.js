@@ -26,6 +26,19 @@ angular.module('frontEndApp')
     $rootScope.selectedRegionName = "";
     $rootScope.selectedRegion = null;
 
+    document.addEventListener("keydown",function(evt){
+      //console.log(evt.keyCode);
+      switch (evt.keyCode){
+        case 46:
+              $rootScope.deleteRegion();
+              break;
+        case 27:
+              $rootScope.deselectRegion();
+              break;
+      }
+      $rootScope.$digest();
+    });
+
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
