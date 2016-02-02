@@ -128,6 +128,11 @@ angular.module('frontEndApp')
         ] + ')';
     }
 
+    $rootScope.zoom = function(zoomLevel){
+      vm.listOfWaves.forEach(function(wave){
+        wave.zoom(zoomLevel);
+      });
+    };
 
     // <editor-fold desc="MUSIC LOADER">
     $http.get("http://xythe.xyz:8080/musics").then(
@@ -389,7 +394,6 @@ angular.module('frontEndApp')
 
     $rootScope.toggleEffect = function(effect){
       vm.previous.push(jsonifyRegions());
-      console.log(vm.previous);
       vm.effects[$rootScope.selectedRegionName][effect] = !vm.effects[$rootScope.selectedRegionName][effect];
     };
 
@@ -403,9 +407,12 @@ angular.module('frontEndApp')
         res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
           var region = wavesurfer.regions.list[id];
           var effects = {};
-          Object.keys(vm.effects[region.id]).forEach(function(key){
-            effects[key] = vm.effects[region.id][key];
-          });
+          try {
+            Object.keys(vm.effects[region.id]).forEach(function (key) {
+              effects[key] = vm.effects[region.id][key];
+            });
+          } catch(ex){
+          }
           return {
             start: region.start,
             end: region.end,
