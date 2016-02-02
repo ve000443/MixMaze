@@ -5,6 +5,7 @@ angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log) {
     var vm = this;
     vm.listOfSound = [];
+    vm.listOfMix = [];
     var bufferLoader;
     var ctx;
     vm.nbReadyTracks = 0;
@@ -61,15 +62,35 @@ angular.module('frontEndApp')
               else if(evt.ctrlKey) undo();
               break;
         // BACKSPACE
-        case 8:
-              undo();
-              evt.preventDefault();
-              break;
+        //case 8:
+        //      undo();
+        //      evt.preventDefault();
+        //      break;
         default:
               console.log(evt.keyCode);
       }
       $rootScope.$digest();
     });
+
+    // TODO : Change to match the song
+    function parseStorage(){
+      vm.listOfMix = [];
+      Object.keys(localStorage).forEach(function(key){
+        if(key.indexOf("MixMaze_") > -1){
+          vm.listOfMix.push(key);
+        }
+      });
+    }
+
+    $rootScope.clearStorage = function(){
+      Object.keys(localStorage).forEach(function(key){
+        if(key.indexOf("MixMaze_") > -1){
+          delete localStorage[key];
+        }
+      });
+      vm.listOfMix = [];
+    };
+    parseStorage();
 
     // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
     var knobDelayTime = document.getElementById('delayTime');
@@ -788,7 +809,6 @@ angular.module('frontEndApp')
     };
 
     // <editor-fold desc="SAVE MODAL">
-
     $rootScope.items = ['item1', 'item2', 'item3'];
     $rootScope.open = function (size) {
 
@@ -804,24 +824,28 @@ angular.module('frontEndApp')
         }
       });
 
-      modalInstance.result.then(function (selectedItem) {
-        $rootScope.selected = selectedItem;
+      modalInstance.result.then(function (name) {
+        // TODO : change to DB storage
+        $rootScope.mixName = name;
+        localStorage['MixMaze_' + name] = jsonifyRegions();
+        parseStorage();
       }, function () {
         $log.info('Modal dismissed at: ' + new Date());
       });
     };
+
+    //$('#myModal').on('shown.bs.modal', function () {
+    //  $('#nameTextArea').focus();
+    //});
     // </editor-fold>
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
 
-  $scope.items = items;
-  $scope.selected = {
-    item: $scope.items[0]
-  };
+  $scope.name = "";
 
   $scope.ok = function () {
-    $uibModalInstance.close($scope.selected.item);
+    $uibModalInstance.close($scope.name);
   };
 
   $scope.cancel = function () {
