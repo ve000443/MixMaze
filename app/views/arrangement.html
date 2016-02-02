@@ -48,16 +48,18 @@
 
 <!-- WAVES -->
 <div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">
-  <div ng-repeat="track in arrangement.listOfSound" class="col-lg-12">
-    <div class="col-lg-1">
+  <div ng-repeat="track in arrangement.listOfSound track by $index" class="col-lg-12" style="border:2px solid black; border-radius:10px;"
+  ng-style="{'border-top':$index!==0?'0':'2px solid black'}">
+    <div class="col-lg-1" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;">
       <!-- Panoramique -->
       <div class="col-lg-12">
-        <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="32" height="32"></webaudio-knob>
+        {{arrangement.nameRecover(track)}}
       </div>
 
 
       <!-- Volume sliders -->
       <div class="col-lg-12">
+        <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="32" height="32"></webaudio-knob>
         <webaudio-knob id="slider{{$index}}" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="80" width="50" height="50" ng-init="arrangement.sliders['slider' + $index] = 80" ng-mousedown="arrangement.volumeStart()" ng-mousemove=""></webaudio-knob>
       </div>
 
@@ -70,7 +72,7 @@
     </div>
 
     <!-- WaveForm -->
-    <div id="wave{{$index}}" class="col-lg-11" style="padding:0">{{arrangement.nameRecover(track)}}</div>
+    <div id="wave{{$index}}" class="col-lg-11" style="padding:0"></div>
 
   </div>
 </div>
@@ -108,34 +110,35 @@
 
 <!-- FOOTER -->
 <div class="col-lg-12" style="height:10%;position:fixed;bottom:0;background-color: lightgray;">
-  <div class="col-lg-4">
-    <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
-      <i class="glyphicon glyphicon-play"></i>
-      /
-      <i class="glyphicon glyphicon-pause"></i>
-    </button>
-    <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
-      <i class="glyphicon glyphicon-stop"></i>
-    </button>
-  </div>
-  <!-- Panoramique -->
-  <div class="col-lg-1">
-    <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
-  </div>
-  <!-- Volume Knob -->
-  <div class="col-lg-2">
-    <webaudio-knob id="sliderGeneral" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="{{arrangement.generalVolume}}" ng-init="arrangement.generalVolume = 80" width="64" height="64" ng-mousemove=""></webaudio-knob>
-  </div>
+  <div class="col-lg-12" style="max-height:75%">
+    <div class="col-lg-4">
+      <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
+        <i class="glyphicon glyphicon-play"></i>
+        /
+        <i class="glyphicon glyphicon-pause"></i>
+      </button>
+      <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
+        <i class="glyphicon glyphicon-stop"></i>
+      </button>
+    </div>
+    <!-- Panoramique -->
+    <div class="col-lg-1">
+      <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+    </div>
+    <!-- Volume Knob -->
+    <div class="col-lg-2">
+      <webaudio-knob id="sliderGeneral" title="Volume" src="img/LittlePhatty.png" sprites="100" min="0" max="100" value="{{arrangement.generalVolume}}" ng-init="arrangement.generalVolume = 80" width="50" height="50" ng-mousemove=""></webaudio-knob>
+    </div>
 
-  <div class="col-lg-4">
-    <button class="btn btn-primary" ng-click="arrangement.reinitSm()">reinit Solo/Mute</button>
-  </div>
+    <div class="col-lg-4">
+      <button class="btn btn-primary" ng-click="arrangement.reinitSm()">reinit Solo/Mute</button>
+    </div>
 
-  <div class="col-lg-1">
-    <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
+    <div class="col-lg-1">
+      <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
+    </div>
   </div>
-
-  <div class="progress col-lg-12" style="padding: 0" ng-show="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0">
+  <div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0">
     <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
       <span class="sr-only">0% Complete</span>
     </div>
