@@ -543,7 +543,8 @@ angular.module('frontEndApp')
         vm.listOfWaves.push(WaveSurfer.create({
           container: cont,
           waveColor: '#bbb',
-          progressColor: '#347'
+          progressColor: '#347',
+          cursorColor: '#000'
         }));
         vm.listOfWaves[i].toggleInteraction();
 
@@ -837,6 +838,30 @@ angular.module('frontEndApp')
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: 'myModalContent.html',
+        controller: 'ModalInstanceCtrl',
+        size: size,
+        resolve: {
+          items: function () {
+            return $rootScope.items;
+          }
+        }
+      });
+
+      modalInstance.result.then(function (name) {
+        // TODO : change to DB storage
+        $rootScope.mixName = name;
+        localStorage['MixMaze_' + name] = jsonifyRegions();
+        parseStorage();
+      }, function () {
+        $log.info('Modal dismissed at: ' + new Date());
+      });
+    };
+
+    $rootScope.openTrackEffects = function (size) {
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'modalTrackEffects.html',
         controller: 'ModalInstanceCtrl',
         size: size,
         resolve: {

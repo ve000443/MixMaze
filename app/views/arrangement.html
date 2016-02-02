@@ -14,6 +14,53 @@
   </div>
 </script>
 
+<script type="text/ng-template" id="modalTrackEffects.html">
+  <div class="modal-header">
+    <h3 class="modal-title">Nom de la piste à mettre ici</h3>
+  </div>
+    <div class="modal-body">
+      <div class="col-lg-12">
+      <!-- delay -->
+      <div class="col-lg-4" style="border: double;">
+        <div class="col-lg-6" style="overflow: hidden">
+          Time
+          <webaudio-knob id="delayTime" title="Time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+        </div>
+        <div class="col-lg-6">
+          Gain
+          <webaudio-knob id="feedbackGain" title="Gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+        </div>
+      </div>
+
+      <!-- filter -->
+      <div class="col-lg-6" style="border: double">
+        <div class="col-lg-4">
+          Detune
+          <webaudio-knob id="filterDetune" title="Detune" value="{{arrangement.filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+        </div>
+        <div class="col-lg-4">
+          Frequency
+          <webaudio-knob id="filterFrequency" title="Frequency" value="{{arrangement.filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+        </div>
+        <div class="col-lg-4">
+          Gain
+          <webaudio-knob id="filterGain" title="Gain" value="{{arrangement.filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+        </div>
+      </div>
+
+      <!-- limiter -->
+      <div class="col-lg-2" style="border: double">
+        Limiter
+        <webaudio-knob id="filterLimiter" title="Limiter" value="{{arrangement.filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+  </div>
+</script>
+
   <!--<button type="button" class="btn btn-default" ng-click="open()">Open me!</button>-->
   <!--<button type="button" class="btn btn-default" ng-click="open('lg')">Large modal</button>-->
   <!--<button type="button" class="btn btn-default" ng-click="open('sm')">Small modal</button>-->
@@ -60,35 +107,35 @@
   <!-- delay -->
   <div class="col-lg-2" style="border: double;">
     <div class="col-lg-6" style="overflow: hidden">
-      delay
-      <webaudio-knob id="delayTime" title="delay time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+      Time
+      <webaudio-knob id="delayTime" title="Time" value="{{arrangement.delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
     </div>
     <div class="col-lg-6">
-      feedback
-      <webaudio-knob id="feedbackGain" title="feedback gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+      Gain
+      <webaudio-knob id="feedbackGain" title="Gain" value="{{arrangement.feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
     </div>
   </div>
 
   <!-- filter -->
   <div class="col-lg-3" style="border: double">
     <div class="col-lg-4">
-      detune
-      <webaudio-knob id="filterDetune" title="feedback gain" value="{{arrangement.filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+      Detune
+      <webaudio-knob id="filterDetune" title="Detune" value="{{arrangement.filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
     </div>
     <div class="col-lg-4">
-      frequency
-      <webaudio-knob id="filterFrequency" title="feedback gain" value="{{arrangement.filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+      Frequency
+      <webaudio-knob id="filterFrequency" title="Frequency" value="{{arrangement.filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
     </div>
     <div class="col-lg-4">
-      gain
-      <webaudio-knob id="filterGain" title="feedback gain" value="{{arrangement.filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+      Gain
+      <webaudio-knob id="filterGain" title="Gain" value="{{arrangement.filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
     </div>
   </div>
 
   <!-- limiter -->
   <div class="col-lg-1" style="border: double">
-    hard limiter
-    <webaudio-knob id="filterLimiter" title="limiter" value="{{arrangement.filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
+    Limiter
+    <webaudio-knob id="filterLimiter" title="Limiter" value="{{arrangement.filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
   </div>
 </div>
 
@@ -128,7 +175,7 @@
   <div class="col-lg-12">&nbsp</div>
   <div class="col-lg-6">
     <button class="btn btn-primary">
-      <i class="glyphicon glyphicon-edit"> Effects</i>
+      <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects()"> Effects</i>
     </button>
   </div>
 
