@@ -1,14 +1,13 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
-<script type="text/ng-template" id="myModalContent.html">
+<script type="text/ng-template" id="modalSave.html">
   <div ng-keypress="keyPressed($event)">
     <div class="modal-header">
       <h3 class="modal-title">And thee name shall be ...</h3>
     </div>
     <div class="modal-body">
       <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
-      {{toto}}
     </div>
     <div class="modal-footer">
       <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
@@ -74,8 +73,8 @@
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
   <div class="col-lg-6">
-    <button class="btn btn-primary" ng-click="saveRegions()"><i class="glyphicon glyphicon-floppy-open"></i></button>
-    <button class="btn btn-primary" ng-click="loadRegions()"><i class="glyphicon glyphicon-floppy-save"></i></button>
+    <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
+    <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
     <select id="selectedMusic">
       <option ng-repeat="music in musics">
@@ -87,10 +86,10 @@
 
     <!-- Split button -->
     <div class="btn-group" uib-dropdown dropdown-append-to-body>
-      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()">
+      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()" ng-disabled="progress === null">
         <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as...
       </button>
-      <button type="button" class="btn btn-danger" uib-dropdown-toggle>
+      <button type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null">
         <span class="caret"></span>
         <span class="sr-only">Split button!</span>
       </button>
@@ -101,7 +100,7 @@
       </ul>
     </div>
 
-    <select>
+    <select ng-if="progress !== null">
       <option ng-repeat="mix in arrangement.listOfMix">{{mix}}</option>
     </select>
   </div>
@@ -208,11 +207,11 @@
 <div class="col-lg-12" style="height:10%;position:fixed;bottom:0;background-color: lightgray;">
   <div class="col-lg-12" style="max-height:75%">
     <div class="col-lg-4">
-      <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
+      <button class="btn btn-primary" ng-disabled="progress === null" style="background-color: #347; border-color: #347;" ng-click="arrangement.playAllTracks()">
         <i ng-if="!arrangement.listOfWaves[1].isPlaying()" class="glyphicon glyphicon-play"></i>
         <i ng-if="arrangement.listOfWaves[1].isPlaying() " class="glyphicon glyphicon-pause"></i>
       </button>
-      <button class="btn btn-primary" ng-disabled="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
+      <button class="btn btn-primary" ng-disabled="progress === null" style="background-color: #347; border-color: #347;" ng-click="arrangement.stopAllTracks()">
         <i class="glyphicon glyphicon-stop"></i>
       </button>
     </div>
@@ -225,7 +224,7 @@
       <webaudio-knob id="sliderGeneral" title="Volume" src="img/knob_med_red.png" sprites="30" min="0" max="100" value="{{arrangement.generalVolume}}" ng-init="arrangement.generalVolume = 80" width="50" height="50" ng-mousemove=""></webaudio-knob>
     </div>
     <div class="col-lg-1">
-      <button class="btn btn-primary" ng-click="arrangement.reinitSm()">reinit Solo/Mute</button>
+      <button class="btn btn-primary" ng-click="arrangement.reinitSm()" ng-disabled="progress === null">reinit Solo/Mute</button>
     </div>
     <div class="col-lg-3">
       Zoom : {{zoomLevel}}%
@@ -238,18 +237,16 @@
   </div>
 
   <!-- LOADING -->
-  <div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0">
-    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+  <div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="progress === null">
+    <div class="progress-bar progress-bar-striped active" type="danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
       <span class="sr-only">0% Complete</span>
     </div>
   </div>
 
   <!-- PROGRESS -->
-  <!--<div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="arrangement.nbReadyTracks === arrangement.listOfSound.length && arrangement.listOfSound.length !== 0">-->
-    <!--<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">-->
-      <!--<span class="sr-only">0% Complete</span>-->
-    <!--</div>-->
-  <!--</div>-->
+  <div class="col-lg-12" style="padding: 0;max-height:25%;" ng-if="progress !== null">
+    <uib-progressbar class="progress-striped active" value="progress" max="duration">{{progress}}/{{duration}}</uib-progressbar>
+  </div>
 </div>
 
 

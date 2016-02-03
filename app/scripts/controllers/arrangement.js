@@ -34,6 +34,7 @@ angular.module('frontEndApp')
 
     $rootScope.selectedRegionName = "";
     $rootScope.selectedRegion = null;
+    $rootScope.progress = null;
 
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
@@ -393,6 +394,8 @@ angular.module('frontEndApp')
     }
 
     function evolveEffects(progress){
+      $rootScope.progress = Math.ceil(progress);
+
       var keys = Object.keys(vm.activeEffects);
       var region;
       keys.forEach(function(key){
@@ -420,6 +423,7 @@ angular.module('frontEndApp')
         });
         //console.log(vm.activeEffects[key]);
       });
+      $rootScope.$digest();
     }
     // </editor-fold>
 
@@ -535,6 +539,9 @@ angular.module('frontEndApp')
         vm.listOfWaves.forEach(function(wave){
           wave.toggleInteraction();
         });
+        $rootScope.progress = 0;
+
+        $rootScope.duration = Math.ceil(vm.listOfWaves[0].getDuration());
       }
     }
 
@@ -569,11 +576,15 @@ angular.module('frontEndApp')
           vm.listOfWaves.forEach(function(wave){
             willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
           });
-          vm.listOfWaves.forEach(function(wave){
+          vm.listOfWaves.forEach(function(wave, index){
+            if(index === 0) {
+              $rootScope.progress = Math.ceil(progress * $rootScope.duration);
+            }
             wave.seekTo(progress);
             if(willPlay) wave.play();
           });
           vm.seeking = false;
+          $rootScope.$digest();
         });
 
         vm.listOfWaves[i].enableDragSelection({
@@ -624,6 +635,7 @@ angular.module('frontEndApp')
         vm.listOfWaves[i].stop();
       }
       console.log(vm.listOfWaves[1]);
+      $rootScope.progress = 0;
     };
 
     vm.updateTrackVolume = function(index){
@@ -847,7 +859,7 @@ angular.module('frontEndApp')
 
       var modalInstance = $uibModal.open({
         animation: true,
-        templateUrl: 'myModalContent.html',
+        templateUrl: 'modalSave.html',
         controller: 'ModalInstanceCtrl',
         size: size,
         resolve: {
