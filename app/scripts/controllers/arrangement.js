@@ -472,6 +472,18 @@ angular.module('frontEndApp')
     $rootScope.toggleEffect = function(effect){
       $rootScope.previous.push(jsonifyRegions());
       $rootScope.effects[$rootScope.selectedRegionName][effect] = !$rootScope.effects[$rootScope.selectedRegionName][effect];
+
+    };
+
+    $rootScope.toggleSoundEffect = function(effect){
+      $rootScope.toggleEffect(effect);
+      var tmp = ['fadein', 'fadeout', 'mute'];
+      Object.keys($rootScope.effects[$rootScope.selectedRegionName]).forEach(function(key){
+        if(key !== effect && tmp.indexOf(key) > -1){
+          $rootScope.effects[$rootScope.selectedRegionName][key] = false;
+        }
+      });
+
     };
 
     $rootScope.hasEffect = function(effect){
