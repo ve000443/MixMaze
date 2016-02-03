@@ -21,7 +21,7 @@ angular
   ])
   .config(function ($routeProvider) {
     $routeProvider
-      .when('/', {
+      .when('/main', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl',
         controllerAs: 'main'
@@ -46,7 +46,7 @@ angular
         controller: 'WaveSurferTestCtrl',
         controllerAs: 'waveSurferTest'
       })
-      .when('/arrangement', {
+      .when('/', {
         templateUrl: 'views/arrangement.html',
         controller: 'ArrangementCtrl',
         controllerAs: 'arrangement'

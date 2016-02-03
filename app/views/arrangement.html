@@ -2,15 +2,18 @@
 <link rel="import" href="../scripts/components/controls.html" >
 
 <script type="text/ng-template" id="myModalContent.html">
-  <div class="modal-header">
-    <h3 class="modal-title">And thee name shall be ...</h3>
-  </div>
-  <div class="modal-body">
-    <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
-    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+  <div ng-keypress="keyPressed($event)">
+    <div class="modal-header">
+      <h3 class="modal-title">And thee name shall be ...</h3>
+    </div>
+    <div class="modal-body">
+      <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
+      {{toto}}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
+      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
   </div>
 </script>
 
@@ -65,10 +68,10 @@
   <!--<button type="button" class="btn btn-default" ng-click="open('lg')">Large modal</button>-->
   <!--<button type="button" class="btn btn-default" ng-click="open('sm')">Small modal</button>-->
   <!--<button type="button" class="btn btn-default" ng-click="toggleAnimation()">Toggle Animation ({{ animationsEnabled }})</button>-->
-  <div ng-show="selected">Selection from a modal: {{ selected }}</div>
+  <!--<div ng-show="selected">Selection from a modal: {{ selected }}</div>-->
 
 <!-- HEADER -->
-<div class="col-lg-12" style="height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
+<div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
   <div class="col-lg-6">
     <button class="btn btn-primary" ng-click="saveRegions()"><i class="glyphicon glyphicon-floppy-open"></i></button>
@@ -84,16 +87,16 @@
 
     <!-- Split button -->
     <div class="btn-group" uib-dropdown dropdown-append-to-body>
-      <button id="split-button" type="button" class="btn btn-danger" ng-click="open()">
-        <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as ...
+      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()">
+        <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as...
       </button>
       <button type="button" class="btn btn-danger" uib-dropdown-toggle>
         <span class="caret"></span>
         <span class="sr-only">Split button!</span>
       </button>
       <ul uib-dropdown-menu role="menu" aria-labelledby="split-button" style="cursor: pointer;">
-        <li role="menuitem" ng-click="open()"><a>Save as ...</a></li>
-        <li role="menuitem"><a>Save</a></li>
+        <li role="menuitem"><a>Save <span class="shortcut">Ctrl+S</span></a></li>
+        <li role="menuitem" ng-click="saveAs()"><a>Save as... <span class="shortcut">Ctrl+Shift+S</span></a></li>
         <li role="menuitem" ng-click="clearStorage()"><a>Clear Storage</a></li>
       </ul>
     </div>
@@ -195,8 +198,8 @@
   </div>
 
   <div class="col-lg-3">
-    <div class="btn btn-primary" ng-click="deselectRegion()">Deselect</div>
-    <div class="btn btn-danger" ng-click="deleteRegion()">Remove</div>
+    <div class="btn btn-primary" ng-click="deselectRegion()">Deselect &nbsp&nbsp<span class="shortcut" style="color:lightgray">Esc</span></div>
+    <div class="btn btn-danger" ng-click="deleteRegion()">Remove &nbsp&nbsp<span class="shortcut" style="color:lightgray">Del</span></div>
   </div>
 
 </div>
@@ -233,12 +236,20 @@
       <webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>
     </div>
   </div>
+
+  <!-- LOADING -->
   <div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="arrangement.nbReadyTracks !== arrangement.listOfSound.length || arrangement.listOfSound.length === 0">
     <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
       <span class="sr-only">0% Complete</span>
     </div>
   </div>
 
+  <!-- PROGRESS -->
+  <!--<div class="progress col-lg-12" style="padding: 0;max-height:25%;" ng-show="arrangement.nbReadyTracks === arrangement.listOfSound.length && arrangement.listOfSound.length !== 0">-->
+    <!--<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">-->
+      <!--<span class="sr-only">0% Complete</span>-->
+    <!--</div>-->
+  <!--</div>-->
 </div>
 
 

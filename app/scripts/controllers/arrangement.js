@@ -4,10 +4,11 @@
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log) {
     var vm = this;
-    vm.listOfSound = [];
-    vm.listOfMix = [];
     var bufferLoader;
     var ctx;
+
+    vm.listOfSound = [];
+    vm.listOfMix = [];
     vm.nbReadyTracks = 0;
 
     vm.delayTime = 0;
@@ -23,6 +24,7 @@ angular.module('frontEndApp')
     vm.smState = [];
     vm.nbSolo = 0;
     vm.songName = "";
+    vm.mixName = "";
 
     vm.sliders = {};
 
@@ -48,11 +50,11 @@ angular.module('frontEndApp')
         // S
         case 83:
               if(evt.ctrlKey && evt.shiftKey) {
-                console.log('save as');
+                $rootScope.saveAs();
                 evt.preventDefault();
               }
               else if(evt.ctrlKey) {
-                console.log('save');
+                $rootScope.save();
                 evt.preventDefault();
               }
               break;
@@ -654,7 +656,6 @@ angular.module('frontEndApp')
     // <editor-fold desc="SOLO/MUTE">
     vm.mute = function(track){
       vm.listOfWaves[track].toggleMute();
-
     };
 
     vm.updateSm = function(track, value){
@@ -831,9 +832,18 @@ angular.module('frontEndApp')
       return splitted[splitted.length - 1].split(".")[0];
     };
 
-    // <editor-fold desc="SAVE MODAL">
-    $rootScope.items = ['item1', 'item2', 'item3'];
-    $rootScope.open = function (size) {
+    // <editor-fold desc="SAVE">
+    $rootScope.save = function(){
+      if(!Boolean(vm.mixName)){
+        $rootScope.saveAs();
+      } else {
+        localStorage['MixMaze_' + vm.mixName] = jsonifyRegions();
+        parseStorage();
+      }
+    };
+
+    /** MODAL */
+    $rootScope.saveAs = function (size) {
 
       var modalInstance = $uibModal.open({
         animation: true,
@@ -842,20 +852,20 @@ angular.module('frontEndApp')
         size: size,
         resolve: {
           items: function () {
-            return $rootScope.items;
+            return vm.mixName;
           }
         }
       });
 
       modalInstance.result.then(function (name) {
         // TODO : change to DB storage
-        $rootScope.mixName = name;
-        localStorage['MixMaze_' + name] = jsonifyRegions();
-        parseStorage();
+        vm.mixName = name;
+        $rootScope.save();
       }, function () {
-        $log.info('Modal dismissed at: ' + new Date());
+        //$log.info('Modal dismissed at: ' + new Date());
       });
     };
+    // </editor-fold>
 
     $rootScope.openTrackEffects = function (size) {
 
@@ -866,30 +876,26 @@ angular.module('frontEndApp')
         size: size,
         resolve: {
           items: function () {
-            return $rootScope.items;
+            return vm.mixName;
           }
         }
       });
 
       modalInstance.result.then(function (name) {
-        // TODO : change to DB storage
-        $rootScope.mixName = name;
-        localStorage['MixMaze_' + name] = jsonifyRegions();
-        parseStorage();
+        // TODO
       }, function () {
-        $log.info('Modal dismissed at: ' + new Date());
+        //$log.info('Modal dismissed at: ' + new Date());
       });
     };
 
     //$('#myModal').on('shown.bs.modal', function () {
     //  $('#nameTextArea').focus();
     //});
-    // </editor-fold>
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
 
-  $scope.name = "";
+  $scope.name = items;
 
   $scope.ok = function () {
     $uibModalInstance.close($scope.name);
@@ -898,4 +904,8 @@ angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, 
   $scope.cancel = function () {
     $uibModalInstance.dismiss('cancel');
   };
+
+  $scope.keyPressed = function(evt){
+    if(evt.keyCode === 13) $scope.ok();
+  }
 });

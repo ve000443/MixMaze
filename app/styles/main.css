@@ -133,3 +133,16 @@ select{
 div {
   overflow: hidden;
 }
+
+.dropdown-menu li a{
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.shortcut {
+  color:grey;
+  font-size:x-small;
+  float:right;
+  vertical-align: middle;
+  padding-top:0.4em;
+}
