@@ -7,30 +7,30 @@ angular.module('frontEndApp')
     var bufferLoader;
     var ctx;
 
-    vm.listOfSound = [];
-    vm.listOfMix = [];
-    vm.nbReadyTracks = 0;
+    $rootScope.listOfSound = [];
+    $rootScope.listOfMix = [];
+    $rootScope.nbReadyTracks = 0;
 
-    vm.delayTime = 0;
-    vm.feedbackGain = 0;
-    vm.filterDetune = 0;
-    vm.filterDrequency = 0;
-    vm.filterGain = 0;
+    $rootScope.delayTime = 0;
+    $rootScope.feedbackGain = 0;
+    $rootScope.filterDetune = 0;
+    $rootScope.filterDrequency = 0;
+    $rootScope.filterGain = 0;
 
-    vm.generalVolume = 80;
-    vm.effects = {};
-    vm.activeEffects = {};
-    vm.listOfWaves = [];
-    vm.smState = [];
-    vm.nbSolo = 0;
-    vm.songName = "";
-    vm.mixName = "";
+    $rootScope.generalVolume = 80;
+    $rootScope.effects = {};
+    $rootScope.activeEffects = {};
+    $rootScope.listOfWaves = [];
+    $rootScope.smState = [];
+    $rootScope.nbSolo = 0;
+    $rootScope.songName = "";
+    $rootScope.mixName = "";
 
-    vm.sliders = {};
+    $rootScope.sliders = {};
 
     // HISTORIC
-    vm.previous = [];
-    vm.next = [];
+    $rootScope.previous = [];
+    $rootScope.next = [];
 
     $rootScope.selectedRegionName = "";
     $rootScope.selectedRegion = null;
@@ -77,10 +77,10 @@ angular.module('frontEndApp')
 
     // TODO : Change to match the song
     function parseStorage(){
-      vm.listOfMix = [];
+      $rootScope.listOfMix = [];
       Object.keys(localStorage).forEach(function(key){
         if(key.indexOf("MixMaze_") > -1){
-          vm.listOfMix.push(key);
+          $rootScope.listOfMix.push(key);
         }
       });
     }
@@ -91,92 +91,92 @@ angular.module('frontEndApp')
           delete localStorage[key];
         }
       });
-      vm.listOfMix = [];
+      $rootScope.listOfMix = [];
     };
     parseStorage();
 
     // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
     var knobLimiter = document.getElementById('filterLimiter');
     knobLimiter.addEventListener('change', function(e) {
-      vm.filterLimiter = e.target.value;
+      $rootScope.filterLimiter = e.target.value;
 
-      var source = vm.listOfWaves[1].backend.source;
+      var source = $rootScope.listOfWaves[1].backend.source;
 
-      if(vm.preGain == null && vm.limiter == null) {
-        vm.preGain = vm.listOfWaves[1].backend.ac.createGain();
-        vm.limiter = vm.listOfWaves[1].backend.ac.createDynamicsCompressor();
+      if($rootScope.preGain == null && $rootScope.limiter == null) {
+        $rootScope.preGain = $rootScope.listOfWaves[1].backend.ac.createGain();
+        $rootScope.limiter = $rootScope.listOfWaves[1].backend.ac.createDynamicsCompressor();
       }
-      vm.limiter.threshold.value = 0; // this is the pitfall, leave some headroom
-      vm.limiter.knee.value = 0.0; // brute force
-      vm.limiter.ratio.value = 20.0; // max compression
-      vm.limiter.attack.value = 0.005; // 5ms attack
-      vm.limiter.release.value = 0.050; // 50ms release
-      vm.preGain.gain.value = vm.filterLimiter;
-      source.connect(vm.preGain);
-      vm.preGain.connect(vm.limiter);
-      vm.limiter.connect(vm.listOfWaves[1].backend.ac.destination);
+      $rootScope.limiter.threshold.value = 0; // this is the pitfall, leave some headroom
+      $rootScope.limiter.knee.value = 0.0; // brute force
+      $rootScope.limiter.ratio.value = 20.0; // max compression
+      $rootScope.limiter.attack.value = 0.005; // 5ms attack
+      $rootScope.limiter.release.value = 0.050; // 50ms release
+      $rootScope.preGain.gain.value = $rootScope.filterLimiter;
+      source.connect($rootScope.preGain);
+      $rootScope.preGain.connect($rootScope.limiter);
+      $rootScope.limiter.connect($rootScope.listOfWaves[1].backend.ac.destination);
     });
 
     var knobDelayTime = document.getElementById('delayTime');
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
-      vm.delayTime = value;
-      var delay = vm.listOfWaves[1].backend.ac.createDelay();
-      delay.delayTime.value = vm.delayTime;
-      var feedback = vm.listOfWaves[1].backend.ac.createGain();
-      feedback.gain.value = vm.feedbackGain;
+      $rootScope.delayTime = value;
+      var delay = $rootScope.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = $rootScope.delayTime;
+      var feedback = $rootScope.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = $rootScope.feedbackGain;
       delay.connect(feedback);
       feedback.connect(delay);
-      vm.listOfWaves[1].backend.setFilter(delay);
+      $rootScope.listOfWaves[1].backend.setFilter(delay);
     });
 
     var knobFeedbackGain = document.getElementById('feedbackGain');
     knobFeedbackGain.addEventListener('change', function(e) {
       var value = e.target.value;
-      vm.feedbackGain = value;
-      var delay = vm.listOfWaves[1].backend.ac.createDelay();
-      delay.delayTime.value = vm.delayTime;
-      var feedback = vm.listOfWaves[1].backend.ac.createGain();
-      feedback.gain.value = vm.feedbackGain;
+      $rootScope.feedbackGain = value;
+      var delay = $rootScope.listOfWaves[1].backend.ac.createDelay();
+      delay.delayTime.value = $rootScope.delayTime;
+      var feedback = $rootScope.listOfWaves[1].backend.ac.createGain();
+      feedback.gain.value = $rootScope.feedbackGain;
       delay.connect(feedback);
       feedback.connect(delay);
-      vm.listOfWaves[1].backend.setFilter(delay);
+      $rootScope.listOfWaves[1].backend.setFilter(delay);
     });
 
     var knobFilterDetune = document.getElementById('filterDetune');
     knobFilterDetune.addEventListener('change', function(e) {
       var value = e.target.value;
-      vm.filterDetune = value;
-      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      $rootScope.filterDetune = value;
+      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = vm.filterFrequency;
-      biquadFilter.gain.value = vm.filterGain;
-      biquadFilter.detune.value = vm.filterDetune;
-      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+      biquadFilter.frequency.value = $rootScope.filterFrequency;
+      biquadFilter.gain.value = $rootScope.filterGain;
+      biquadFilter.detune.value = $rootScope.filterDetune;
+      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
     var knobFilterFrequency = document.getElementById('filterFrequency');
     knobFilterFrequency.addEventListener('change', function(e) {
       var value = e.target.value;
-      vm.filterFrequency = value;
-      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      $rootScope.filterFrequency = value;
+      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = vm.filterFrequency;
-      biquadFilter.gain.value = vm.filterGain;
-      biquadFilter.detune.value = vm.filterDetune;
-      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+      biquadFilter.frequency.value = $rootScope.filterFrequency;
+      biquadFilter.gain.value = $rootScope.filterGain;
+      biquadFilter.detune.value = $rootScope.filterDetune;
+      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
     });
 
     var knobFilterGain = document.getElementById('filterGain');
     knobFilterGain.addEventListener('change', function(e) {
       var value = e.target.value;
-      vm.filterGain = value;
-      var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      $rootScope.filterGain = value;
+      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = vm.filterFrequency;
-      biquadFilter.gain.value = vm.filterGain;
-      biquadFilter.detune.value = vm.filterDetune;
-      vm.listOfWaves[1].backend.setFilter(biquadFilter);
+      biquadFilter.frequency.value = $rootScope.filterFrequency;
+      biquadFilter.gain.value = $rootScope.filterGain;
+      biquadFilter.detune.value = $rootScope.filterDetune;
+      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
     });
     // </editor-fold>
 
@@ -193,7 +193,7 @@ angular.module('frontEndApp')
     }
 
     $rootScope.zoom = function(zoomLevel){
-      vm.listOfWaves.forEach(function(wave){
+      $rootScope.listOfWaves.forEach(function(wave){
         wave.zoom(zoomLevel);
       });
     };
@@ -224,20 +224,20 @@ angular.module('frontEndApp')
         // or server returns response with an error status
       });
 
-    vm.loadSamples = function(){
-      vm.listOfSound = [];
+    $rootScope.loadSamples = function(){
+      $rootScope.listOfSound = [];
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
-          vm.songName = $("#selectedMusic option:selected").text().trim();
+          $rootScope.songName = $("#selectedMusic option:selected").text().trim();
           console.log(response.data);
           $rootScope.pistes = response.data.musicFiles;
 
           $rootScope.pistes.forEach(function(p){
-            vm.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+            $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
           //====================================A enlever quand on veut vraiment lire depuis serv=================================
-          vm.listOfSound=[
+          $rootScope.listOfSound=[
             'tracks/synth.mp3',
             'tracks/vocal.mp3',
             'tracks/drums.mp3',
@@ -265,7 +265,7 @@ angular.module('frontEndApp')
       // be its only parameter (see function above)
       bufferLoader = new BufferLoader(
         ctx,
-        vm.listOfSound
+        $rootScope.listOfSound
       );
 
       // start loading and decoding the files
@@ -306,7 +306,7 @@ angular.module('frontEndApp')
             loader.bufferList[index] = buffer;
 
             if (++loader.loadCount == loader.urlList.length)
-              vm.init();
+              $rootScope.init();
 
           },
           function(error) {
@@ -337,32 +337,32 @@ angular.module('frontEndApp')
     };
     // </editor-fold>
 
-    vm.init = function(){
-      vm.initWaves();
-      for(var i = 0; i < vm.listOfSound.length; i++){
-        vm.smState[i] = null;
+    $rootScope.init = function(){
+      $rootScope.initWaves();
+      for(var i = 0; i < $rootScope.listOfSound.length; i++){
+        $rootScope.smState[i] = null;
       }
 
-      /*var biquadFilter = vm.listOfWaves[1].backend.ac.createBiquadFilter();
+      /*var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
       biquadFilter.frequency.value = 1000;
       biquadFilter.gain.value = 25;
       console.log(biquadFilter);
-      vm.listOfWaves[1].backend.setFilter(biquadFilter);*/
+      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
     // <editor-fold desc="EFFECTS">
     function activateEffects(region) {
-      var effects = vm.effects[region.id];
+      var effects = $rootScope.effects[region.id];
       var keys = Object.keys(effects);
       var effect = {region: region};
       keys.forEach(function(key){
         switch(key){
           case 'mute':
-                if(vm.effects[region.id].mute && !region.wavesurfer.isMuted){
+                if($rootScope.effects[region.id].mute && !region.wavesurfer.isMuted){
                   region.wavesurfer.toggleMute();
                 }
-                else if (!vm.effects[region.id].mute && region.wavesurfer.isMuted){
+                else if (!$rootScope.effects[region.id].mute && region.wavesurfer.isMuted){
                   region.wavesurfer.toggleMute();
                 }
                 break;
@@ -370,50 +370,50 @@ angular.module('frontEndApp')
             effect[key] = effects[key];
         }
       });
-      vm.activeEffects[region.id] = effect;
+      $rootScope.activeEffects[region.id] = effect;
     }
 
     function deactivateEffects(region) {
       var waveId = region.wavesurfer.container.id.split("wave")[1];
 
-      if(vm.effects[region.id].mute && region.wavesurfer.isMuted){
+      if($rootScope.effects[region.id].mute && region.wavesurfer.isMuted){
         region.wavesurfer.toggleMute();
       }
-      else if (!vm.effects[region.id].mute && !region.wavesurfer.isMuted){
+      else if (!$rootScope.effects[region.id].mute && !region.wavesurfer.isMuted){
         region.wavesurfer.toggleMute();
       }
 
-      delete vm.activeEffects[region.id];
+      delete $rootScope.activeEffects[region.id];
 
-      if(vm.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
-      else if(vm.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+      if($rootScope.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
+      else if($rootScope.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
 
-      if(vm.effects[region.id].fadeout) {
-        region.wavesurfer.setVolume(vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100);
+      if($rootScope.effects[region.id].fadeout) {
+        region.wavesurfer.setVolume($rootScope.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * $rootScope.generalVolume/100);
       }
     }
 
     function evolveEffects(progress){
       $rootScope.progress = Math.ceil(progress);
 
-      var keys = Object.keys(vm.activeEffects);
+      var keys = Object.keys($rootScope.activeEffects);
       var region;
       keys.forEach(function(key){
-        region = vm.activeEffects[key].region;
-        var subKeys = Object.keys(vm.activeEffects[key]);
+        region = $rootScope.activeEffects[key].region;
+        var subKeys = Object.keys($rootScope.activeEffects[key]);
         subKeys.forEach(function(subKey){
           switch(subKey){
             case "fadein":
                   var start = region.start;
                   var end = region.end;
-                  var volume = vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100;
+                  var volume = $rootScope.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * $rootScope.generalVolume/100;
                   var res = Math.min((progress - start) * volume / (end - start), volume);
                   region.wavesurfer.setVolume(res);
                   break;
             case "fadeout":
                   var start = region.start;
                   var end = region.end;
-                  var volume = vm.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * vm.generalVolume/100;
+                  var volume = $rootScope.sliders['slider'+region.wavesurfer.container.id.split("wave")[1]]/100 * $rootScope.generalVolume/100;
                   var res = Math.max(volume - volume * ((progress - start) / (end - start)), 0);
                   region.wavesurfer.setVolume(res);
                   break;
@@ -421,7 +421,7 @@ angular.module('frontEndApp')
           }
           //console.log("toto");
         });
-        //console.log(vm.activeEffects[key]);
+        //console.log($rootScope.activeEffects[key]);
       });
       $rootScope.$digest();
     }
@@ -429,18 +429,18 @@ angular.module('frontEndApp')
 
     // <editor-fold desc="REGIONS">
     function undo(){
-      if(vm.previous.length === 0) return;
+      if($rootScope.previous.length === 0) return;
       $rootScope.deselectRegion();
-      vm.next.push(jsonifyRegions());
-      var previousState = vm.previous.pop();
+      $rootScope.next.push(jsonifyRegions());
+      var previousState = $rootScope.previous.pop();
       $rootScope.loadRegions(previousState);
     }
 
     function redo(){
-      if(vm.next.length === 0) return;
+      if($rootScope.next.length === 0) return;
       $rootScope.deselectRegion();
-      vm.previous.push(jsonifyRegions());
-      var nextState = vm.next.pop();
+      $rootScope.previous.push(jsonifyRegions());
+      var nextState = $rootScope.next.pop();
       $rootScope.loadRegions(nextState);
     }
 
@@ -460,9 +460,9 @@ angular.module('frontEndApp')
     };
 
     $rootScope.deleteRegion = function(){
-      vm.previous.push(jsonifyRegions());
+      $rootScope.previous.push(jsonifyRegions());
       if($rootScope.selectedRegion !== null){
-        delete vm.effects[$rootScope.selectedRegionName];
+        delete $rootScope.effects[$rootScope.selectedRegionName];
         $rootScope.selectedRegion.remove();
         $rootScope.selectedRegion = null;
         $rootScope.selectedRegionName = "";
@@ -470,23 +470,23 @@ angular.module('frontEndApp')
     };
 
     $rootScope.toggleEffect = function(effect){
-      vm.previous.push(jsonifyRegions());
-      vm.effects[$rootScope.selectedRegionName][effect] = !vm.effects[$rootScope.selectedRegionName][effect];
+      $rootScope.previous.push(jsonifyRegions());
+      $rootScope.effects[$rootScope.selectedRegionName][effect] = !$rootScope.effects[$rootScope.selectedRegionName][effect];
     };
 
     $rootScope.hasEffect = function(effect){
-      return vm.effects[$rootScope.selectedRegionName][effect] === true;
+      return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
     };
 
     function jsonifyRegions(){
       var res = {};
-      vm.listOfWaves.forEach(function(wavesurfer, index){
-        res[vm.nameRecover(vm.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
+      $rootScope.listOfWaves.forEach(function(wavesurfer, index){
+        res[$rootScope.nameRecover($rootScope.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
           var region = wavesurfer.regions.list[id];
           var effects = {};
           try {
-            Object.keys(vm.effects[region.id]).forEach(function (key) {
-              effects[key] = vm.effects[region.id][key];
+            Object.keys($rootScope.effects[region.id]).forEach(function (key) {
+              effects[key] = $rootScope.effects[region.id][key];
             });
           } catch(ex){
           }
@@ -506,7 +506,7 @@ angular.module('frontEndApp')
      * Save regions to localStorage.
      */
     $rootScope.saveRegions = function() {
-      localStorage[vm.songName] = JSON.stringify(jsonifyRegions());
+      localStorage[$rootScope.songName] = JSON.stringify(jsonifyRegions());
     };
 
     /**
@@ -514,239 +514,239 @@ angular.module('frontEndApp')
      */
     $rootScope.loadRegions = function(regions) {
       if(regions === undefined) {
-        if (localStorage[vm.songName] === undefined) return;
+        if (localStorage[$rootScope.songName] === undefined) return;
         $rootScope.deselectRegion();
-        regions = JSON.parse(localStorage[vm.songName]);
+        regions = JSON.parse(localStorage[$rootScope.songName]);
       }
-      vm.effects = {};
-      vm.listOfWaves.forEach(function(wavesurfer, index){
+      $rootScope.effects = {};
+      $rootScope.listOfWaves.forEach(function(wavesurfer, index){
         wavesurfer.clearRegions();
-        var piste = vm.nameRecover(vm.listOfSound[index]);
+        var piste = $rootScope.nameRecover($rootScope.listOfSound[index]);
         var color = randomColor(0.5);
         regions[piste].forEach(function(region){
           region.color = color;
           wavesurfer.addRegion(region);
           var keys = Object.keys(wavesurfer.regions.list);
           var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
-          vm.effects[newRegion.id] = region.effects;
+          $rootScope.effects[newRegion.id] = region.effects;
         });
       });
     };
     // </editor-fold>
 
     function checkReadiness(){
-      if(vm.nbReadyTracks === vm.listOfSound.length){
-        vm.listOfWaves.forEach(function(wave){
+      if($rootScope.nbReadyTracks === $rootScope.listOfSound.length){
+        $rootScope.listOfWaves.forEach(function(wave){
           wave.toggleInteraction();
         });
         $rootScope.progress = 0;
 
-        $rootScope.duration = Math.ceil(vm.listOfWaves[0].getDuration());
+        $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
       }
     }
 
-    vm.initWaves = function() {
-      for (var i = 0; i < vm.listOfSound.length; i++) {
+    $rootScope.initWaves = function() {
+      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
         var cont = '#wave' + i;
 
-        vm.listOfWaves.push(WaveSurfer.create({
+        $rootScope.listOfWaves.push(WaveSurfer.create({
           container: cont,
           waveColor: '#bbb',
           progressColor: '#347',
           cursorColor: '#000'
         }));
-        vm.listOfWaves[i].toggleInteraction();
+        $rootScope.listOfWaves[i].toggleInteraction();
 
         if(i === 0){
-          vm.listOfWaves[i].on('audioprocess', evolveEffects);
+          $rootScope.listOfWaves[i].on('audioprocess', evolveEffects);
         }
 
-        vm.listOfWaves[i].on('ready', function () {
+        $rootScope.listOfWaves[i].on('ready', function () {
           console.log("song ready");
-          vm.nbReadyTracks = vm.nbReadyTracks + 1;
+          $rootScope.nbReadyTracks = $rootScope.nbReadyTracks + 1;
           checkReadiness();
-          $(".progress-bar").attr("style","width:" + ((vm.nbReadyTracks / vm.listOfSound.length) * 100) + "%");
+          $(".progress-bar").attr("style","width:" + (($rootScope.nbReadyTracks / $rootScope.listOfSound.length) * 100) + "%");
           $rootScope.$digest();
         });
 
-        vm.listOfWaves[i].on('seek', function(progress){
-          if (vm.seeking === true) return;
-          vm.seeking = true;
+        $rootScope.listOfWaves[i].on('seek', function(progress){
+          if ($rootScope.seeking === true) return;
+          $rootScope.seeking = true;
           var willPlay = false;
-          vm.listOfWaves.forEach(function(wave){
+          $rootScope.listOfWaves.forEach(function(wave){
             willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
           });
-          vm.listOfWaves.forEach(function(wave, index){
+          $rootScope.listOfWaves.forEach(function(wave, index){
             if(index === 0) {
               $rootScope.progress = Math.ceil(progress * $rootScope.duration);
             }
             wave.seekTo(progress);
             if(willPlay) wave.play();
           });
-          vm.seeking = false;
+          $rootScope.seeking = false;
           $rootScope.$digest();
         });
 
-        vm.listOfWaves[i].enableDragSelection({
+        $rootScope.listOfWaves[i].enableDragSelection({
           color: randomColor(0.6)
         });
 
-        vm.listOfWaves[i].on('region-click', function (region, e) {
+        $rootScope.listOfWaves[i].on('region-click', function (region, e) {
           e.stopPropagation();
           selectRegion(region);
           $rootScope.$digest();
           // Play on click, loop on shift click
           //e.shiftKey ? region.playLoop() : region.play();
         });
-        //vm.wavesurfer.on('region-click', editAnnotation);
+        //$rootScope.wavesurfer.on('region-click', editAnnotation);
 
-        vm.listOfWaves[i].on('region-updated', function(region, e){
+        $rootScope.listOfWaves[i].on('region-updated', function(region, e){
           if(region.end - region.start < 0.5) return;
           selectRegion(region);
-          if(vm.effects[region.id] === undefined)
-            vm.effects[region.id] = {};
+          if($rootScope.effects[region.id] === undefined)
+            $rootScope.effects[region.id] = {};
           $rootScope.$digest();
         });
 
-        vm.listOfWaves[i].on('region-created', function(region, e){
-          vm.previous.push(jsonifyRegions());
+        $rootScope.listOfWaves[i].on('region-created', function(region, e){
+          $rootScope.previous.push(jsonifyRegions());
         });
 
-        vm.listOfWaves[i].on('region-in', activateEffects);
-        vm.listOfWaves[i].on('region-out', deactivateEffects);
+        $rootScope.listOfWaves[i].on('region-in', activateEffects);
+        $rootScope.listOfWaves[i].on('region-out', deactivateEffects);
 
-        //vm.wavesurfer.on('region-removed', saveRegions);
-        //vm.wavesurfer.on('region-in', showNote);
+        //$rootScope.wavesurfer.on('region-removed', saveRegions);
+        //$rootScope.wavesurfer.on('region-in', showNote);
 
-        vm.listOfWaves[i].load(vm.listOfSound[i]);
+        $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
 
-        //vm.listOfWaves.push(vm.wavesurfer);
+        //$rootScope.listOfWaves.push($rootScope.wavesurfer);
       }
     };
 
-    vm.playAllTracks = function(){
-      for(var i = 0; i < vm.listOfWaves.length; i++){
-        vm.listOfWaves[i].playPause();
+    $rootScope.playAllTracks = function(){
+      for(var i = 0; i < $rootScope.listOfWaves.length; i++){
+        $rootScope.listOfWaves[i].playPause();
       }
     };
 
-    vm.stopAllTracks = function(){
-      for(var i = 0; i < vm.listOfWaves.length; i++){
-        vm.listOfWaves[i].stop();
+    $rootScope.stopAllTracks = function(){
+      for(var i = 0; i < $rootScope.listOfWaves.length; i++){
+        $rootScope.listOfWaves[i].stop();
       }
-      console.log(vm.listOfWaves[1]);
+      console.log($rootScope.listOfWaves[1]);
       $rootScope.progress = 0;
     };
 
-    vm.updateTrackVolume = function(index){
-      if(vm.smState[index] == "mute"){
-        vm.smState[index] = null;
+    $rootScope.updateTrackVolume = function(index){
+      if($rootScope.smState[index] == "mute"){
+        $rootScope.smState[index] = null;
       }
-      vm.listOfWaves[index].setVolume(vm.sliders['slider'+index]/100 * vm.generalVolume/100);
+      $rootScope.listOfWaves[index].setVolume($rootScope.sliders['slider'+index]/100 * $rootScope.generalVolume/100);
     };
 
-    vm.updateAllTracksVolume = function(value){
-      vm.generalVolume = value;
-      for(var i = 0; i < vm.listOfWaves.length; i++){
+    $rootScope.updateAllTracksVolume = function(value){
+      $rootScope.generalVolume = value;
+      for(var i = 0; i < $rootScope.listOfWaves.length; i++){
         // gerer le volume
-        vm.updateTrackVolume(i);
+        $rootScope.updateTrackVolume(i);
       }
     };
 
-    vm.playPause = function(){
-      vm.wavesurfer.playPause();
+    $rootScope.playPause = function(){
+      $rootScope.wavesurfer.playPause();
     };
 
-    vm.stop = function(){
-      vm.wavesurfer.stop();
+    $rootScope.stop = function(){
+      $rootScope.wavesurfer.stop();
     };
 
-    vm.updateVolume = function(track, value){
-      vm.wavesurfer.setVolume(value);
+    $rootScope.updateVolume = function(track, value){
+      $rootScope.wavesurfer.setVolume(value);
     };
 
     // <editor-fold desc="SOLO/MUTE">
-    vm.mute = function(track){
-      vm.listOfWaves[track].toggleMute();
+    $rootScope.mute = function(track){
+      $rootScope.listOfWaves[track].toggleMute();
     };
 
-    vm.updateSm = function(track, value){
-      console.log(vm.listOfWaves[track].isMuted);
-      if(value == 'solo' && vm.nbSolo == 0 && vm.smState[track] != 'solo'){
-        vm.smState[track] = 'solo';
-        vm.nbSolo++;
-        for(var i = 0; i < vm.smState.length; i++){
+    $rootScope.updateSm = function(track, value){
+      console.log($rootScope.listOfWaves[track].isMuted);
+      if(value == 'solo' && $rootScope.nbSolo == 0 && $rootScope.smState[track] != 'solo'){
+        $rootScope.smState[track] = 'solo';
+        $rootScope.nbSolo++;
+        for(var i = 0; i < $rootScope.smState.length; i++){
           if(i != track){
-            vm.smState[i] = 'mute';
+            $rootScope.smState[i] = 'mute';
           }
         }
-      } else if(value == 'solo' && vm.nbSolo > 0 && vm.smState[track] != 'solo'){
-        vm.smState[track] = 'solo';
-        vm.nbSolo++;
-      } else if(value == 'mute' && vm.nbSolo > 0 && vm.smState[track] == 'mute'){
-        vm.smState[track] = 'solo';
-        vm.nbSolo++;
-      } else if(value == 'mute' && vm.smState[track] == 'solo'){
-        vm.smState[track] = 'mute';
-        vm.nbSolo--;
-      } else if(value == 'solo' && vm.smState[track] == 'solo' && vm.nbSolo > 1){
-        vm.smState[track] = 'mute';
-        vm.nbSolo--;
-      } else if(value == 'solo' && vm.smState[track] == 'solo' && vm.nbSolo == 1){
-        for(var i = 0; i < vm.smState.length; i++) {
-          vm.smState[i] = null;
+      } else if(value == 'solo' && $rootScope.nbSolo > 0 && $rootScope.smState[track] != 'solo'){
+        $rootScope.smState[track] = 'solo';
+        $rootScope.nbSolo++;
+      } else if(value == 'mute' && $rootScope.nbSolo > 0 && $rootScope.smState[track] == 'mute'){
+        $rootScope.smState[track] = 'solo';
+        $rootScope.nbSolo++;
+      } else if(value == 'mute' && $rootScope.smState[track] == 'solo'){
+        $rootScope.smState[track] = 'mute';
+        $rootScope.nbSolo--;
+      } else if(value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo > 1){
+        $rootScope.smState[track] = 'mute';
+        $rootScope.nbSolo--;
+      } else if(value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo == 1){
+        for(var i = 0; i < $rootScope.smState.length; i++) {
+          $rootScope.smState[i] = null;
         }
-        vm.nbSolo--;
-      } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == null){
-        vm.smState[track] = 'mute';
-      } else if(value == 'mute' && vm.nbSolo == 0 && vm.smState[track] == 'mute'){
-        vm.smState[track] = null;
+        $rootScope.nbSolo--;
+      } else if(value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == null){
+        $rootScope.smState[track] = 'mute';
+      } else if(value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == 'mute'){
+        $rootScope.smState[track] = null;
       }
-      vm.manageSoloMute(vm.smState);
+      $rootScope.manageSoloMute($rootScope.smState);
     };
 
-    vm.reinitSm = function(){
-      for(var i = 0; i < vm.smState.length; i++){
-        vm.smState[i] = null;
-        vm.nbSolo = 0;
+    $rootScope.reinitSm = function(){
+      for(var i = 0; i < $rootScope.smState.length; i++){
+        $rootScope.smState[i] = null;
+        $rootScope.nbSolo = 0;
       }
-      vm.manageSoloMute(vm.smState);
+      $rootScope.manageSoloMute($rootScope.smState);
     };
 
-    vm.manageSoloMute = function(smState){
+    $rootScope.manageSoloMute = function(smState){
       for(var i = 0; i < smState.length; i++){
-        if(smState[i] == 'mute' && vm.listOfWaves[i].isMuted != true){
-          vm.listOfWaves[i].toggleMute();
-        } else if(smState[i] == 'solo' && vm.listOfWaves[i].isMuted == true
-          || smState[i] == null && vm.listOfWaves[i].isMuted == true){
-          vm.listOfWaves[i].toggleMute();
+        if(smState[i] == 'mute' && $rootScope.listOfWaves[i].isMuted != true){
+          $rootScope.listOfWaves[i].toggleMute();
+        } else if(smState[i] == 'solo' && $rootScope.listOfWaves[i].isMuted == true
+          || smState[i] == null && $rootScope.listOfWaves[i].isMuted == true){
+          $rootScope.listOfWaves[i].toggleMute();
         }
       }
     };
 
-    vm.solo = function(track){
-      for(var i = 0; i < vm.listOfWaves.length; i++){
+    $rootScope.solo = function(track){
+      for(var i = 0; i < $rootScope.listOfWaves.length; i++){
         if(i != track){
-          vm.listOfWaves[i].toggleMute();
+          $rootScope.listOfWaves[i].toggleMute();
         }
       }
     };
     // </editor-fold>
 
     // <editor-fold desc="PANNER">
-    vm.updatePan = function(track, value){
+    $rootScope.updatePan = function(track, value){
 
       console.log("updatePan(" + track + "," + value + ")");
       /*// Add panner
-       vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-       vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+       $rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
+       $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
 
        // Bind panner slider
        // @see http://stackoverflow.com/a/14412601/352796
        var onChange = function () {
        var xDeg = parseInt(slider.value);
        var x = Math.sin(xDeg * (Math.PI / 180));
-       vm.wavesurfer.panner.setPosition(x, 0, 0);
+       $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
        };
        var slider = document.querySelector('[data-action="pan"]');
        slider.addEventListener('input', onChange);
@@ -757,15 +757,15 @@ angular.module('frontEndApp')
     // Panner
     /*(function () {
      // Add panner
-     vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+     $rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
+     $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
 
      // Bind panner slider
      // @see http://stackoverflow.com/a/14412601/352796
      var onChange = function () {
      var xDeg = parseInt(slider.value);
      var x = Math.sin(xDeg * (Math.PI / 180));
-     vm.wavesurfer.panner.setPosition(x, 0, 0);
+     $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
      };
      var slider = document.querySelector('[data-action="pan"]');
      slider.addEventListener('input', onChange);
@@ -774,15 +774,15 @@ angular.module('frontEndApp')
      }());*/
 
     // Add panner
-    /*vm.wavesurfer.panner = vm.wavesurfer.backend.ac.createPanner();
-     vm.wavesurfer.backend.setFilter(vm.wavesurfer.panner);
+    /*$rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
+     $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
 
      var pan1 = document.getElementById('pan1');
      pan1.addEventListener('change', function(e){
      console.log(e.target.value);
      var xDeg = parseInt(pan1.value);
      var x = Math.sin(xDeg * (Math.PI / 180));
-     vm.wavesurfer.panner.setPosition(x, 0, 0);
+     $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
      });*/
 
     nx.onload = function() {
@@ -793,7 +793,7 @@ angular.module('frontEndApp')
 
       /*slider1.on('*', function (data) {
        var value = data.value / 100;
-       vm.updateVolume(1, value);
+       $rootScope.updateVolume(1, value);
        });
        slider1.set({
        value: 80
@@ -822,34 +822,34 @@ angular.module('frontEndApp')
     sliderGeneral.addEventListener('change', function(e) {
       //console.log("volume general : " + e.target.value);
       var value = e.target.value;
-      vm.updateAllTracksVolume(value);
+      $rootScope.updateAllTracksVolume(value);
     });
 
-    vm.volumeStart = function(){
-      if(vm.slidersInitialized) return;
-      vm.slidersInitialized = true;
+    $rootScope.volumeStart = function(){
+      if($rootScope.slidersInitialized) return;
+      $rootScope.slidersInitialized = true;
 
-      var keys = Object.keys(vm.sliders);
+      var keys = Object.keys($rootScope.sliders);
 
       keys.forEach(function(key){
         document.getElementById(key).addEventListener('change', function(e){
-          vm.sliders[key] = e.target.value;
-          vm.updateTrackVolume(key.split('r')[1]);
+          $rootScope.sliders[key] = e.target.value;
+          $rootScope.updateTrackVolume(key.split('r')[1]);
         });
       });
     };
 
-    vm.nameRecover = function(str){
+    $rootScope.nameRecover = function(str){
       var splitted = str.split("/");
       return splitted[splitted.length - 1].split(".")[0];
     };
 
     // <editor-fold desc="SAVE">
     $rootScope.save = function(){
-      if(!Boolean(vm.mixName)){
+      if(!Boolean($rootScope.mixName)){
         $rootScope.saveAs();
       } else {
-        localStorage['MixMaze_' + vm.mixName] = jsonifyRegions();
+        localStorage['MixMaze_' + $rootScope.mixName] = jsonifyRegions();
         parseStorage();
       }
     };
@@ -864,14 +864,14 @@ angular.module('frontEndApp')
         size: size,
         resolve: {
           items: function () {
-            return vm.mixName;
+            return $rootScope.mixName;
           }
         }
       });
 
       modalInstance.result.then(function (name) {
         // TODO : change to DB storage
-        vm.mixName = name;
+        $rootScope.mixName = name;
         $rootScope.save();
       }, function () {
         //$log.info('Modal dismissed at: ' + new Date());
@@ -888,7 +888,7 @@ angular.module('frontEndApp')
         size: size,
         resolve: {
           items: function () {
-            return vm.mixName;
+            return $rootScope.mixName;
           }
         }
       });
