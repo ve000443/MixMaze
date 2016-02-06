@@ -596,7 +596,6 @@ angular.module('frontEndApp')
             if(willPlay) wave.play();
           });
           $rootScope.seeking = false;
-          $rootScope.$digest();
         });
 
         $rootScope.listOfWaves[i].enableDragSelection({
@@ -654,7 +653,6 @@ angular.module('frontEndApp')
       for(var i = 0; i < $rootScope.listOfWaves.length; i++){
         $rootScope.listOfWaves[i].stop();
       }
-      console.log($rootScope.listOfWaves[1]);
       $rootScope.progress = 0;
     };
 
