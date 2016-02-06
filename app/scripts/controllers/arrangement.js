@@ -38,6 +38,9 @@ angular.module('frontEndApp')
 
     // TOGGLERS
     var isTracking = true;
+    var isMoving = false;
+    var isCreating = false;
+    var hasClicked = false;
     var isLoopingOnTrack = false;
     vm.isLoopingOnRegion = false;
 
@@ -71,9 +74,9 @@ angular.module('frontEndApp')
               break;
         // SPACE
         case 32:
-              $rootScope.listOfWaves[0].addRegion({
-                id:'toto'
-              });
+              console.log($rootScope.previous);
+          console.log(jsonifyRegions());
+              console.log($rootScope.next);
               evt.preventDefault();
               break;
         // BACKSPACE
@@ -647,16 +650,21 @@ angular.module('frontEndApp')
             selectRegion(region);
             $rootScope.$digest();
           }
+          hasClicked = true;
         });
 
         $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
           e.stopPropagation();
           // Play on click, loop on shift click
-          e.shiftKey ? region.playLoop() : region.play();
+          //e.shiftKey ? region.playLoop() : region.play();
         });
         //$rootScope.wavesurfer.on('region-click', editAnnotation);
 
         $rootScope.listOfWaves[i].on('region-updated', function(region, e){
+          if(!isMoving && (!isCreating || hasClicked)) {
+            savePrevious();
+            isMoving = true;
+          }
           if(region.end - region.start < 0.5) return;
           selectRegion(region);
           if($rootScope.effects[region.id] === undefined)
@@ -664,7 +672,14 @@ angular.module('frontEndApp')
           $rootScope.$digest();
         });
 
+        $rootScope.listOfWaves[i].on('region-update-end', function(region){
+          isMoving = false;
+          isCreating = false;
+          hasClicked = false;
+        });
+
         $rootScope.listOfWaves[i].on('region-created', function(region, e){
+          isCreating = true;
           savePrevious();
         });
 
