@@ -178,6 +178,9 @@
     <button class="btn btn-primary">
       <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects()"> Effects</i>
     </button>
+    <button type="button" class="btn btn-primary check" ng-model="arrangement.isLoopingOnRegion" ng-click="loopRegion($event)" uib-btn-checkbox ng-disabled="progress === null">
+      <i class="glyphicon glyphicon-repeat"></i>
+    </button>
   </div>
 
   <div class="col-lg-3">
@@ -212,6 +215,10 @@
       </button>
       <button class="btn btn-primary" ng-disabled="progress === null" style="background-color: #347; border-color: #347;" ng-click="stopAllTracks()">
         <i class="glyphicon glyphicon-stop"></i>
+      </button>
+
+      <button type="button" class="btn btn-primary check" ng-model="isLoopingTrack" uib-btn-checkbox ng-click="loopTrack(isLoopingTrack, $event);" ng-disabled="progress === null">
+        <i class="glyphicon glyphicon-repeat"></i>
       </button>
     </div>
     <!-- Panoramique -->

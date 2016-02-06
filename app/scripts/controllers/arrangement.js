@@ -38,6 +38,8 @@ angular.module('frontEndApp')
 
     // TOGGLERS
     var isTracking = true;
+    var isLoopingOnTrack = false;
+    vm.isLoopingOnRegion = false;
 
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
@@ -370,6 +372,7 @@ angular.module('frontEndApp')
     }
 
     function deactivateEffects(region) {
+      if(region.id === $rootScope.selectedRegionName) checkLoop();
       var waveId = region.wavesurfer.container.id.split("wave")[1];
 
       if($rootScope.effects[region.id].mute && region.wavesurfer.isMuted){
@@ -451,6 +454,7 @@ angular.module('frontEndApp')
         $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
         $rootScope.selectedRegion = null;
         $rootScope.selectedRegionName = "";
+        vm.isLoopingOnRegion = false;
       }
     };
 
@@ -623,16 +627,26 @@ angular.module('frontEndApp')
           $rootScope.seeking = false;
         });
 
+        $rootScope.listOfWaves[i].on('finish', function(){
+          if(isLoopingOnTrack) $rootScope.listOfWaves[0].seekTo(0);
+          $rootScope.listOfWaves.forEach(function(wave){
+            if(isLoopingOnTrack){
+              wave.play();
+            }
+            else wave.stop();
+          });
+        });
+
         $rootScope.listOfWaves[i].enableDragSelection({
           color: $rootScope.listOfWaves[i].color
         });
 
         $rootScope.listOfWaves[i].on('region-click', function (region, e) {
-          e.stopPropagation();
-          selectRegion(region);
-          $rootScope.$digest();
-          // Play on click, loop on shift click
-          //e.shiftKey ? region.playLoop() : region.play();
+          if(!isSelected(region)){
+            e.stopPropagation();
+            selectRegion(region);
+            $rootScope.$digest();
+          }
         });
 
         $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
@@ -673,15 +687,41 @@ angular.module('frontEndApp')
     };
 
     $rootScope.stopAllTracks = function(){
-      for(var i = 0; i < $rootScope.listOfWaves.length; i++){
+      $rootScope.listOfWaves.forEach(function(wave){
         try{
-          $rootScope.listOfWaves[i].stop();
-        } catch (ex){
+          wave.stop();
+        } catch (e){
 
         }
+      });
+
+      if(vm.isLoopingOnRegion) {
+        var nextProgress = $rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration();
+        $rootScope.progress = nextProgress;
+        $rootScope.listOfWaves[0].seekTo(nextProgress);
       }
-      $rootScope.progress = 0;
+      else {
+        $rootScope.progress = 0;
+      }
     };
+
+    $rootScope.loopTrack = function(isLooping, event){
+      isLoopingOnTrack = isLooping;
+      event.target.blur();
+    };
+
+    $rootScope.loopRegion = function(event){
+      if($rootScope.listOfWaves[0].getCurrentTime() >= $rootScope.selectedRegion.end || $rootScope.listOfWaves[0].getCurrentTime() <= $rootScope.selectedRegion.start){
+        if(vm.isLoopingOnRegion)$rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
+      }
+      event.target.blur();
+    };
+
+    function checkLoop(){
+      if(vm.isLoopingOnRegion ){
+        $rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
+      }
+    }
 
     $rootScope.updateTrackVolume = function(index){
       if($rootScope.smState[index] == "mute"){
@@ -957,6 +997,14 @@ angular.module('frontEndApp')
       $rootScope.loadRegions(localStorage[mixName]);
       //console.log(localStorage);
     };
+
+    $rootScope.blur = function(event){
+      event.target.blur();
+    }
+
+    function isSelected(region){
+      return region.id === $rootScope.selectedRegionName;
+    }
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
@@ -973,5 +1021,5 @@ angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, 
 
   $scope.keyPressed = function(evt){
     if(evt.keyCode === 13) $scope.ok();
-  }
+  };
 });
