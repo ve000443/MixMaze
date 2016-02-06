@@ -439,7 +439,7 @@ angular.module('frontEndApp')
 
     function redo(){
       if($rootScope.next.length === 0) return;
-      savePrevious();
+      savePrevious(true);
       $rootScope.deselectRegion();
       var nextState = $rootScope.next.pop();
       $rootScope.loadRegions(nextState);
@@ -978,10 +978,10 @@ angular.module('frontEndApp')
       });
     };
 
-    function savePrevious(){
+    function savePrevious(fromRedo){
       if (isTracking) {
         $rootScope.previous.push(jsonifyRegions());
-        $rootScope.next = [];
+        if(!fromRedo) $rootScope.next = [];
       }
     }
     // </editor-fold>
