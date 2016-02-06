@@ -608,10 +608,16 @@ angular.module('frontEndApp')
             willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
           });
           $rootScope.listOfWaves.forEach(function(wave, index){
+            wave.seekTo(progress);
             if(index === 0) {
               $rootScope.progress = Math.ceil(progress * $rootScope.duration);
+            } else if (index=== $rootScope.listOfWaves.length-1){
+              try{
+                $rootScope.$digest();
+              } catch (ex){
+
+              }
             }
-            wave.seekTo(progress);
             if(willPlay) wave.play();
           });
           $rootScope.seeking = false;
@@ -668,7 +674,11 @@ angular.module('frontEndApp')
 
     $rootScope.stopAllTracks = function(){
       for(var i = 0; i < $rootScope.listOfWaves.length; i++){
-        $rootScope.listOfWaves[i].stop();
+        try{
+          $rootScope.listOfWaves[i].stop();
+        } catch (ex){
+
+        }
       }
       $rootScope.progress = 0;
     };
