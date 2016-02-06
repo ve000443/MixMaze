@@ -2,11 +2,12 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log) {
+  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
     var vm = this;
     var bufferLoader;
     var ctx;
 
+    $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "Test";
     $rootScope.listOfSound = [];
     $rootScope.listOfMix = [];
     $rootScope.nbReadyTracks = 0;
@@ -861,8 +862,17 @@ angular.module('frontEndApp')
       if(!Boolean($rootScope.mixName)){
         $rootScope.saveAs();
       } else {
-        localStorage['MixMaze_' + $rootScope.mixName] = jsonifyRegions();
+        var json = jsonifyRegions();
+        localStorage['MixMaze_' + $rootScope.mixName] = json;
         parseStorage();
+        console.log(JSON.stringify(jsonifyRegions()));
+        $http.post('http://localhost:8080/mix/', json).then(
+          function successCallback(response) {
+            console.log("mix stored");
+          }, function errorCallback(response) {
+            console.log("Error : " + response);
+          }
+        );
       }
     };
 

@@ -46,7 +46,7 @@ angular
         controller: 'WaveSurferTestCtrl',
         controllerAs: 'waveSurferTest'
       })
-      .when('/arrangement', {
+      .when('/', {
         templateUrl: 'views/arrangement.html',
         controller: 'ArrangementCtrl',
         controllerAs: 'arrangement'

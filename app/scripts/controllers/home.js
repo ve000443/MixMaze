@@ -8,7 +8,7 @@
  * Controller of the frontEndApp
  */
 angular.module('frontEndApp')
-  .controller('HomeCtrl', function ($http, $location) {
+  .controller('HomeCtrl', function ($http, $location, $cookies, $cookieStore) {
 
     var home = this;
 
@@ -40,6 +40,7 @@ angular.module('frontEndApp')
               home.http.post('http://localhost:8080/users/', data).then(
                 function successCallback(response) {
                   console.log(response);
+                  $cookieStore.put("user", data.pseudo);
                   $location.path("/arrangement");
                 }, function errorCallback(response) {
                   console.log("Error : " + response);
@@ -64,6 +65,7 @@ angular.module('frontEndApp')
           var user = response.data;
           home.goodConnection = exists && (user.password === home.passwordConnection);
           if(home.goodConnection){
+            $cookieStore.put("user", user.pseudo);
             $location.path("/arrangement");
           }
         }, function errorCallback(response) {
