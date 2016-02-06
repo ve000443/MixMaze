@@ -36,6 +36,9 @@ angular.module('frontEndApp')
     $rootScope.selectedRegion = null;
     $rootScope.progress = null;
 
+    // TOGGLERS
+    var isTracking = true;
+
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
       //console.log(evt.keyCode);
@@ -63,6 +66,13 @@ angular.module('frontEndApp')
         case 90:
               if(evt.ctrlKey && evt.shiftKey) redo();
               else if(evt.ctrlKey) undo();
+              break;
+        // SPACE
+        case 32:
+              $rootScope.listOfWaves[0].addRegion({
+                id:'toto'
+              });
+              evt.preventDefault();
               break;
         // BACKSPACE
         //case 8:
@@ -405,7 +415,6 @@ angular.module('frontEndApp')
                   break;
             default:
           }
-          //console.log("toto");
         });
         //console.log($rootScope.activeEffects[key]);
       });
@@ -416,16 +425,16 @@ angular.module('frontEndApp')
     // <editor-fold desc="REGIONS">
     function undo(){
       if($rootScope.previous.length === 0) return;
-      $rootScope.deselectRegion();
       $rootScope.next.push(jsonifyRegions());
+      $rootScope.deselectRegion();
       var previousState = $rootScope.previous.pop();
       $rootScope.loadRegions(previousState);
     }
 
     function redo(){
       if($rootScope.next.length === 0) return;
+      savePrevious();
       $rootScope.deselectRegion();
-      $rootScope.previous.push(jsonifyRegions());
       var nextState = $rootScope.next.pop();
       $rootScope.loadRegions(nextState);
     }
@@ -446,7 +455,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.deleteRegion = function(){
-      $rootScope.previous.push(jsonifyRegions());
+      savePrevious();
       if($rootScope.selectedRegion !== null){
         delete $rootScope.effects[$rootScope.selectedRegionName];
         $rootScope.selectedRegion.remove();
@@ -456,7 +465,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.toggleEffect = function(effect){
-      $rootScope.previous.push(jsonifyRegions());
+      savePrevious();
       $rootScope.effects[$rootScope.selectedRegionName][effect] = !$rootScope.effects[$rootScope.selectedRegionName][effect];
 
     };
@@ -469,7 +478,6 @@ angular.module('frontEndApp')
           $rootScope.effects[$rootScope.selectedRegionName][key] = false;
         }
       });
-
     };
 
     $rootScope.hasEffect = function(effect){
@@ -493,7 +501,9 @@ angular.module('frontEndApp')
             end: region.end,
             attributes: region.attributes,
             data: region.data,
-            effects: effects
+            effects: effects,
+            id: region.id,
+            isSelected: region.id === $rootScope.selectedRegionName
           };
         });
       });
@@ -511,6 +521,7 @@ angular.module('frontEndApp')
      * Load regions from localStorage.
      */
     $rootScope.loadRegions = function(regions) {
+      isTracking = false;
       if(regions === undefined) {
         if (localStorage[$rootScope.songName] === undefined) return;
         $rootScope.deselectRegion();
@@ -522,15 +533,20 @@ angular.module('frontEndApp')
       $rootScope.listOfWaves.forEach(function(wavesurfer, index){
         wavesurfer.clearRegions();
         var piste = $rootScope.nameRecover($rootScope.listOfSound[index]);
-        if(regions[piste] === undefined) return;
-        regions[piste].forEach(function(region){
-          region.color = wavesurfer.color;
-          wavesurfer.addRegion(region);
-          var keys = Object.keys(wavesurfer.regions.list);
-          var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
-          $rootScope.effects[newRegion.id] = region.effects;
-        });
+        if(regions[piste] !== undefined){
+          regions[piste].forEach(function(region){
+            region.color = wavesurfer.color;
+            wavesurfer.addRegion(region);
+            var keys = Object.keys(wavesurfer.regions.list);
+            var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
+            if(region.isSelected){
+              selectRegion(newRegion);
+            }
+            $rootScope.effects[newRegion.id] = region.effects;
+          });
+        }
       });
+      isTracking = true;
     };
     // </editor-fold>
 
@@ -629,7 +645,7 @@ angular.module('frontEndApp')
         });
 
         $rootScope.listOfWaves[i].on('region-created', function(region, e){
-          $rootScope.previous.push(jsonifyRegions());
+          savePrevious();
         });
 
         $rootScope.listOfWaves[i].on('region-in', activateEffects);
@@ -896,6 +912,13 @@ angular.module('frontEndApp')
         //$log.info('Modal dismissed at: ' + new Date());
       });
     };
+
+    function savePrevious(){
+      if (isTracking) {
+        $rootScope.previous.push(jsonifyRegions());
+        $rootScope.next = [];
+      }
+    }
     // </editor-fold>
 
     $rootScope.openTrackEffects = function (size) {
@@ -920,7 +943,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadMix = function(mixName) {
-      $rootScope.previous.push(jsonifyRegions());
+      savePrevious();
       $rootScope.loadRegions(localStorage[mixName]);
       //console.log(localStorage);
     };
