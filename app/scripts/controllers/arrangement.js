@@ -17,8 +17,8 @@ angular.module('frontEndApp')
     $rootScope.filterDetune = 0;
     $rootScope.filterDrequency = 0;
     $rootScope.filterGain = 0;
-
     $rootScope.generalVolume = 80;
+
     $rootScope.effects = {};
     $rootScope.activeEffects = {};
     $rootScope.listOfWaves = [];
@@ -26,8 +26,9 @@ angular.module('frontEndApp')
     $rootScope.nbSolo = 0;
     $rootScope.songName = "";
     $rootScope.mixName = "";
-
     $rootScope.sliders = {};
+
+    $rootScope.mixData = {};
 
     // HISTORIC
     $rootScope.previous = [];
@@ -94,11 +95,26 @@ angular.module('frontEndApp')
     // TODO : Change to match the song
     function parseStorage(){
       $rootScope.listOfMix = [];
-      Object.keys(localStorage).forEach(function(key){
-        if(key.indexOf("MixMaze_") > -1){
-          $rootScope.listOfMix.push(key);
+      //Object.keys(localStorage).forEach(function(key){
+      //  if(key.indexOf("MixMaze_") > -1){
+      //    $rootScope.listOfMix.push(key);
+      //  }
+      //});
+      $http.get("http://localhost:8080/mix/"+$rootScope.songName).then(
+        function successCallback(response){
+          console.log(response);
+          response.data.forEach(function (key){
+            $rootScope.listOfMix.push(key.name);
+            $rootScope.mixData[key.name] = key.data;
+          });
+          console.log($rootScope.mixData);
+        }, function errorCallback(response) {
+          console.error;
+          // called asynchronously if an error occurs
+          // or server returns response with an error status
         }
-      });
+      )
+
     }
 
     $rootScope.clearStorage = function(){
@@ -109,7 +125,6 @@ angular.module('frontEndApp')
       });
       $rootScope.listOfMix = [];
     };
-    parseStorage();
 
     // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
     var knobLimiter = document.getElementById('filterLimiter');
@@ -247,17 +262,17 @@ angular.module('frontEndApp')
           $rootScope.songName = $("#selectedMusic option:selected").text().trim();
           console.log(response.data);
           $rootScope.pistes = response.data.musicFiles;
-
+          parseStorage();
           $rootScope.pistes.forEach(function(p){
             $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
           //====================================A enlever quand on veut vraiment lire depuis serv=================================
-          $rootScope.listOfSound=[
-            'tracks/synth.mp3',
-            'tracks/vocal.mp3',
-            'tracks/drums.mp3',
-          ];
+          //$rootScope.listOfSound=[
+          //  'tracks/synth.mp3',
+          //  'tracks/vocal.mp3',
+          //  'tracks/drums.mp3',
+          //];
           //======================================================================================================================
 
           var audioContext = window.AudioContext || window.webkitAudioContext;
@@ -489,7 +504,8 @@ angular.module('frontEndApp')
     };
 
     $rootScope.hasEffect = function(effect){
-      return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
+      if($rootScope.effects[$rootScope.selectedRegionName]!==undefined)
+        return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
     };
 
     function jsonifyRegions(){
@@ -951,12 +967,12 @@ angular.module('frontEndApp')
         $rootScope.saveAs();
       } else {
         var json = jsonifyRegions();
-        localStorage['MixMaze_' + $rootScope.mixName] = json;
-        parseStorage();
-        console.log(JSON.stringify(jsonifyRegions()));
-        $http.post('http://localhost:8080/mix/', json).then(
+        var mix = {name : $rootScope.mixName, music: $rootScope.songName, data : json};
+        //localStorage['MixMaze_' + $rootScope.mixName] = json;
+        $http.post('http://localhost:8080/mix/', mix).then(
           function successCallback(response) {
             console.log("mix stored");
+            parseStorage();
           }, function errorCallback(response) {
             console.log("Error : " + response);
           }
@@ -1019,7 +1035,7 @@ angular.module('frontEndApp')
 
     $rootScope.loadMix = function(mixName) {
       savePrevious();
-      $rootScope.loadRegions(localStorage[mixName]);
+      $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);
     };
 

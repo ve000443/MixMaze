@@ -94,7 +94,7 @@
         <span class="sr-only">Split button!</span>
       </button>
       <ul uib-dropdown-menu role="menu" aria-labelledby="split-button" style="cursor: pointer;">
-        <li role="menuitem"><a>Save <span class="shortcut">Ctrl+S</span></a></li>
+        <li role="menuitem" ng-click="save()"><a>Save <span class="shortcut">Ctrl+S</span></a></li>
         <li role="menuitem" ng-click="saveAs()"><a>Save as... <span class="shortcut">Ctrl+Shift+S</span></a></li>
         <li role="menuitem" ng-click="clearStorage()"><a>Clear Storage</a></li>
       </ul>
