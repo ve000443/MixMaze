@@ -1,0 +1,71 @@
+<div class="jumbotron">
+  <div>
+    <form ng-submit="home.inscription()" class="form-horizontal">
+      <div class="form-group">
+        <div>
+          <label for="pseudo" class="col-lg-1 control-label">Pseudo</label>
+          <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="home.pseudo" id="pseudo" placeholder="Enter a pseudo" required>
+            <span style="color:red" ng-if="home.userExists">Ce pseudo est déjà pris, veuillez en trouver un nouveau</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="">
+          <label for="email" class="col-lg-1 control-label">Email</label>
+          <div class="col-lg-2">
+            <input type="email" class="form-control" ng-model="home.email" id="email" placeholder="Email" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="">
+          <label for="password" class="col-lg-1 control-label">Password</label>
+          <div class="col-lg-2">
+            <input type="password" class="form-control" ng-model="home.password" id="password" placeholder="Password" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="">
+          <label for="passwordConfirm" class="col-lg-1 control-label">Confirm password</label>
+          <div class="col-lg-2">
+            <input type="password" class="form-control" id="passwordConfirm" ng-model="home.passwordConfirm" placeholder="Confirm password" required>
+            <span style="color:red" ng-if="home.badConfirmation">Doit être identique au champ précédent</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-lg-offset-1 col-lg-2">
+          <button type="submit" class="btn btn-success">Inscription</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <form ng-submit="home.connection()" class="form-horizontal">
+      <div class="form-group">
+        <div>
+          <label for="pseudoConnection" class="col-lg-1 control-label">Pseudo</label>
+          <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="home.pseudoConnection" id="pseudoConnection" placeholder="Enter a pseudo" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="">
+          <label for="passwordConnection" class="col-lg-1 control-label">Password</label>
+          <div class="col-lg-2">
+            <input type="password" class="form-control" ng-model="home.passwordConnection" id="passwordConnection" placeholder="Password" required>
+            <span style="color:red" ng-if="!home.goodConnection">Login ou mot de passe incorrect</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-lg-offset-1 col-lg-2">
+          <button type="submit" class="btn btn-primary">Connexion</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
