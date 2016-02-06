@@ -6,7 +6,7 @@ angular.module('frontEndApp')
     /**
      * CONNECTION WITH MONGO DB API
      */
-    $http.get("http://xythe.xyz:8080").then(
+    $http.get("http://xythe.xyz:8080/musics").then(
 
       function successCallback(response){
         console.log(response.data);
