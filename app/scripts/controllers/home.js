@@ -18,15 +18,12 @@ angular.module('frontEndApp')
     home.passwordConfirm="";
     home.userExists = false;
     home.http = $http;
+    home.user = {};
 
-    home.getUserByPseudo = function(){
-      home.http.get("http://localhost:8080/users/"+home.pseudo).then(
-
+    home.getUserByPseudo = function(pseudo){
+        home.http.get("http://localhost:8080/users/"+pseudo).then(
         function successCallback(response){
-          home.userExists = (response.data !== "");
-          if(! home.userExists){
-            home.createUser();
-          }
+           home.user = response.data;
           // this callback will be called asynchronously
           // when the response is available
         }, function errorCallback(response) {
@@ -57,6 +54,8 @@ angular.module('frontEndApp')
     };
 
     home.inscription = function(){
-      home.getUserByPseudo();
+      home.getUserByPseudo(home.pseudo);
+      console.log(home.user);
     }
+
   });

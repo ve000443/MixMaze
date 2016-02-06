@@ -1,27 +1,3 @@
-<!-- Add your site or application content here -->
-<div class="header">
-  <div class="navbar navbar-default" role="navigation">
-    <div class="container">
-      <div class="navbar-header">
-        <!---->
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#js-navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-
-      </div>
-
-      <div class="collapse navbar-collapse" id="js-navbar-collapse">
-
-        <ul class="nav navbar-nav">
-          <li><button type="button" class="btn-lg btn-primary navbar-btn">Connexion</button></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
 <div class="jumbotron">
   <div>
     <form ng-submit="home.inscription()" class="form-horizontal">
@@ -70,7 +46,7 @@
       <div>
         <label for="pseudoConnection" class="col-lg-1 control-label">Pseudo</label>
         <div class="col-lg-2">
-          <input type="text" class="form-control" ng-model="home.pseudo" id="pseudoConnection" placeholder="Enter a pseudo" required>
+          <input type="text" class="form-control" ng-model="home.pseudoConnection" id="pseudoConnection" placeholder="Enter a pseudo" required>
         </div>
       </div>
     </div>
@@ -78,7 +54,7 @@
       <div class="">
         <label for="passwordConnection" class="col-lg-1 control-label">Password</label>
         <div class="col-lg-2">
-          <input type="password" class="form-control" ng-model="home.password" id="passwordConnection" placeholder="Password" required>
+          <input type="password" class="form-control" ng-model="home.passwordConnection" id="passwordConnection" placeholder="Password" required>
         </div>
       </div>
     </div>
