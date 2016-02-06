@@ -337,20 +337,6 @@ angular.module('frontEndApp')
     };
     // </editor-fold>
 
-    $rootScope.init = function(){
-      $rootScope.initWaves();
-      for(var i = 0; i < $rootScope.listOfSound.length; i++){
-        $rootScope.smState[i] = null;
-      }
-
-      /*var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
-      biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = 1000;
-      biquadFilter.gain.value = 25;
-      console.log(biquadFilter);
-      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);*/
-    };
-
     // <editor-fold desc="EFFECTS">
     function activateEffects(region) {
       var effects = $rootScope.effects[region.id];
@@ -511,14 +497,14 @@ angular.module('frontEndApp')
           };
         });
       });
-      return res;
+      return JSON.stringify(res);
     }
 
     /**
      * Save regions to localStorage.
      */
     $rootScope.saveRegions = function() {
-      localStorage[$rootScope.songName] = JSON.stringify(jsonifyRegions());
+      localStorage[$rootScope.songName] = jsonifyRegions();
     };
 
     /**
@@ -530,10 +516,13 @@ angular.module('frontEndApp')
         $rootScope.deselectRegion();
         regions = JSON.parse(localStorage[$rootScope.songName]);
       }
+      else if (typeof regions === 'string')
+        regions = JSON.parse(regions);
       $rootScope.effects = {};
       $rootScope.listOfWaves.forEach(function(wavesurfer, index){
         wavesurfer.clearRegions();
         var piste = $rootScope.nameRecover($rootScope.listOfSound[index]);
+        if(regions[piste] === undefined) return;
         regions[piste].forEach(function(region){
           region.color = wavesurfer.color;
           wavesurfer.addRegion(region);
@@ -555,6 +544,20 @@ angular.module('frontEndApp')
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
       }
     }
+
+    $rootScope.init = function(){
+      $rootScope.initWaves();
+      for(var i = 0; i < $rootScope.listOfSound.length; i++){
+        $rootScope.smState[i] = null;
+      }
+
+      /*var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
+       biquadFilter.type = "lowshelf";
+       biquadFilter.frequency.value = 1000;
+       biquadFilter.gain.value = 25;
+       console.log(biquadFilter);
+       $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);*/
+    };
 
     $rootScope.initWaves = function() {
       for (var i = 0; i < $rootScope.listOfSound.length; i++) {
@@ -612,8 +615,6 @@ angular.module('frontEndApp')
 
         $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
           e.stopPropagation();
-          //selectRegion(region);
-          //$rootScope.$digest();
           // Play on click, loop on shift click
           e.shiftKey ? region.playLoop() : region.play();
         });
@@ -918,9 +919,11 @@ angular.module('frontEndApp')
       });
     };
 
-    //$('#myModal').on('shown.bs.modal', function () {
-    //  $('#nameTextArea').focus();
-    //});
+    $rootScope.loadMix = function(mixName) {
+      $rootScope.previous.push(jsonifyRegions());
+      $rootScope.loadRegions(localStorage[mixName]);
+      //console.log(localStorage);
+    };
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {

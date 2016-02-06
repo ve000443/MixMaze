@@ -100,10 +100,9 @@
       </ul>
     </div>
 
-    <select ng-if="progress !== null" ng-model="toto" ng-options="mix as 'toto' for mix in listOfMix">
+    <select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
       <option value="">&lt;Select a Mix&gt;</option>
     </select>
-    {{toto}}
   </div>
 
 
