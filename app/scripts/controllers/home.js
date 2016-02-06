@@ -18,44 +18,67 @@ angular.module('frontEndApp')
     home.passwordConfirm="";
     home.userExists = false;
     home.http = $http;
-    home.user = {};
 
-    home.getUserByPseudo = function(pseudo){
-        home.http.get("http://localhost:8080/users/"+pseudo).then(
+    home.pseudoConnection = "";
+    home.passwordConnection = "";
+    home.goodConnection = true;
+    home.badConfirmation = false;
+
+    home.createUser = function(){
+      home.badConfirmation = home.password !== home.passwordConfirm;
+      if(!home.badConfirmation) {
+
+        var data = {
+          pseudo: home.pseudo,
+          email: home.email,
+          password: home.password
+        };
+        home.http.get("http://localhost:8080/users/" + home.pseudo).then(
+          function successCallback(response) {
+            home.userExists = (response.data !== "");
+            if (!home.userExists) {
+              home.http.post('http://localhost:8080/users/', data).then(
+                function successCallback(response) {
+                  console.log(response);
+                  $location.path("/arrangement");
+                }, function errorCallback(response) {
+                  console.log("Error : " + response);
+                  // called asynchronously if an error occurs
+                  // or server returns response with an error status
+                }
+              );
+            }
+          }, function errorCallback(response) {
+            console.error;
+            // called asynchronously if an error occurs
+            // or server returns response with an error status
+          }
+        );
+      }
+    };
+
+    home.connect = function(){
+      home.http.get("http://localhost:8080/users/"+home.pseudoConnection).then(
         function successCallback(response){
-           home.user = response.data;
-          // this callback will be called asynchronously
-          // when the response is available
+          var exists = (response.data !== "");
+          var user = response.data;
+          home.goodConnection = exists && (user.password === home.passwordConnection);
+          if(home.goodConnection){
+            $location.path("/arrangement");
+          }
         }, function errorCallback(response) {
           console.error;
           // called asynchronously if an error occurs
           // or server returns response with an error status
         }
       );
-    };
-
-    home.createUser = function(){
-      var data = {
-        pseudo: home.pseudo,
-        email: home.email,
-        password: home.password
-      };
-      console.log(data);
-      home.http.post('http://localhost:8080/users/',data).then(
-        function successCallback(response){
-          console.log(response);
-          $location.path("/arrangement");
-        }, function errorCallback(response) {
-          console.log("Error : "+response);
-          // called asynchronously if an error occurs
-          // or server returns response with an error status
-        }
-      );
-    };
-
-    home.inscription = function(){
-      home.getUserByPseudo(home.pseudo);
-      console.log(home.user);
     }
 
+    home.inscription = function(){
+      home.createUser();
+    }
+
+    home.connection = function(){
+      home.connect();
+    }
   });
