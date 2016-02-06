@@ -534,9 +534,8 @@ angular.module('frontEndApp')
       $rootScope.listOfWaves.forEach(function(wavesurfer, index){
         wavesurfer.clearRegions();
         var piste = $rootScope.nameRecover($rootScope.listOfSound[index]);
-        var color = randomColor(0.5);
         regions[piste].forEach(function(region){
-          region.color = color;
+          region.color = wavesurfer.color;
           wavesurfer.addRegion(region);
           var keys = Object.keys(wavesurfer.regions.list);
           var newRegion = wavesurfer.regions.list[keys[keys.length-1]];
@@ -568,6 +567,7 @@ angular.module('frontEndApp')
           cursorColor: '#000'
         }));
         $rootScope.listOfWaves[i].toggleInteraction();
+        $rootScope.listOfWaves[i].color = randomColor(0.5);
 
         if(i === 0){
           $rootScope.listOfWaves[i].on('audioprocess', evolveEffects);
@@ -600,7 +600,7 @@ angular.module('frontEndApp')
         });
 
         $rootScope.listOfWaves[i].enableDragSelection({
-          color: randomColor(0.6)
+          color: $rootScope.listOfWaves[i].color
         });
 
         $rootScope.listOfWaves[i].on('region-click', function (region, e) {
@@ -609,6 +609,14 @@ angular.module('frontEndApp')
           $rootScope.$digest();
           // Play on click, loop on shift click
           //e.shiftKey ? region.playLoop() : region.play();
+        });
+
+        $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
+          e.stopPropagation();
+          //selectRegion(region);
+          //$rootScope.$digest();
+          // Play on click, loop on shift click
+          e.shiftKey ? region.playLoop() : region.play();
         });
         //$rootScope.wavesurfer.on('region-click', editAnnotation);
 

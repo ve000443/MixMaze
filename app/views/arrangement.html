@@ -100,9 +100,10 @@
       </ul>
     </div>
 
-    <select ng-if="progress !== null">
-      <option ng-repeat="mix in listOfMix">{{mix}}</option>
+    <select ng-if="progress !== null" ng-model="toto" ng-options="mix as 'toto' for mix in listOfMix">
+      <option value="">&lt;Select a Mix&gt;</option>
     </select>
+    {{toto}}
   </div>
 
 
@@ -150,7 +151,6 @@
       <div class="col-lg-12" style="text-align: center;">
         {{nameRecover(track)}}
       </div>
-
 
       <!-- Volume sliders -->
       <div class="col-lg-12" style="text-align: center;">
@@ -206,7 +206,7 @@
 <!-- FOOTER -->
 <div class="col-lg-12" style="height:10%;position:fixed;bottom:0;background-color: lightgray;">
   <div class="col-lg-12" style="max-height:75%">
-    <div class="col-lg-4">
+    <div class="col-lg-2">
       <button class="btn btn-primary" ng-disabled="progress === null" style="background-color: #347; border-color: #347;" ng-click="playAllTracks()">
         <i ng-if="!listOfWaves[1].isPlaying()" class="glyphicon glyphicon-play"></i>
         <i ng-if="listOfWaves[1].isPlaying() " class="glyphicon glyphicon-pause"></i>
@@ -220,8 +220,11 @@
       <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
     </div>
     <!-- Volume Knob -->
-    <div class="col-lg-2">
+    <div class="col-lg-1">
       <webaudio-knob id="sliderGeneral" title="Volume" src="img/knob_med_red.png" sprites="30" min="0" max="100" value="{{generalVolume}}" ng-init="generalVolume = 80" width="50" height="50" ng-mousemove=""></webaudio-knob>
+    </div>
+    <div class="col-lg-3 rating noselect">
+      <uib-rating class="noselect" ng-model="rate" max="5" readonly="progress === null" on-hover="hoveringOver(value)" on-leave="overStar = null" titles="['one','two','three']" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>
     </div>
     <div class="col-lg-1">
       <button class="btn btn-primary" ng-click="reinitSm()" ng-disabled="progress === null">reinit Solo/Mute</button>
