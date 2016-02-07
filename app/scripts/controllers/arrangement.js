@@ -4,7 +4,7 @@
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
 
-    $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "Test";
+    $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "toto";
 
     // TOGGLERS
     $rootScope.hasModalOpen = false;
@@ -66,6 +66,36 @@ angular.module('frontEndApp')
     }
     initVar();
 
+    $rootScope.noteMix = function(rate){
+      var star = {mixName : $rootScope.mixName, userName: $rootScope.user, star : rate};
+      $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user).then(
+        function successCallback(response) {
+          console.log("la");
+          console.log(response.data);
+          if(response.data.length === 0){
+            $http.post('http://xythe.xyz:8080/star', star).then(
+              function successCallback(response) {
+                console.log("star added");
+              }, function errorCallback(response) {
+                console.log("Error : " + response);
+              }
+            );
+          }
+          else{
+            $http.put('http://xythe.xyz:8080/star', star).then(
+              function successCallback(response) {
+                console.log("star modified");
+              }, function errorCallback(response) {
+                console.log("Error : " + response);
+              }
+            );
+          }
+        }, function errorCallback(response) {
+          console.log("Error : " + response);
+        }
+      );
+
+    };
 
     $rootScope.hoveringOver = function(value) {
       $rootScope.overStar = value;
@@ -1102,6 +1132,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadMix = function(mixName) {
+      $rootScope.mixName = mixName;
       savePrevious();
       $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);

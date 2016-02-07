@@ -81,12 +81,8 @@
     <button type="button" class="btn btn-primary" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')">Manage users</button>
   </div>
 
-  <div class="col-lg-3 rating noselect">
-    <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="false" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
-    <uib-rating ng-model="rate" max="max" readonly="isReadonly" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating"></uib-rating>
-  </div>
-</div>
 
+</div>
 
 
 <!-- WAVES -->
@@ -263,10 +259,12 @@
       </div>
     </div>
 
-    <div class="col-lg-2">
-      Zoom : {{zoomLevel}}%
-      <input type="range" style="width: 100%" max="300" min="100" ng-model="zoomLevel" ng-init="zoomLevel=100" ng-change="zoom(zoomLevel)">
-    </div>
+
+      <div class="col-lg-2 rating noselect">
+        <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="false" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
+        <uib-rating ng-click="noteMix(rate)" ng-model="rate" max="max" readonly="isReadonly" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress !== null && mixName != null"></uib-rating>
+      </div>
+
 
     <!-- TODO : Move to top frame-->
     <!--<div class="col-lg-3 rating noselect">-->
