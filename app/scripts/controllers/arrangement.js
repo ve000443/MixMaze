@@ -3,46 +3,8 @@
 
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
-    var vm = this;
-    var bufferLoader;
-    var ctx;
 
     $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "Test";
-    $rootScope.listOfSound = [];
-    $rootScope.listOfMix = [];
-    $rootScope.listOfWaves = [];
-
-    $rootScope.delayTime = 0;
-    $rootScope.feedbackGain = 0;
-    $rootScope.filterDetune = 0;
-    $rootScope.filterDrequency = 0;
-    $rootScope.filterGain = 0;
-    $rootScope.generalVolume = 100;
-
-    $rootScope.effects = {};
-    $rootScope.activeEffects = {};
-    $rootScope.smState = [];
-    $rootScope.nbSolo = 0;
-    $rootScope.songName = "";
-    $rootScope.mixName = "";
-    $rootScope.sliders = {};
-
-    $rootScope.mixData = {};
-
-    // LOADING
-    $rootScope.nbTrack = 0;
-    $rootScope.download = 0;
-    $rootScope.decode = 0;
-    $rootScope.buffer = 0;
-
-    // HISTORIC
-    $rootScope.previous = [];
-    $rootScope.next = [];
-
-    $rootScope.selectedRegionName = "";
-    $rootScope.selectedRegion = null;
-    $rootScope.progress = null;
-    $rootScope.duration = 0;
 
     // TOGGLERS
     var isTracking = true;
@@ -50,7 +12,53 @@ angular.module('frontEndApp')
     var isCreating = false;
     var hasClicked = false;
     var isLoopingOnTrack = false;
-    vm.isLoopingOnRegion = false;
+    var vm = this;
+    var bufferLoader;
+    var ctx;
+
+    function initVar(){
+
+      $rootScope.listOfSound = [];
+      $rootScope.listOfMix = [];
+      $rootScope.listOfWaves = [];
+
+      $rootScope.delayTime = 0;
+      $rootScope.feedbackGain = 0;
+      $rootScope.filterDetune = 0;
+      $rootScope.filterDrequency = 0;
+      $rootScope.filterGain = 0;
+      $rootScope.generalVolume = 100;
+
+      $rootScope.effects = {};
+      $rootScope.activeEffects = {};
+      $rootScope.smState = [];
+      $rootScope.nbSolo = 0;
+      $rootScope.songName = "";
+      $rootScope.mixName = "";
+      $rootScope.sliders = {};
+
+      $rootScope.mixData = {};
+
+      // LOADING
+      $rootScope.nbTrack = 0;
+      $rootScope.download = 0;
+      $rootScope.decode = 0;
+      $rootScope.buffer = 0;
+
+      // HISTORIC
+      $rootScope.previous = [];
+      $rootScope.next = [];
+
+      $rootScope.selectedRegionName = "";
+      $rootScope.selectedRegion = null;
+      $rootScope.progress = null;
+      $rootScope.duration = 0;
+
+
+      vm.isLoopingOnRegion = false;
+    }
+    initVar();
+
 
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
@@ -244,7 +252,7 @@ angular.module('frontEndApp')
         // called asynchronously if an error occurs
         // or server returns response with an error status
       });
-    
+
     function loadSamples(){
       var audioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -265,7 +273,13 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadRemoteSamples = function(){
-      $rootScope.listOfSound = [];
+      initVar();
+      isTracking = true;
+      isMoving = false;
+      isCreating = false;
+      hasClicked = false;
+      isLoopingOnTrack = false;
+
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
           $rootScope.songName = $("#selectedMusic option:selected").text().trim();
