@@ -552,10 +552,10 @@ angular.module('frontEndApp')
     $rootScope.deselectRegion = function(){
       if($rootScope.selectedRegion !== null){
         try {
-          $rootScope.selectedRegion = null;
           $rootScope.selectedRegionName = "";
           vm.isLoopingOnRegion = false;
           $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+          $rootScope.selectedRegion = null;
         } catch (ex){
 
         }
