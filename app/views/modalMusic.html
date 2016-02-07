@@ -1,0 +1,13 @@
+<div ng-keypress="keyPressed($event)">
+  <div class="modal-header">
+    <h3 class="modal-title">Select a music</h3>
+  </div>
+  <div class="modal-body">
+    <label>Search: <input type="text" ng-model="searchText" autofocus></label>
+    <div ng-repeat="music in musics | filter:searchText" style="cursor:pointer;">
+      <a class="samples" ng-click="loadRemoteSamples(music.musicName);ok()">
+        {{music.musicName}}
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,21 +1,6 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
-<script type="text/ng-template" id="modalSave.html">
-  <div ng-keypress="keyPressed($event)">
-    <div class="modal-header">
-      <h3 class="modal-title">And thee name shall be ...</h3>
-    </div>
-    <div class="modal-body">
-      <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
-      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
-    </div>
-  </div>
-</script>
-
 <script type="text/ng-template" id="modalTrackEffects.html">
   <div class="modal-header">
     <h3 class="modal-title">Nom de la piste à mettre ici</h3>
@@ -76,7 +61,7 @@
     <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-sm">Available Samples</button>
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalMusic', 'ModalMusicCtrl')">Load Music...</button>
 
     <!--<select id="selectedMusic">
       <option ng-repeat="music in musics">
@@ -295,18 +280,6 @@
       <!--<webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>-->
     <!--</div>-->
 
-</div>
-<div class="modal fade bs-example-modal-sm" id="modalSamples" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <label>Search: <input ng-model="searchText"></label>
-      <div ng-repeat="music in musics | filter:searchText">
-        <a class="samples" ng-click="loadRemoteSamples(music.musicName)">
-        {{music.musicName}}
-        </a>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!--

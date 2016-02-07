@@ -7,6 +7,7 @@ angular.module('frontEndApp')
     $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "Test";
 
     // TOGGLERS
+    $rootScope.hasModalOpen = false;
     var isTracking = true;
     var isMoving = false;
     var isCreating = false;
@@ -62,6 +63,7 @@ angular.module('frontEndApp')
 
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
+      if($rootScope.hasModalOpen) return;
       //console.log(evt.keyCode);
       switch (evt.keyCode){
         // DELETE
@@ -273,7 +275,6 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadRemoteSamples = function(selectedMusic){
-      $('#modalSamples').modal('hide');
       $rootScope.stopAllTracks();
       initVar();
       isTracking = true;
@@ -990,24 +991,19 @@ angular.module('frontEndApp')
     /** MODAL */
     $rootScope.saveAs = function (size) {
 
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'modalSave.html',
-        controller: 'ModalInstanceCtrl',
-        size: size,
-        resolve: {
-          items: function () {
-            return $rootScope.mixName;
-          }
-        }
-      });
-
-      modalInstance.result.then(function (name) {
+      var thenFct = function (name) {
+        $rootScope.hasModalOpen = false;
         $rootScope.mixName = name;
         $rootScope.save();
-      }, function () {
-        //$log.info('Modal dismissed at: ' + new Date());
-      });
+      };
+
+      var resolve = {
+        items: function () {
+          return $rootScope.mixName;
+        }
+      };
+
+      $rootScope.openModal('modalSave', 'ModalInstanceCtrl', resolve, thenFct);
     };
 
     function savePrevious(fromRedo){
@@ -1037,6 +1033,23 @@ angular.module('frontEndApp')
       }, function () {
         //$log.info('Modal dismissed at: ' + new Date());
       });
+    };
+
+    $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
+      var defaultFct = function(){
+        $rootScope.hasModalOpen = false;
+      };
+      $rootScope.hasModalOpen = true;
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'views/' + template + '.html',
+        controller: controller,
+        size: size,
+        resolve: resolve
+      });
+
+      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
     };
 
     $rootScope.loadMix = function(mixName) {
