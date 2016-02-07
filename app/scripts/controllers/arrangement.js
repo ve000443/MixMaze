@@ -273,6 +273,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadRemoteSamples = function(){
+      $rootScope.stopAllTracks();
       initVar();
       isTracking = true;
       isMoving = false;
