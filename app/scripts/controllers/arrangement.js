@@ -42,6 +42,7 @@ angular.module('frontEndApp')
     $rootScope.selectedRegionName = "";
     $rootScope.selectedRegion = null;
     $rootScope.progress = null;
+    $rootScope.duration = 0;
 
     // TOGGLERS
     var isTracking = true;
@@ -116,7 +117,6 @@ angular.module('frontEndApp')
           // or server returns response with an error status
         }
       )
-
     }
 
     $rootScope.clearStorage = function(){
@@ -244,8 +244,27 @@ angular.module('frontEndApp')
         // called asynchronously if an error occurs
         // or server returns response with an error status
       });
+    
+    function loadSamples(){
+      var audioContext = window.AudioContext || window.webkitAudioContext;
 
-    $rootScope.loadSamples = function(){
+      ctx = new audioContext();
+
+      loadAllSoundSamples();
+    }
+
+    $rootScope.loadLocalSamples = function(){
+      $rootScope.listOfSound = [];
+      $rootScope.listOfSound=[
+        'tracks/synth.mp3',
+        'tracks/vocal.mp3',
+        'tracks/drums.mp3'
+      ];
+      $rootScope.songName = "Local mix";
+      loadSamples();
+    };
+
+    $rootScope.loadRemoteSamples = function(){
       $rootScope.listOfSound = [];
       $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
         function successCallback(response){
@@ -257,19 +276,8 @@ angular.module('frontEndApp')
             $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
             console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
-          //====================================A enlever quand on veut vraiment lire depuis serv=================================
-          //$rootScope.listOfSound=[
-          //  'tracks/synth.mp3',
-          //  'tracks/vocal.mp3',
-          //  'tracks/drums.mp3',
-          //];
-          //======================================================================================================================
 
-          var audioContext = window.AudioContext || window.webkitAudioContext;
-
-          ctx = new audioContext();
-
-          loadAllSoundSamples();
+          loadSamples();
           // this callback will be called asynchronously
           // when the response is available
         }, function errorCallback(response) {
@@ -577,6 +585,7 @@ angular.module('frontEndApp')
         });
         $rootScope.progress = 0;
 
+        console.log(Math.ceil($rootScope.listOfWaves[0].getDuration()));
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
       }
     }
@@ -976,7 +985,6 @@ angular.module('frontEndApp')
       });
 
       modalInstance.result.then(function (name) {
-        // TODO : change to DB storage
         $rootScope.mixName = name;
         $rootScope.save();
       }, function () {
@@ -1025,7 +1033,11 @@ angular.module('frontEndApp')
     }
 
     $rootScope.getPercent = function(current, total){
-      return Math.ceil(current/total*100);
+      return Math.round(current/total*100);
+    };
+
+    $rootScope.timeFormat = function (duration){
+      return Math.floor(duration/60) + ":" + Math.floor(duration%60)
     };
 
     $rootScope.nameRecover = function(str){
@@ -1049,7 +1061,6 @@ angular.module('frontEndApp')
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
-
   $scope.name = items;
 
   $scope.ok = function () {
