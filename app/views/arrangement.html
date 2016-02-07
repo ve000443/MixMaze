@@ -78,41 +78,6 @@
 
     <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
   </div>
-
-
-  <!-- delay -->
-  <div class="col-lg-2" style="border: double;">
-    <div class="col-lg-6" style="overflow: hidden">
-      Time
-      <webaudio-knob id="delayTime" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-    <div class="col-lg-6">
-      Gain
-      <webaudio-knob id="feedbackGain" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-  </div>
-
-  <!-- filter -->
-  <div class="col-lg-3" style="border: double">
-    <div class="col-lg-4">
-      Detune
-      <webaudio-knob id="filterDetune" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-    <div class="col-lg-4">
-      Frequency
-      <webaudio-knob id="filterFrequency" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-    <div class="col-lg-4">
-      Gain
-      <webaudio-knob id="filterGain" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
-    </div>
-  </div>
-
-  <!-- limiter -->
-  <div class="col-lg-1" style="border: double">
-    Limiter
-    <webaudio-knob id="filterLimiter" title="Limiter" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
-  </div>
 </div>
 
 <!-- WAVES -->
@@ -122,7 +87,7 @@
     <div id="track{{$index}}" class="col-lg-1" data-ng-class="{'track-selected':trackSelected===$index}" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;" ng-click="selectTrack($index)">
       <!-- Panoramique -->
       <div class="col-lg-12 debrief">
-        {{nameRecover(track)}} <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects($index, nameRecover(track))"></i>
+        {{nameRecover(track)}}
       </div>
 
       <!-- Volume sliders -->
@@ -145,14 +110,11 @@
   </div>
 </div>
 
-<!-- EFFECTS -->
+<!-- EFFECTS REGION -->
 <div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="selectedRegion !== null">
   <div class="col-lg-12">&nbsp</div>
 
   <div class="col-lg-6">
-    <button class="btn btn-primary">
-      <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects()"> Effects</i>
-    </button>
     <button type="button" class="btn btn-primary check" ng-model="arrangement.isLoopingOnRegion" ng-click="loopRegion($event)" uib-btn-checkbox ng-disabled="progress === null">
       <i class="glyphicon glyphicon-repeat"></i>
     </button>
@@ -176,6 +138,51 @@
   <div class="col-lg-3">
     <div class="btn btn-primary" ng-click="deselectRegion()">Deselect &nbsp&nbsp<span class="shortcut" style="color:lightgray">Esc</span></div>
     <div class="btn btn-danger" ng-click="deleteRegion()">Remove &nbsp&nbsp<span class="shortcut" style="color:lightgray">Del</span></div>
+  </div>
+</div>
+
+<!-- EFFECTS TRACK -->
+<div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="trackSelected !== null">
+  <div class="col-lg-12">&nbsp</div>
+
+  <div class="col-lg-9">
+    <!-- delay -->
+    <div class="col-lg-2" style="border: double;">
+      <div class="col-lg-6" style="overflow: hidden">
+        Time
+        <webaudio-knob id="delayTime" value="{{tracks[trackSelected].delayTime}}" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+      <div class="col-lg-6">
+        Gain
+        <webaudio-knob id="feedbackGain" value="{{tracks[trackSelected].delayFeedbackGain}}" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+    </div>
+
+    <!-- filter -->
+    <div class="col-lg-3" style="border: double">
+      <div class="col-lg-4">
+        Detune
+        <webaudio-knob id="filterDetune" value="{{tracks[trackSelected].filterDetune}}" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+      <div class="col-lg-4">
+        Frequency
+        <webaudio-knob id="filterFrequency" value="{{tracks[trackSelected].filterFrequency}}" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+      <div class="col-lg-4">
+        Gain
+        <webaudio-knob id="filterGain" value="{{tracks[trackSelected].filterGain}}" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+      </div>
+    </div>
+
+    <!-- limiter -->
+    <div class="col-lg-1" style="border: double">
+      Limiter
+      <webaudio-knob id="filterLimiter" value="{{tracks[trackSelected].hardLimiterValue}}" title="Limiter" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
+    </div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="btn btn-primary" ng-click="deselectTrack()">Deselect &nbsp&nbsp<span class="shortcut" style="color:lightgray">Esc</span></div>
   </div>
 </div>
 
