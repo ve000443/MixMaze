@@ -299,7 +299,8 @@
 <div class="modal fade bs-example-modal-sm" id="modalSamples" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
-      <div ng-repeat="music in musics">
+      <label>Search: <input ng-model="searchText"></label>
+      <div ng-repeat="music in musics | filter:searchText">
         <a class="samples" ng-click="loadRemoteSamples(music.musicName)">
         {{music.musicName}}
         </a>
