@@ -13,8 +13,7 @@
       <uib-accordion-group ng-repeat="music in musics | filter:search" ng-click="getSongMixes(music.musicName)">
         <uib-accordion-heading>
           {{music.musicName}}</span>
-          <!-- TODO : Handle rights whence available -->
-          <span class="pull-right">
+          <span class="pull-right" ng-if="hasRights(1)">
             <button class="btn btn-primary" style="padding: 0 2px;">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
@@ -35,7 +34,7 @@
           <!-- TODO : Handle mixes update and deletion -->
           <div class="col-lg-12" ng-repeat="mix in details">
             {{mix.name}}<span style="color:darkgray"> - {{mix.owner}}</span>
-            <div class="pull-right" style="margin-right:50px;">
+            <div class="pull-right" style="margin-right:50px;" ng-if="hasRights(1)">
               <button class="btn btn-primary" style="padding: 0 2px;">
                 <i class="glyphicon glyphicon-edit"></i>
               </button>
@@ -43,7 +42,7 @@
                 <i class="glyphicon glyphicon-remove"></i>
               </button>
             </div>
-            <hr class="simple">
+            <hr class="simple" ng-if="hasRights(1)">
           </div>
         </fieldset>
       </uib-accordion-group>

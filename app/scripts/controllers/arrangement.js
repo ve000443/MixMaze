@@ -41,6 +41,7 @@ angular.module('frontEndApp')
       $rootScope.sliders = {};
 
       $rootScope.mixData = {};
+      $rootScope.mixOwner = {};
 
       // LOADING
       $rootScope.nbTrack = 0;
@@ -1180,6 +1181,20 @@ angular.module('frontEndApp')
       $rootScope.owner = $rootScope.mixOwner[mixName];
       $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);
+    };
+
+    $rootScope.hasRights = function(level){
+      var res = false;
+      //noinspection FallThroughInSwitchStatementJS
+      switch(level){
+        case 0:
+              res = res || $rootScope.user.role === 'member';
+        case 1:
+              res = res || $rootScope.user.role === 'moderator';
+        default:
+              res = res || $rootScope.user.role === 'admin';
+      }
+      return res;
     };
 
     // <editor-fold desc="TOOLS">

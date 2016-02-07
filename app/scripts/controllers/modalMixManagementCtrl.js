@@ -5,17 +5,15 @@ angular.module('frontEndApp').controller('ModalMixManagementCtrl', function ($sc
   $http.get("http://xythe.xyz:8080/musics").then(
     function successCallback(response){
       $rootScope.musics = response.data;
-      response.data.forEach(function(music){
-        $scope.getSongMixes(music.musicName);
-      })
     }, function errorCallback(response) {
     }
   );
 
   $scope.getSongMixes = function(songName){
+    console.log("http://xythe.xyz:8080/mix/"+songName);
     $http.get("http://xythe.xyz:8080/mix/"+songName).then(
       function successCallback(response){
-        $scope.mixes[songName] = response.data;
+        $scope.details = response.data;
       }, function errorCallback(response) {
       }
     )
