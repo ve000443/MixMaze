@@ -1,0 +1,45 @@
+<div ng-keypress="keyPressed($event)">
+  <div class="modal-header">
+    <h3 class="modal-title">Users list</h3>
+  </div>
+  <div class="modal-body">
+    <!--<input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>-->
+
+    <uib-accordion close-others="true">
+      <uib-accordion-group ng-repeat="user in listOfUsers" ng-click="getUserDetails(user.pseudo)">
+        <uib-accordion-heading>
+          {{user.pseudo}}
+          <!-- TODO : Handle rights whence available -->
+          <span class="pull-right">
+            <button class="btn btn-primary" style="padding: 0 2px;">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+            <button class="btn btn-danger" style="padding: 0 2px;">
+              <i class="glyphicon glyphicon-remove"></i>
+            </button>
+          </span>
+        </uib-accordion-heading>
+
+        <fieldset>
+          <legend>Informations :</legend>
+          <div class="col-lg-6">
+            Email : {{user.email}}
+          </div>
+          <div class="col-lg-6">
+            Role : {{user.role}}
+          </div>
+        </fieldset>
+        <hr>
+        <fieldset>
+          <legend>Mixes :</legend>
+          <!-- TODO : Handle mixes list whence available -->
+          {{details}}
+        </fieldset>
+      </uib-accordion-group>
+    </uib-accordion>
+  </div>
+  <div class="modal-footer">
+    <!--<button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>-->
+    <!--<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>-->
+  </div>
+</div>
