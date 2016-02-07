@@ -63,6 +63,10 @@ angular.module('frontEndApp')
     initVar();
 
 
+    $rootScope.hoveringOver = function(value) {
+      $rootScope.overStar = value;
+    };
+
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
       if($rootScope.hasModalOpen) return;
