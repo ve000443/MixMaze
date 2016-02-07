@@ -1059,7 +1059,7 @@ angular.module('frontEndApp')
     }
     // </editor-fold>
 
-    $rootScope.openTrackEffects = function (size) {
+    $rootScope.openTrackEffects = function (trackSelected, title, size) {
 
       var modalInstance = $uibModal.open({
         animation: true,
@@ -1073,9 +1073,7 @@ angular.module('frontEndApp')
         }
       });
 
-      console.log($rootScope.selectedRegion.wavesurfer);
-      console.log($rootScope.selectedRegionName);
-
+      $rootScope.title = title;
 
       var knobLimiter = $('#regionFilterLimiter');
       knobLimiter.addEventListener('change', function(e) {

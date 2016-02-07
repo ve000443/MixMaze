@@ -3,7 +3,7 @@
 
 <script type="text/ng-template" id="modalTrackEffects.html">
   <div class="modal-header">
-    <h3 class="modal-title">Nom de la piste à mettre ici</h3>
+    <h3 class="modal-title">{{title}}</h3>
   </div>
     <div class="modal-body">
       <div class="col-lg-12">
@@ -142,7 +142,7 @@
     <div id="track{{$index}}" class="col-lg-1" data-ng-class="{'track-selected':trackSelected===$index}" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;" ng-click="selectTrack($index)">
       <!-- Panoramique -->
       <div class="col-lg-12 debrief">
-        {{nameRecover(track)}}
+        {{nameRecover(track)}} <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects($index, nameRecover(track))"></i>
       </div>
 
       <!-- Volume sliders -->
@@ -157,11 +157,11 @@
         <button id="solo{{$index}}" class="btn btn-xs" ng-class="{'btn-info':smState[$index]== 'solo'}" ng-click="updateSm($index, 'solo')">s</button>
         <button id="mute{{$index}}" class="btn btn-xs" ng-class="{'btn-info':smState[$index]== 'mute'}" ng-click="updateSm($index, 'mute')">m</button>
       </div>
+
     </div>
 
     <!-- WaveForm -->
     <div id="wave{{$index}}" class="col-lg-11" style="padding:0"></div>
-
   </div>
 </div>
 
