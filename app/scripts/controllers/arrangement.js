@@ -59,6 +59,7 @@ angular.module('frontEndApp')
 
 
       $rootScope.trackSelected = null;
+      $rootScope.tracks = [];
     }
     initVar();
 
@@ -142,13 +143,23 @@ angular.module('frontEndApp')
     $rootScope.selectTrack = function(index){
       $rootScope.trackSelected = index;
       console.log("track selected : " + $rootScope.trackSelected);
-    }
+      console.log($rootScope.tracks);
+      console.log($rootScope.tracks[$rootScope.trackSelected]);
+      // set knob value
+      document.getElementById('filterLimiter').setValue($rootScope.tracks[$rootScope.trackSelected].hardLimiterValue);
+      document.getElementById('delayTime').setValue($rootScope.tracks[$rootScope.trackSelected].delayTime);
+      document.getElementById('feedbackGain').setValue($rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain);
+      document.getElementById('filterDetune').setValue($rootScope.tracks[$rootScope.trackSelected].filterDetune);
+      document.getElementById('filterFrequency').setValue($rootScope.tracks[$rootScope.trackSelected].filterFrequency);
+      document.getElementById('filterGain').setValue($rootScope.tracks[$rootScope.trackSelected].filterGain);
+    };
 
     // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
     var knobLimiter = document.getElementById('filterLimiter');
     knobLimiter.addEventListener('change', function(e) {
       $rootScope.filterLimiter = e.target.value;
 
+      $rootScope.tracks[$rootScope.trackSelected].hardLimiterValue = e.target.value;
 
       var source = $rootScope.listOfWaves[$rootScope.trackSelected].backend.source;
 
@@ -171,6 +182,9 @@ angular.module('frontEndApp')
     knobDelayTime.addEventListener('change', function(e) {
       var value = e.target.value;
       $rootScope.delayTime = value;
+
+      $rootScope.tracks[$rootScope.trackSelected].delayTime = e.target.value;
+
       var delay = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createDelay();
       delay.delayTime.value = $rootScope.delayTime;
       var feedback = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createGain();
@@ -184,6 +198,9 @@ angular.module('frontEndApp')
     knobFeedbackGain.addEventListener('change', function(e) {
       var value = e.target.value;
       $rootScope.feedbackGain = value;
+
+      $rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain = e.target.value;
+
       var delay = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createDelay();
       delay.delayTime.value = $rootScope.delayTime;
       var feedback = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createGain();
@@ -197,6 +214,9 @@ angular.module('frontEndApp')
     knobFilterDetune.addEventListener('change', function(e) {
       var value = e.target.value;
       $rootScope.filterDetune = value;
+
+      $rootScope.tracks[$rootScope.trackSelected].filterDetune = e.target.value;
+
       var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
       biquadFilter.frequency.value = $rootScope.filterFrequency;
@@ -209,6 +229,9 @@ angular.module('frontEndApp')
     knobFilterFrequency.addEventListener('change', function(e) {
       var value = e.target.value;
       $rootScope.filterFrequency = value;
+
+      $rootScope.tracks[$rootScope.trackSelected].filterFrequency = e.target.value;
+
       var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
       biquadFilter.frequency.value = $rootScope.filterFrequency;
@@ -221,6 +244,9 @@ angular.module('frontEndApp')
     knobFilterGain.addEventListener('change', function(e) {
       var value = e.target.value;
       $rootScope.filterGain = value;
+
+      $rootScope.tracks[$rootScope.trackSelected].filterGain = e.target.value;
+
       var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
       biquadFilter.type = "lowshelf";
       biquadFilter.frequency.value = $rootScope.filterFrequency;
@@ -279,6 +305,18 @@ angular.module('frontEndApp')
       ];
       $rootScope.songName = "Local mix";
       loadSamples();
+      for(var i = 0; i < $rootScope.listOfSound.length; i++) {
+        var trackEffects = {
+          'hardLimiterValue' : 2,
+          'delayTime' : 0,
+          'delayFeedbackGain' : 0,
+          'filterDetune' : 0,
+          'filterFrequency' : 0,
+          'filterGain' : 0
+        };
+        $rootScope.tracks.push(trackEffects);
+        console.log($rootScope.tracks[i]);
+      }
     };
 
     $rootScope.loadRemoteSamples = function(selectedMusic){
