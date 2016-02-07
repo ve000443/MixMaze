@@ -10,18 +10,17 @@ angular.module('frontEndApp')
     $rootScope.user = ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "Test";
     $rootScope.listOfSound = [];
     $rootScope.listOfMix = [];
-    $rootScope.nbReadyTracks = 0;
+    $rootScope.listOfWaves = [];
 
     $rootScope.delayTime = 0;
     $rootScope.feedbackGain = 0;
     $rootScope.filterDetune = 0;
     $rootScope.filterDrequency = 0;
     $rootScope.filterGain = 0;
-    $rootScope.generalVolume = 80;
+    $rootScope.generalVolume = 100;
 
     $rootScope.effects = {};
     $rootScope.activeEffects = {};
-    $rootScope.listOfWaves = [];
     $rootScope.smState = [];
     $rootScope.nbSolo = 0;
     $rootScope.songName = "";
@@ -29,6 +28,12 @@ angular.module('frontEndApp')
     $rootScope.sliders = {};
 
     $rootScope.mixData = {};
+
+    // LOADING
+    $rootScope.nbTrack = 0;
+    $rootScope.download = 0;
+    $rootScope.decode = 0;
+    $rootScope.buffer = 0;
 
     // HISTORIC
     $rootScope.previous = [];
@@ -76,9 +81,6 @@ angular.module('frontEndApp')
               break;
         // SPACE
         case 32:
-              console.log($rootScope.previous);
-          console.log(jsonifyRegions());
-              console.log($rootScope.next);
               evt.preventDefault();
               break;
         // BACKSPACE
@@ -211,18 +213,6 @@ angular.module('frontEndApp')
     });
     // </editor-fold>
 
-    /**
-     * Random RGBA color.
-     */
-    function randomColor(alpha) {
-      return 'rgba(' + [
-          ~~(Math.random() * 255),
-          ~~(Math.random() * 255),
-          ~~(Math.random() * 255),
-          alpha || 1
-        ] + ')';
-    }
-
     $rootScope.zoom = function(zoomLevel){
       $rootScope.listOfWaves.forEach(function(wave){
         wave.zoom(zoomLevel);
@@ -327,6 +317,8 @@ angular.module('frontEndApp')
         loader.context.decodeAudioData(
           request.response,
           function(buffer) {
+            $rootScope.decode += 1;
+            $rootScope.$digest();
             console.log("Loaded and decoded track " + (loader.loadCount+1) +
               "/" +  loader.urlList.length + "...");
 
@@ -349,7 +341,10 @@ angular.module('frontEndApp')
       request.onprogress = function(e) {
         if(e.total !== 0) {
           var percent = (e.loaded * 100) / e.total;
-
+          if(percent === 100) {
+            $rootScope.download += 1;
+            $rootScope.$digest();
+          }
           console.log("loaded " + percent  + " % of file " + index);
         }
       };
@@ -363,6 +358,7 @@ angular.module('frontEndApp')
 
     BufferLoader.prototype.load = function() {
       console.log("Loading " + this.urlList.length + "track(s)... please wait...");
+      $rootScope.nbTrack = this.urlList.length;
       for (var i = 0; i < this.urlList.length; ++i)
         this.loadBuffer(this.urlList[i], i);
     };
@@ -575,7 +571,7 @@ angular.module('frontEndApp')
     // </editor-fold>
 
     function checkReadiness(){
-      if($rootScope.nbReadyTracks === $rootScope.listOfSound.length){
+      if($rootScope.buffer === $rootScope.listOfSound.length){
         $rootScope.listOfWaves.forEach(function(wave){
           wave.toggleInteraction();
         });
@@ -618,9 +614,8 @@ angular.module('frontEndApp')
 
         $rootScope.listOfWaves[i].on('ready', function () {
           console.log("song ready");
-          $rootScope.nbReadyTracks = $rootScope.nbReadyTracks + 1;
+          $rootScope.buffer += 1;
           checkReadiness();
-          $(".progress-bar").attr("style","width:" + (($rootScope.nbReadyTracks / $rootScope.listOfSound.length) * 100) + "%");
           $rootScope.$digest();
         });
 
@@ -712,6 +707,7 @@ angular.module('frontEndApp')
       }
     };
 
+    // <editor-fold desc="TRACKS MANIPULATION">
     $rootScope.playAllTracks = function(){
       for(var i = 0; i < $rootScope.listOfWaves.length; i++){
         $rootScope.listOfWaves[i].playPause();
@@ -769,18 +765,7 @@ angular.module('frontEndApp')
         $rootScope.updateTrackVolume(i);
       }
     };
-
-    $rootScope.playPause = function(){
-      $rootScope.wavesurfer.playPause();
-    };
-
-    $rootScope.stop = function(){
-      $rootScope.wavesurfer.stop();
-    };
-
-    $rootScope.updateVolume = function(track, value){
-      $rootScope.wavesurfer.setVolume(value);
-    };
+    // </editor-fold>
 
     // <editor-fold desc="SOLO/MUTE">
     $rootScope.mute = function(track){
@@ -956,11 +941,6 @@ angular.module('frontEndApp')
       });
     };
 
-    $rootScope.nameRecover = function(str){
-      var splitted = str.split("/");
-      return splitted[splitted.length - 1].split(".")[0];
-    };
-
     // <editor-fold desc="SAVE">
     $rootScope.save = function(){
       if(!Boolean($rootScope.mixName)){
@@ -1039,13 +1019,33 @@ angular.module('frontEndApp')
       //console.log(localStorage);
     };
 
+    // <editor-fold desc="TOOLS">
     $rootScope.blur = function(event){
       event.target.blur();
+    }
+
+    $rootScope.getPercent = function(current, total){
+      return Math.ceil(current/total*100);
+    };
+
+    $rootScope.nameRecover = function(str){
+      var splitted = str.split("/");
+      return splitted[splitted.length - 1].split(".")[0];
+    };
+
+    function randomColor(alpha) {
+      return 'rgba(' + [
+          ~~(Math.random() * 255),
+          ~~(Math.random() * 255),
+          ~~(Math.random() * 255),
+          alpha || 1
+        ] + ')';
     }
 
     function isSelected(region){
       return region.id === $rootScope.selectedRegionName;
     }
+    // </editor-fold>
   });
 
 angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
