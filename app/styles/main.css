@@ -161,6 +161,19 @@ div {
   border-bottom-left-radius: 0;
 }
 
+.btn.active{
+  background-color: #3c763d;
+}
+
+.btn.active:hover{
+  background-color: #2f5f2c;
+}
+
+.debrief{
+  text-align: center;
+  padding-left:0;
+}
+
 .rating span i{
   font-size:50px;
   color:goldenrod;
