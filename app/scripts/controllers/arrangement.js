@@ -17,8 +17,8 @@ angular.module('frontEndApp')
 
     function initVar() {
       $rootScope.user = {
-        name: ($cookieStore.get("user") !== undefined) ? $cookieStore.get("user") !== undefined : "toto",
-        role: ($cookieStore.get("role") !== undefined) ? $cookieStore.get("role") !== undefined : "member"
+        name: ($cookieStore.get("user") !== undefined) ? $cookieStore.get("user") !== undefined : "null",
+        role: ($cookieStore.get("role") !== undefined) ? $cookieStore.get("role") !== undefined : "guest"
       };
       $rootScope.listOfSound = [];
       $rootScope.listOfMix = [];
