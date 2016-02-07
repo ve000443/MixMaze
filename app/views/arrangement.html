@@ -16,6 +16,21 @@
   </div>
 </script>
 
+<script type="text/ng-template" id="deleteMix.html">
+  <div ng-keypress="keyPressed($event)">
+    <div class="modal-header">
+      <h3 class="modal-title">Are you sure?</h3>
+    </div>
+    <div class="modal-body">
+      <span>Do you really want to delete this mix ?</span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
+      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>
+
 <script type="text/ng-template" id="modalTrackEffects.html">
   <div class="modal-header">
     <h3 class="modal-title">Nom de la piste à mettre ici</h3>
@@ -87,10 +102,10 @@
 
     <!-- Split button -->
     <div class="btn-group" uib-dropdown dropdown-append-to-body>
-      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()" ng-disabled="progress === null">
+      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()" ng-disabled="progress === null || user.role === 'guest'">
         <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as...
       </button>
-      <button type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null">
+      <button type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null || user.role === 'guest'">
         <span class="caret"></span>
         <span class="sr-only">Split button!</span>
       </button>
@@ -104,6 +119,9 @@
     <select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
       <option value="">&lt;Select a Mix&gt;</option>
     </select>
+    <button ng-click="deleteMixModal()" ng-if="progress !== null" type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null || user.role === 'guest' || user.name !== owner">
+      <i class="glyphicon glyphicon-trash"></i> Delete this mix
+    </button>
   </div>
 
 
