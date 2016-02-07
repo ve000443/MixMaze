@@ -5,8 +5,8 @@ angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
 
     $rootScope.user = {
-      name: ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "kev",
-      role: ($cookieStore.get("role")!== undefined)?$cookieStore.get("role")!== undefined : "member"
+      name: $cookieStore.get("user")!== undefined ? $cookieStore.get("user") : null,
+      role: $cookieStore.get("role")!== undefined ? $cookieStore.get("role") : "guest"
     };
 
     // TOGGLERS
@@ -1135,8 +1135,14 @@ angular.module('frontEndApp')
 
     $rootScope.deleteMix = function(){
       console.log($rootScope.mixName);
-    }
+    };
 
+    $rootScope.logOut = function(){
+      $cookieStore.put('user', undefined);
+      $cookieStore.put('role', undefined);
+      $rootScope.user.name = null;
+      $rootScope.user.role = 'guest';
+    };
 
     function savePrevious(fromRedo){
       if (isTracking) {
@@ -1161,6 +1167,16 @@ angular.module('frontEndApp')
       });
 
       modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
+    };
+
+    $rootScope.openModalLogIn = function(){
+      var resolve = {operation:function(){return 'login';}};
+      $rootScope.openModal('modalSession', 'ModalSessionCtrl', resolve);
+    };
+
+    $rootScope.openModalSignUp = function(){
+      var resolve = {operation:function(){return 'signup';}};
+      $rootScope.openModal('modalSession', 'ModalSessionCtrl', resolve);
     };
 
     $rootScope.loadMix = function(mixName) {

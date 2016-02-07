@@ -75,7 +75,18 @@
       <i class="glyphicon glyphicon-trash"></i> Delete this mix
     </button>
 
-    <button type="button" class="btn btn-primary" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')">Manage users</button>
+    <!-- LOGGED OUT-->
+    <div class="pull-right" ng-if="user.name !== null">
+      <label>Welcome {{user.name}}</label>
+      <button type="button" class="btn btn-danger" ng-click="logOut()">Log Out</button>
+    </div>
+
+    <!-- LOGGED IN -->
+    <div class="pull-right" ng-if="user.name === null">
+      <button type="button" class="btn btn-primary" ng-click="openModalLogIn()">Log In</button>
+      <button type="button" class="btn btn-success" ng-click="openModalSignUp()">Sign Up</button>
+    </div>
+
   </div>
 </div>
 

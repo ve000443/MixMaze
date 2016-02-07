@@ -1,0 +1,46 @@
+<div ng-keypress="keyPressed($event)">
+  <form ng-submit="submit()" class="form-horizontal">
+    <div class="modal-header">
+      <h3 class="modal-title">Sign Up</h3>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div class="col-lg-12">
+          <label for="pseudo" class="col-lg-5 control-label">Pseudo</label>
+          <div class="col-lg-6">
+            <input type="text" class="form-control" ng-model="pseudo" id="pseudo" placeholder="Enter a pseudo"
+                   required>
+            <span style="color:red" ng-if="userExists">Ce pseudo est déjà pris, veuillez en trouver un nouveau</span>
+          </div>
+        </div>
+        <div class="col-lg-12" ng-show="operation === 'signup'">
+          <label for="email" class="col-lg-5 control-label">Email</label>
+          <div class="col-lg-6">
+            <input type="email" class="form-control" ng-model="email" id="email" placeholder="Email" ng-required="operation === 'signup'">
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <label for="password" class="col-lg-5 control-label">Password</label>
+          <div class="col-lg-6">
+            <input type="password" class="form-control" ng-model="password" id="password" placeholder="Password"
+                   required>
+          </div>
+        </div>
+        <div class="col-lg-12" ng-show="operation === 'signup'">
+          <label for="passwordConfirm" class="col-lg-5 control-label">Confirm password</label>
+          <div class="col-lg-6">
+            <input type="password" class="form-control" id="passwordConfirm" ng-model="passwordConfirm"
+                   placeholder="Confirm password" ng-required="operation === 'signup'">
+            <span style="color:red" ng-if="badConfirmation">Doit être identique au champ précédent</span>
+          </div>
+        </div>
+        <div class="col-lg-offset-1 col-lg-2">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-success">Confirm</button>
+      <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </form>
+</div>
