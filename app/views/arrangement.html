@@ -78,7 +78,14 @@
 
     <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
   </div>
+
+  <div class="col-lg-3 rating noselect">
+    <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="false" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
+    <uib-rating ng-model="rate" max="max" readonly="isReadonly" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating"></uib-rating>
+  </div>
 </div>
+
+
 
 <!-- WAVES -->
 <div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">

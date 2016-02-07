@@ -59,6 +59,10 @@ angular.module('frontEndApp')
 
       $rootScope.trackSelected = null;
       $rootScope.tracks = [];
+
+      $rootScope.rate = 0;
+      $rootScope.max = 5;
+      $rootScope.isReadonly = false;
     }
     initVar();
 
