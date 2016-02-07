@@ -145,6 +145,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.selectTrack = function(index){
+      $rootScope.deselectRegion();
       $rootScope.trackSelected = index;
       console.log("track selected : " + $rootScope.trackSelected);
       console.log($rootScope.tracks);
@@ -536,6 +537,7 @@ angular.module('frontEndApp')
 
     function selectRegion(region){
       $rootScope.deselectRegion();
+      $rootScope.deselectTrack();
       $rootScope.selectedRegion = region;
       $rootScope.selectedRegionName = region.id;
       region.element.className += " selected";

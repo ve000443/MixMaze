@@ -31,53 +31,6 @@
   </div>
 </script>
 
-<script type="text/ng-template" id="modalTrackEffects.html">
-  <div class="modal-header">
-    <h3 class="modal-title">{{title}}</h3>
-  </div>
-    <div class="modal-body">
-      <div class="col-lg-12">
-      <!-- delay -->
-      <div class="col-lg-4" style="border: double;">
-        <div class="col-lg-6" style="overflow: hidden">
-          Time
-          <webaudio-knob id="regionDelayTime" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
-        </div>
-        <div class="col-lg-6">
-          Gain
-          <webaudio-knob id="regionFeedbackGain" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
-        </div>
-      </div>
-
-      <!-- filter -->
-      <div class="col-lg-6" style="border: double">
-        <div class="col-lg-4">
-          Detune
-          <webaudio-knob id="regionFilterDetune" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
-        </div>
-        <div class="col-lg-4">
-          Frequency
-          <webaudio-knob id="regionFilterFrequency" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
-        </div>
-        <div class="col-lg-4">
-          Gain
-          <webaudio-knob id="regionFilterGain" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
-        </div>
-      </div>
-
-      <!-- limiter -->
-      <div class="col-lg-2" style="border: double">
-        Limiter
-        <webaudio-knob id="regionFilterLimiter" title="Limiter" value="{{filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
-      </div>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
-    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
-  </div>
-</script>
-
 <!-- HEADER -->
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
