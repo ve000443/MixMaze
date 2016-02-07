@@ -3,9 +3,6 @@
 
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
-    var vm = this;
-    var bufferLoader;
-    var ctx;
 
     $rootScope.user = {
       name: ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "kev",
@@ -50,15 +47,65 @@ angular.module('frontEndApp')
     $rootScope.duration = 0;
 
     // TOGGLERS
+    $rootScope.hasModalOpen = false;
     var isTracking = true;
     var isMoving = false;
     var isCreating = false;
     var hasClicked = false;
     var isLoopingOnTrack = false;
-    vm.isLoopingOnRegion = false;
+    var vm = this;
+    var bufferLoader;
+    var ctx;
+
+    function initVar(){
+
+      $rootScope.listOfSound = [];
+      $rootScope.listOfMix = [];
+      $rootScope.listOfWaves = [];
+
+      $rootScope.delayTime = 0;
+      $rootScope.feedbackGain = 0;
+      $rootScope.filterDetune = 0;
+      $rootScope.filterDrequency = 0;
+      $rootScope.filterGain = 0;
+      $rootScope.generalVolume = 100;
+
+      $rootScope.effects = {};
+      $rootScope.activeEffects = {};
+      $rootScope.smState = [];
+      $rootScope.nbSolo = 0;
+      $rootScope.songName = "";
+      $rootScope.mixName = "";
+      $rootScope.sliders = {};
+
+      $rootScope.mixData = {};
+
+      // LOADING
+      $rootScope.nbTrack = 0;
+      $rootScope.download = 0;
+      $rootScope.decode = 0;
+      $rootScope.buffer = 0;
+
+      // HISTORIC
+      $rootScope.previous = [];
+      $rootScope.next = [];
+
+      $rootScope.selectedRegionName = "";
+      $rootScope.selectedRegion = null;
+      $rootScope.progress = null;
+      $rootScope.duration = 0;
+
+      vm.isLoopingOnRegion = false;
+
+      $rootScope.trackSelected = null;
+      $rootScope.tracks = [];
+    }
+    initVar();
+
 
     // SHORTCUTS
     document.addEventListener("keydown",function(evt){
+      if($rootScope.hasModalOpen) return;
       //console.log(evt.keyCode);
       switch (evt.keyCode){
         // DELETE
@@ -68,6 +115,7 @@ angular.module('frontEndApp')
         // ESCAPE
         case 27:
               $rootScope.deselectRegion();
+              $rootScope.deselectTrack();
               break;
         // S
         case 83:
@@ -134,90 +182,134 @@ angular.module('frontEndApp')
       $rootScope.listOfMix = [];
     };
 
-    // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
-    var knobLimiter = document.getElementById('filterLimiter');
-    knobLimiter.addEventListener('change', function(e) {
-      $rootScope.filterLimiter = e.target.value;
+    $rootScope.selectTrack = function(index){
+      $rootScope.trackSelected = index;
+      console.log("track selected : " + $rootScope.trackSelected);
+      console.log($rootScope.tracks);
+      console.log($rootScope.tracks[$rootScope.trackSelected]);
+      // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
+      var knobLimiter = document.getElementById('filterLimiter');
+      knobLimiter.addEventListener('change', function(e) {
+        $rootScope.filterLimiter = e.target.value;
 
-      var source = $rootScope.listOfWaves[1].backend.source;
+        $rootScope.tracks[$rootScope.trackSelected].hardLimiterValue = e.target.value;
 
-      if($rootScope.preGain == null && $rootScope.limiter == null) {
-        $rootScope.preGain = $rootScope.listOfWaves[1].backend.ac.createGain();
-        $rootScope.limiter = $rootScope.listOfWaves[1].backend.ac.createDynamicsCompressor();
+        var source = $rootScope.listOfWaves[$rootScope.trackSelected].backend.source;
+
+        if($rootScope.preGain == null && $rootScope.limiter == null) {
+          $rootScope.preGain = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createGain();
+          $rootScope.limiter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createDynamicsCompressor();
+        }
+        $rootScope.limiter.threshold.value = 0; // this is the pitfall, leave some headroom
+        $rootScope.limiter.knee.value = 0.0; // brute force
+        $rootScope.limiter.ratio.value = 20.0; // max compression
+        $rootScope.limiter.attack.value = 0.005; // 5ms attack
+        $rootScope.limiter.release.value = 0.050; // 50ms release
+        $rootScope.preGain.gain.value = $rootScope.filterLimiter;
+        source.connect($rootScope.preGain);
+        $rootScope.preGain.connect($rootScope.limiter);
+        $rootScope.limiter.connect($rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.destination);
+      });
+
+      var knobDelayTime = document.getElementById('delayTime');
+      knobDelayTime.addEventListener('change', function(e) {
+        var value = e.target.value;
+        $rootScope.delayTime = value;
+
+        $rootScope.tracks[$rootScope.trackSelected].delayTime = e.target.value;
+
+        var delay = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createDelay();
+        delay.delayTime.value = $rootScope.delayTime;
+        var feedback = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createGain();
+        feedback.gain.value = $rootScope.feedbackGain;
+        delay.connect(feedback);
+        feedback.connect(delay);
+        $rootScope.listOfWaves[$rootScope.trackSelected].backend.setFilter(delay);
+      });
+
+      var knobFeedbackGain = document.getElementById('feedbackGain');
+      knobFeedbackGain.addEventListener('change', function(e) {
+        var value = e.target.value;
+        $rootScope.feedbackGain = value;
+
+        $rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain = e.target.value;
+
+        var delay = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createDelay();
+        delay.delayTime.value = $rootScope.delayTime;
+        var feedback = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createGain();
+        feedback.gain.value = $rootScope.feedbackGain;
+        delay.connect(feedback);
+        feedback.connect(delay);
+        $rootScope.listOfWaves[$rootScope.trackSelected].backend.setFilter(delay);
+      });
+
+      var knobFilterDetune = document.getElementById('filterDetune');
+      knobFilterDetune.addEventListener('change', function(e) {
+        var value = e.target.value;
+        $rootScope.filterDetune = value;
+
+        $rootScope.tracks[$rootScope.trackSelected].filterDetune = e.target.value;
+
+        var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
+        biquadFilter.type = "lowshelf";
+        biquadFilter.frequency.value = $rootScope.filterFrequency;
+        biquadFilter.gain.value = $rootScope.filterGain;
+        biquadFilter.detune.value = $rootScope.filterDetune;
+        $rootScope.listOfWaves[$rootScope.trackSelected].backend.setFilter(biquadFilter);
+      });
+
+      var knobFilterFrequency = document.getElementById('filterFrequency');
+      knobFilterFrequency.addEventListener('change', function(e) {
+        var value = e.target.value;
+        $rootScope.filterFrequency = value;
+
+        $rootScope.tracks[$rootScope.trackSelected].filterFrequency = e.target.value;
+
+        var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
+        biquadFilter.type = "lowshelf";
+        biquadFilter.frequency.value = $rootScope.filterFrequency;
+        biquadFilter.gain.value = $rootScope.filterGain;
+        biquadFilter.detune.value = $rootScope.filterDetune;
+        $rootScope.listOfWaves[$rootScope.trackSelected].backend.setFilter(biquadFilter);
+      });
+
+      var knobFilterGain = document.getElementById('filterGain');
+      knobFilterGain.addEventListener('change', function(e) {
+        var value = e.target.value;
+        $rootScope.filterGain = value;
+
+        $rootScope.tracks[$rootScope.trackSelected].filterGain = e.target.value;
+
+        var biquadFilter = $rootScope.listOfWaves[$rootScope.trackSelected].backend.ac.createBiquadFilter();
+        biquadFilter.type = "lowshelf";
+        biquadFilter.frequency.value = $rootScope.filterFrequency;
+        biquadFilter.gain.value = $rootScope.filterGain;
+        biquadFilter.detune.value = $rootScope.filterDetune;
+        $rootScope.listOfWaves[$rootScope.trackSelected].backend.setFilter(biquadFilter);
+      });
+      // </editor-fold>
+      // set knob value
+      document.getElementById('filterLimiter').setValue($rootScope.tracks[$rootScope.trackSelected].hardLimiterValue);
+      document.getElementById('delayTime').setValue($rootScope.tracks[$rootScope.trackSelected].delayTime);
+      document.getElementById('feedbackGain').setValue($rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain);
+      document.getElementById('filterDetune').setValue($rootScope.tracks[$rootScope.trackSelected].filterDetune);
+      document.getElementById('filterFrequency').setValue($rootScope.tracks[$rootScope.trackSelected].filterFrequency);
+      document.getElementById('filterGain').setValue($rootScope.tracks[$rootScope.trackSelected].filterGain);
+    };
+
+    $rootScope.deselectTrack = function(){
+      if($rootScope.trackSelected !== null){
+        try {
+          $rootScope.trackSelected = null;
+/*
+          $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+*/
+        } catch (ex){
+
+        }
       }
-      $rootScope.limiter.threshold.value = 0; // this is the pitfall, leave some headroom
-      $rootScope.limiter.knee.value = 0.0; // brute force
-      $rootScope.limiter.ratio.value = 20.0; // max compression
-      $rootScope.limiter.attack.value = 0.005; // 5ms attack
-      $rootScope.limiter.release.value = 0.050; // 50ms release
-      $rootScope.preGain.gain.value = $rootScope.filterLimiter;
-      source.connect($rootScope.preGain);
-      $rootScope.preGain.connect($rootScope.limiter);
-      $rootScope.limiter.connect($rootScope.listOfWaves[1].backend.ac.destination);
-    });
+    };
 
-    var knobDelayTime = document.getElementById('delayTime');
-    knobDelayTime.addEventListener('change', function(e) {
-      var value = e.target.value;
-      $rootScope.delayTime = value;
-      var delay = $rootScope.listOfWaves[1].backend.ac.createDelay();
-      delay.delayTime.value = $rootScope.delayTime;
-      var feedback = $rootScope.listOfWaves[1].backend.ac.createGain();
-      feedback.gain.value = $rootScope.feedbackGain;
-      delay.connect(feedback);
-      feedback.connect(delay);
-      $rootScope.listOfWaves[1].backend.setFilter(delay);
-    });
-
-    var knobFeedbackGain = document.getElementById('feedbackGain');
-    knobFeedbackGain.addEventListener('change', function(e) {
-      var value = e.target.value;
-      $rootScope.feedbackGain = value;
-      var delay = $rootScope.listOfWaves[1].backend.ac.createDelay();
-      delay.delayTime.value = $rootScope.delayTime;
-      var feedback = $rootScope.listOfWaves[1].backend.ac.createGain();
-      feedback.gain.value = $rootScope.feedbackGain;
-      delay.connect(feedback);
-      feedback.connect(delay);
-      $rootScope.listOfWaves[1].backend.setFilter(delay);
-    });
-
-    var knobFilterDetune = document.getElementById('filterDetune');
-    knobFilterDetune.addEventListener('change', function(e) {
-      var value = e.target.value;
-      $rootScope.filterDetune = value;
-      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
-      biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = $rootScope.filterFrequency;
-      biquadFilter.gain.value = $rootScope.filterGain;
-      biquadFilter.detune.value = $rootScope.filterDetune;
-      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
-    });
-
-    var knobFilterFrequency = document.getElementById('filterFrequency');
-    knobFilterFrequency.addEventListener('change', function(e) {
-      var value = e.target.value;
-      $rootScope.filterFrequency = value;
-      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
-      biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = $rootScope.filterFrequency;
-      biquadFilter.gain.value = $rootScope.filterGain;
-      biquadFilter.detune.value = $rootScope.filterDetune;
-      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
-    });
-
-    var knobFilterGain = document.getElementById('filterGain');
-    knobFilterGain.addEventListener('change', function(e) {
-      var value = e.target.value;
-      $rootScope.filterGain = value;
-      var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
-      biquadFilter.type = "lowshelf";
-      biquadFilter.frequency.value = $rootScope.filterFrequency;
-      biquadFilter.gain.value = $rootScope.filterGain;
-      biquadFilter.detune.value = $rootScope.filterDetune;
-      $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);
-    });
-    // </editor-fold>
 
     $rootScope.zoom = function(zoomLevel){
       $rootScope.listOfWaves.forEach(function(wave){
@@ -270,12 +362,21 @@ angular.module('frontEndApp')
       loadSamples();
     };
 
-    $rootScope.loadRemoteSamples = function(){
-      $rootScope.listOfSound = [];
-      $http.get("http://localhost:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
+    $rootScope.loadRemoteSamples = function(selectedMusic){
+      $rootScope.stopAllTracks();
+      initVar();
+      isTracking = true;
+      isMoving = false;
+      isCreating = false;
+      hasClicked = false;
+      isLoopingOnTrack = false;
+
+      $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
         function successCallback(response){
-          $rootScope.songName = $("#selectedMusic option:selected").text().trim();
+          $rootScope.songName = selectedMusic;
+          console.log(selectedMusic);
           console.log(response.data);
+
           $rootScope.pistes = response.data.musicFiles;
           parseStorage();
           $rootScope.pistes.forEach(function(p){
@@ -480,10 +581,14 @@ angular.module('frontEndApp')
 
     $rootScope.deselectRegion = function(){
       if($rootScope.selectedRegion !== null){
-        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-        $rootScope.selectedRegion = null;
-        $rootScope.selectedRegionName = "";
-        vm.isLoopingOnRegion = false;
+        try {
+          $rootScope.selectedRegion = null;
+          $rootScope.selectedRegionName = "";
+          vm.isLoopingOnRegion = false;
+          $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+        } catch (ex){
+
+        }
       }
     };
 
@@ -590,6 +695,7 @@ angular.module('frontEndApp')
           wave.toggleInteraction();
         });
         $rootScope.progress = 0;
+        parseStorage();
 
         console.log(Math.ceil($rootScope.listOfWaves[0].getDuration()));
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
@@ -632,6 +738,16 @@ angular.module('frontEndApp')
           $rootScope.buffer += 1;
           checkReadiness();
           $rootScope.$digest();
+          // load effects values for each tracks
+          var trackEffects = {
+            'hardLimiterValue': 5,
+            'delayTime': 0,
+            'delayFeedbackGain': 0,
+            'filterDetune': 0,
+            'filterFrequency': 0,
+            'filterGain': 0
+          };
+          $rootScope.tracks.push(trackEffects);
         });
 
         $rootScope.listOfWaves[i].on('seek', function(progress){
@@ -658,12 +774,12 @@ angular.module('frontEndApp')
         });
 
         $rootScope.listOfWaves[i].on('finish', function(){
-          if(isLoopingOnTrack) $rootScope.listOfWaves[0].seekTo(0);
           $rootScope.listOfWaves.forEach(function(wave){
+            wave.stop();
+            wave.stop();
             if(isLoopingOnTrack){
               wave.play();
             }
-            else wave.stop();
           });
         });
 
@@ -993,6 +1109,19 @@ angular.module('frontEndApp')
             console.log("Error : " + response);
           }
         );
+        var thenFct = function (name) {
+          $rootScope.hasModalOpen = false;
+          $rootScope.mixName = name;
+          $rootScope.save();
+        };
+
+        var resolve = {
+          items: function () {
+            return $rootScope.mixName;
+          }
+        };
+
+        $rootScope.openModal('modalSave', 'ModalInstanceCtrl', resolve, thenFct);
       }, function () {
         //$log.info('Modal dismissed at: ' + new Date());
       });
@@ -1048,25 +1177,21 @@ angular.module('frontEndApp')
     }
     // </editor-fold>
 
-    $rootScope.openTrackEffects = function (size) {
+    $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
+      var defaultFct = function(){
+        $rootScope.hasModalOpen = false;
+      };
+      $rootScope.hasModalOpen = true;
 
       var modalInstance = $uibModal.open({
         animation: true,
-        templateUrl: 'modalTrackEffects.html',
-        controller: 'ModalInstanceCtrl',
+        templateUrl: 'views/' + template + '.html',
+        controller: controller,
         size: size,
-        resolve: {
-          items: function () {
-            return $rootScope.mixName;
-          }
-        }
+        resolve: resolve
       });
 
-      modalInstance.result.then(function (name) {
-        // TODO
-      }, function () {
-        //$log.info('Modal dismissed at: ' + new Date());
-      });
+      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
     };
 
     $rootScope.loadMix = function(mixName) {
@@ -1080,14 +1205,14 @@ angular.module('frontEndApp')
     // <editor-fold desc="TOOLS">
     $rootScope.blur = function(event){
       event.target.blur();
-    }
+    };
 
     $rootScope.getPercent = function(current, total){
       return Math.round(current/total*100);
     };
 
     $rootScope.timeFormat = function (duration){
-      return Math.floor(duration/60) + ":" + Math.floor(duration%60)
+      return pad(Math.floor(duration/60), 2) + ":" + pad(Math.floor(duration%60), 2);
     };
 
     $rootScope.nameRecover = function(str){
@@ -1102,6 +1227,12 @@ angular.module('frontEndApp')
           ~~(Math.random() * 255),
           alpha || 1
         ] + ')';
+    }
+
+    function pad(num, size) {
+      var s = num+"";
+      while (s.length < size) s = "0" + s;
+      return s;
     }
 
     function isSelected(region){
