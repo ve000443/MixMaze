@@ -73,10 +73,11 @@ angular.module('frontEndApp')
     initVar();
 
     $rootScope.noteMix = function(rate){
-      var star = {mixName : $rootScope.mixName, userName: $rootScope.user, star : rate};
-
-      $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user).then(
+      var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
+      console.log(star);
+      $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
         function successCallback(response) {
+          console.log(response.data);
           if(response.data.length === 0){
             $http.post('http://xythe.xyz:8080/star', star).then(
               function successCallback(response) {
