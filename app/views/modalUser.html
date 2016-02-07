@@ -1,16 +1,19 @@
 <div ng-keypress="keyPressed($event)">
   <div class="modal-header">
     <h3 class="modal-title">Users list</h3>
+    <div class="pull-right">
+      <label>Filter</label>
+      <input type="text" ng-model="search">
+    </div>
   </div>
   <div class="modal-body">
     <!--<input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>-->
 
     <uib-accordion close-others="true">
-      <uib-accordion-group ng-repeat="user in listOfUsers" ng-click="getUserDetails(user.pseudo)">
+      <uib-accordion-group ng-repeat="user in listOfUsers | filter:search" ng-click="getUserDetails(user.pseudo)">
         <uib-accordion-heading>
           {{user.pseudo}}
-          <!-- TODO : Handle rights whence available -->
-          <span class="pull-right">
+          <span class="pull-right" ng-if="hasRights(1)">
             <button class="btn btn-primary" style="padding: 0 2px;">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
