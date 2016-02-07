@@ -77,6 +77,8 @@
     </div>
 
     <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
+
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')">Manage users</button>
   </div>
 
   <div class="col-lg-3 rating noselect">
@@ -150,18 +152,17 @@
 
 <!-- EFFECTS TRACK -->
 <div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="trackSelected !== null">
-  <div class="col-lg-12">&nbsp</div>
 
   <div class="col-lg-9">
     <!-- delay -->
     <div class="col-lg-2" style="border: double;">
       <div class="col-lg-6" style="overflow: hidden">
         Time
-        <webaudio-knob id="delayTime" value="{{tracks[trackSelected].delayTime}}" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="delayTime" value="{{tracks[trackSelected].delayTime}}" title="Time" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" width="40" height="40"></webaudio-knob>
       </div>
       <div class="col-lg-6">
         Gain
-        <webaudio-knob id="feedbackGain" value="{{tracks[trackSelected].delayFeedbackGain}}" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="feedbackGain" value="{{tracks[trackSelected].delayFeedbackGain}}" title="Gain" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" width="40" height="40"></webaudio-knob>
       </div>
     </div>
 
@@ -169,22 +170,22 @@
     <div class="col-lg-3" style="border: double">
       <div class="col-lg-4">
         Detune
-        <webaudio-knob id="filterDetune" value="{{tracks[trackSelected].filterDetune}}" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="filterDetune" value="{{tracks[trackSelected].filterDetune}}" title="Detune" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" width="40" height="40"></webaudio-knob>
       </div>
       <div class="col-lg-4">
         Frequency
-        <webaudio-knob id="filterFrequency" value="{{tracks[trackSelected].filterFrequency}}" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="filterFrequency" value="{{tracks[trackSelected].filterFrequency}}" title="Frequency" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" width="40" height="40"></webaudio-knob>
       </div>
       <div class="col-lg-4">
         Gain
-        <webaudio-knob id="filterGain" value="{{tracks[trackSelected].filterGain}}" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="filterGain" value="{{tracks[trackSelected].filterGain}}" title="Gain" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" width="40" height="40"></webaudio-knob>
       </div>
     </div>
 
     <!-- limiter -->
     <div class="col-lg-1" style="border: double">
       Limiter
-      <webaudio-knob id="filterLimiter" value="{{tracks[trackSelected].hardLimiterValue}}" title="Limiter" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
+      <webaudio-knob id="filterLimiter" value="{{tracks[trackSelected].hardLimiterValue}}" title="Limiter" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" width="40" height="40"></webaudio-knob>
     </div>
   </div>
 
