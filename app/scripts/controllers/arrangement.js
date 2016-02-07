@@ -4,48 +4,6 @@
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
 
-    $rootScope.user = {
-      name: ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "kev",
-      role: ($cookieStore.get("role")!== undefined)?$cookieStore.get("role")!== undefined : "member"
-    };
-    $rootScope.listOfSound = [];
-    $rootScope.listOfMix = [];
-    $rootScope.listOfWaves = [];
-
-    $rootScope.delayTime = 0;
-    $rootScope.feedbackGain = 0;
-    $rootScope.filterDetune = 0;
-    $rootScope.filterDrequency = 0;
-    $rootScope.filterGain = 0;
-    $rootScope.generalVolume = 100;
-
-    $rootScope.effects = {};
-    $rootScope.activeEffects = {};
-    $rootScope.smState = [];
-    $rootScope.nbSolo = 0;
-    $rootScope.songName = "";
-    $rootScope.mixName = "";
-    $rootScope.sliders = {};
-
-    $rootScope.mixData = {};
-    $rootScope.mixOwner = {};
-    $rootScope.owner = "";
-
-    // LOADING
-    $rootScope.nbTrack = 0;
-    $rootScope.download = 0;
-    $rootScope.decode = 0;
-    $rootScope.buffer = 0;
-
-    // HISTORIC
-    $rootScope.previous = [];
-    $rootScope.next = [];
-
-    $rootScope.selectedRegionName = "";
-    $rootScope.selectedRegion = null;
-    $rootScope.progress = null;
-    $rootScope.duration = 0;
-
     // TOGGLERS
     $rootScope.hasModalOpen = false;
     var isTracking = true;
@@ -58,7 +16,10 @@ angular.module('frontEndApp')
     var ctx;
 
     function initVar(){
-
+      $rootScope.user = {
+        name: ($cookieStore.get("user")!== undefined)?$cookieStore.get("user")!== undefined : "toto",
+        role: ($cookieStore.get("role")!== undefined)?$cookieStore.get("role")!== undefined : "member"
+      };
       $rootScope.listOfSound = [];
       $rootScope.listOfMix = [];
       $rootScope.listOfWaves = [];
@@ -79,6 +40,8 @@ angular.module('frontEndApp')
       $rootScope.sliders = {};
 
       $rootScope.mixData = {};
+      $rootScope.mixOwner = {};
+      $rootScope.owner = "";
 
       // LOADING
       $rootScope.nbTrack = 0;
@@ -1072,6 +1035,25 @@ angular.module('frontEndApp')
       });
     };
 
+    $rootScope.storeMixInDatabase = function(name) {
+      $rootScope.mixName = name;
+      var json = jsonifyRegions();
+      var mix = {
+        owner: $rootScope.user.name,
+        name: $rootScope.mixName,
+        music: $rootScope.songName,
+        data: json
+      };
+      //localStorage['MixMaze_' + $rootScope.mixName] = json;
+      $http.post('http://localhost:8080/mix/', mix).then(
+        function successCallback(response) {
+          console.log("mix stored");
+          parseStorage();
+        }, function errorCallback(response) {
+          console.log("Error : " + response);
+        });
+    }
+
     // <editor-fold desc="SAVE">
     $rootScope.save = function(){
       if(!Boolean($rootScope.mixName)){
@@ -1082,54 +1064,72 @@ angular.module('frontEndApp')
     };
 
     /** MODAL */
-    $rootScope.saveAs = function (size) {
+    $rootScope.saveAs = function () {
+
+      //var modalInstance = $uibModal.open({
+      //  animation: true,
+      //  templateUrl: 'modalSave.html',
+      //  controller: 'ModalInstanceCtrl',
+      //  size: size,
+      //  resolve: {
+      //    items: function () {
+      //      return $rootScope.mixName;
+      //    }
+      //  }
+      //});
+
+      //modalInstance.result.then(function (name) {
+      //  $rootScope.mixName = name;
+      //  var json = jsonifyRegions();
+      //  var mix = {userRole : $rootScope.user.role, owner: $rootScope.user.name, name : $rootScope.mixName, music: $rootScope.songName, data : json};
+      //  //localStorage['MixMaze_' + $rootScope.mixName] = json;
+      //  $http.post('http://localhost:8080/mix/', mix).then(
+      //    function successCallback(response) {
+      //      console.log("mix stored");
+      //      parseStorage();
+      //    }, function errorCallback(response) {
+      //      console.log("Error : " + response);
+      //    }
+      //  );
+      var thenFct = function (name) {
+        $rootScope.hasModalOpen = false;
+        $rootScope.mixName = name;
+        $rootScope.storeMixInDatabase(name);
+      };
+
+      var resolve = {
+        items: function () {
+          return $rootScope.mixName;
+        }
+      };
+
+
+      $rootScope.openModal('modalSave', 'ModalInstanceCtrl', resolve, thenFct);
+      //}, function () {
+      //  $log.info('Modal dismissed at: ' + new Date());
+      //});
+  };
+
+    $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
+      var defaultFct = function(){
+        $rootScope.hasModalOpen = false;
+      };
+      $rootScope.hasModalOpen = true;
 
       var modalInstance = $uibModal.open({
         animation: true,
-        templateUrl: 'modalSave.html',
-        controller: 'ModalInstanceCtrl',
+        templateUrl: 'views/' + template + '.html',
+        controller: controller,
         size: size,
-        resolve: {
-          items: function () {
-            return $rootScope.mixName;
-          }
-        }
+        resolve: resolve
       });
 
-      modalInstance.result.then(function (name) {
-        $rootScope.mixName = name;
-        var json = jsonifyRegions();
-        var mix = {userRole : $rootScope.user.role, owner: $rootScope.user.name, name : $rootScope.mixName, music: $rootScope.songName, data : json};
-        //localStorage['MixMaze_' + $rootScope.mixName] = json;
-        $http.post('http://localhost:8080/mix/', mix).then(
-          function successCallback(response) {
-            console.log("mix stored");
-            parseStorage();
-          }, function errorCallback(response) {
-            console.log("Error : " + response);
-          }
-        );
-        var thenFct = function (name) {
-          $rootScope.hasModalOpen = false;
-          $rootScope.mixName = name;
-          $rootScope.save();
-        };
-
-        var resolve = {
-          items: function () {
-            return $rootScope.mixName;
-          }
-        };
-
-        $rootScope.openModal('modalSave', 'ModalInstanceCtrl', resolve, thenFct);
-      }, function () {
-        //$log.info('Modal dismissed at: ' + new Date());
-      });
+      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
     };
 
     $rootScope.updateMix = function(name){
       var json = jsonifyRegions();
-      var mix = {userRole : $rootScope.user.role, owner: $rootScope.user.name, name : name, music: $rootScope.songName, data : json};
+      var mix = {owner: $rootScope.user.name, name : name, music: $rootScope.songName, data : json};
 
       $http.put('http://localhost:8080/mix/', mix).then(
         function successCallback(response) {
@@ -1165,7 +1165,14 @@ angular.module('frontEndApp')
     };
 
     $rootScope.deleteMix = function(){
-      console.log($rootScope.mixName);
+      $http.delete('http://localhost:8080/mix/'+$rootScope.mixName+'/'+$rootScope.user.name).then(
+        function successCallback(response) {
+          console.log("mix deleted");
+          parseStorage();
+        }, function errorCallback(response) {
+          console.log("Error : " + response);
+        }
+      );
     }
 
 
@@ -1176,23 +1183,6 @@ angular.module('frontEndApp')
       }
     }
     // </editor-fold>
-
-    $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
-      var defaultFct = function(){
-        $rootScope.hasModalOpen = false;
-      };
-      $rootScope.hasModalOpen = true;
-
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'views/' + template + '.html',
-        controller: controller,
-        size: size,
-        resolve: resolve
-      });
-
-      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
-    };
 
     $rootScope.loadMix = function(mixName) {
       savePrevious();
