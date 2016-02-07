@@ -281,7 +281,9 @@ angular.module('frontEndApp')
       loadSamples();
     };
 
-    $rootScope.loadRemoteSamples = function(){
+    $rootScope.loadRemoteSamples = function(selectedMusic){
+      $('#modalSamples').modal('hide');
+      $rootScope.stopAllTracks();
       initVar();
       isTracking = true;
       isMoving = false;
@@ -289,10 +291,12 @@ angular.module('frontEndApp')
       hasClicked = false;
       isLoopingOnTrack = false;
 
-      $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
+      $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
         function successCallback(response){
-          $rootScope.songName = $("#selectedMusic option:selected").text().trim();
+          $rootScope.songName = selectedMusic;
+          console.log(selectedMusic);
           console.log(response.data);
+
           $rootScope.pistes = response.data.musicFiles;
           parseStorage();
           $rootScope.pistes.forEach(function(p){
@@ -675,12 +679,12 @@ angular.module('frontEndApp')
         });
 
         $rootScope.listOfWaves[i].on('finish', function(){
-          if(isLoopingOnTrack) $rootScope.listOfWaves[0].seekTo(0);
           $rootScope.listOfWaves.forEach(function(wave){
+            wave.stop();
+            wave.stop();
             if(isLoopingOnTrack){
               wave.play();
             }
-            else wave.stop();
           });
         });
 
@@ -1078,14 +1082,14 @@ angular.module('frontEndApp')
     // <editor-fold desc="TOOLS">
     $rootScope.blur = function(event){
       event.target.blur();
-    }
+    };
 
     $rootScope.getPercent = function(current, total){
       return Math.round(current/total*100);
     };
 
     $rootScope.timeFormat = function (duration){
-      return Math.floor(duration/60) + ":" + Math.floor(duration%60)
+      return pad(Math.floor(duration/60), 2) + ":" + pad(Math.floor(duration%60), 2);
     };
 
     $rootScope.nameRecover = function(str){
@@ -1100,6 +1104,12 @@ angular.module('frontEndApp')
           ~~(Math.random() * 255),
           alpha || 1
         ] + ')';
+    }
+
+    function pad(num, size) {
+      var s = num+"";
+      while (s.length < size) s = "0" + s;
+      return s;
     }
 
     function isSelected(region){
