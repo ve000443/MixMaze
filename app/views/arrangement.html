@@ -107,9 +107,11 @@
       </ul>
     </div>
 
-    <select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
+    <button type="button" ng-if="progress !== null" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Available Mix</button>
+
+    <!--<select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
       <option value="">&lt;Select a Mix&gt;</option>
-    </select>
+    </select>-->
   </div>
 
 
@@ -309,6 +311,18 @@
   </div>
 </div>
 
+<div class="modal fade bs-example-modal-lg" id="modalMix" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <label>Search: <input ng-model="searchText"></label>
+      <div ng-repeat="mix in listOfMix | filter:searchText">
+        <a ng-click="loadMix(mix)">
+        {{mix}}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
 <webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>

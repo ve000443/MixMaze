@@ -1040,6 +1040,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadMix = function(mixName) {
+      $('#modalMix').modal('hide');
       savePrevious();
       $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);
