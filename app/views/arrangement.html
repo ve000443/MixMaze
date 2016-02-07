@@ -26,11 +26,11 @@
       <div class="col-lg-4" style="border: double;">
         <div class="col-lg-6" style="overflow: hidden">
           Time
-          <webaudio-knob id="delayTime" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+          <webaudio-knob id="regionDelayTime" title="Time" value="{{delayTime}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
         </div>
         <div class="col-lg-6">
           Gain
-          <webaudio-knob id="feedbackGain" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
+          <webaudio-knob id="regionFeedbackGain" title="Gain" value="{{feedbackGain}}" sprites="30" src="img/fxknob2.png" step="0.01" min="0" max="1" value="0" width="40" height="40"></webaudio-knob>
         </div>
       </div>
 
@@ -38,22 +38,22 @@
       <div class="col-lg-6" style="border: double">
         <div class="col-lg-4">
           Detune
-          <webaudio-knob id="filterDetune" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
+          <webaudio-knob id="regionFilterDetune" title="Detune" value="{{filterDetune}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="100" value="0" width="40" height="40"></webaudio-knob>
         </div>
         <div class="col-lg-4">
           Frequency
-          <webaudio-knob id="filterFrequency" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
+          <webaudio-knob id="regionFilterFrequency" title="Frequency" value="{{filterFrequency}}" sprites="30" src="img/fxknob2.png" step="1" min="0" max="3000" value="0" width="40" height="40"></webaudio-knob>
         </div>
         <div class="col-lg-4">
           Gain
-          <webaudio-knob id="filterGain" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
+          <webaudio-knob id="regionFilterGain" title="Gain" value="{{filterGain}}" sprites="30" src="img/fxknob2.png" step="0.1" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
         </div>
       </div>
 
       <!-- limiter -->
       <div class="col-lg-2" style="border: double">
         Limiter
-        <webaudio-knob id="filterLimiter" title="Limiter" value="{{filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
+        <webaudio-knob id="regionFilterLimiter" title="Limiter" value="{{filterLimiter}}" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
       </div>
     </div>
   </div>
@@ -150,11 +150,17 @@
   </div>
 </div>
 
+<style>
+  .track-selected{
+    background-color: #00b3ee;
+  }
+</style>
+
 <!-- WAVES -->
 <div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">
   <div ng-repeat="track in listOfSound track by $index" class="col-lg-12" style="border:2px solid black; border-radius:10px;"
   ng-style="{'border-top':$index!==0?'0':'2px solid black'}">
-    <div class="col-lg-1" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;">
+    <div id="track{{$index}}" class="col-lg-1" data-ng-class="{'track-selected':trackSelected===$index}" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;" ng-click="selectTrack($index)">
       <!-- Panoramique -->
       <div class="col-lg-12 debrief">
         {{nameRecover(track)}}
