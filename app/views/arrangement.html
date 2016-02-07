@@ -148,19 +148,19 @@
   ng-style="{'border-top':$index!==0?'0':'2px solid black'}">
     <div class="col-lg-1" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;">
       <!-- Panoramique -->
-      <div class="col-lg-12" style="text-align: center;">
+      <div class="col-lg-12 debrief">
         {{nameRecover(track)}}
       </div>
 
       <!-- Volume sliders -->
-      <div class="col-lg-12" style="text-align: center;">
+      <div class="col-lg-12 debrief">
         <webaudio-knob id="pan{{$index}}" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="32" height="32"></webaudio-knob>
         <webaudio-knob id="slider{{$index}}" title="Volume" src="img/knob_med_red.png" sprites="30" min="0" max="100" value="100" width="50" height="50" ng-init="sliders['slider' + $index] = 100" ng-mousedown="volumeStart()" ng-mousemove=""></webaudio-knob>
       </div>
 
 
       <!-- Solo & Mute -->
-      <div class="col-lg-12" style="text-align: center;">
+      <div class="col-lg-12 debrief">
         <button id="solo{{$index}}" class="btn btn-xs" ng-class="{'btn-info':smState[$index]== 'solo'}" ng-click="updateSm($index, 'solo')">s</button>
         <button id="mute{{$index}}" class="btn btn-xs" ng-class="{'btn-info':smState[$index]== 'mute'}" ng-click="updateSm($index, 'mute')">m</button>
       </div>

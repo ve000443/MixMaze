@@ -667,12 +667,12 @@ angular.module('frontEndApp')
         });
 
         $rootScope.listOfWaves[i].on('finish', function(){
-          if(isLoopingOnTrack) $rootScope.listOfWaves[0].seekTo(0);
           $rootScope.listOfWaves.forEach(function(wave){
+            wave.stop();
+            wave.stop();
             if(isLoopingOnTrack){
               wave.play();
             }
-            else wave.stop();
           });
         });
 
@@ -1045,14 +1045,14 @@ angular.module('frontEndApp')
     // <editor-fold desc="TOOLS">
     $rootScope.blur = function(event){
       event.target.blur();
-    }
+    };
 
     $rootScope.getPercent = function(current, total){
       return Math.round(current/total*100);
     };
 
     $rootScope.timeFormat = function (duration){
-      return Math.floor(duration/60) + ":" + Math.floor(duration%60)
+      return pad(Math.floor(duration/60), 2) + ":" + pad(Math.floor(duration%60), 2);
     };
 
     $rootScope.nameRecover = function(str){
@@ -1067,6 +1067,12 @@ angular.module('frontEndApp')
           ~~(Math.random() * 255),
           alpha || 1
         ] + ')';
+    }
+
+    function pad(num, size) {
+      var s = num+"";
+      while (s.length < size) s = "0" + s;
+      return s;
     }
 
     function isSelected(region){
