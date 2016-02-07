@@ -15,11 +15,13 @@ angular.module('frontEndApp')
     var bufferLoader;
     var ctx;
 
+    $rootScope.user = {
+      name: ($cookieStore.get("user") !== undefined) ? $cookieStore.get("user") : null,
+      role: ($cookieStore.get("role") !== undefined) ? $cookieStore.get("role") : "guest"
+    };
+
     function initVar() {
-      $rootScope.user = {
-        name: ($cookieStore.get("user") !== undefined) ? $cookieStore.get("user") !== undefined : "null",
-        role: ($cookieStore.get("role") !== undefined) ? $cookieStore.get("role") !== undefined : "guest"
-      };
+
       $rootScope.listOfSound = [];
       $rootScope.listOfMix = [];
       $rootScope.listOfWaves = [];
@@ -1136,6 +1138,7 @@ angular.module('frontEndApp')
 
     $rootScope.updateMix = function (name) {
       var json = jsonifyRegions();
+      console.log($rootScope.user.name);
       var mix = {owner: $rootScope.user.name, name: name, music: $rootScope.songName, data: json};
 
       $http.put('http://xythe.xyz:8080/mix/', mix).then(
