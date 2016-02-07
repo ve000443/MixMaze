@@ -272,7 +272,8 @@ angular.module('frontEndApp')
       loadSamples();
     };
 
-    $rootScope.loadRemoteSamples = function(){
+    $rootScope.loadRemoteSamples = function(selectedMusic){
+      $('#modalSamples').modal('hide');
       $rootScope.stopAllTracks();
       initVar();
       isTracking = true;
@@ -281,10 +282,12 @@ angular.module('frontEndApp')
       hasClicked = false;
       isLoopingOnTrack = false;
 
-      $http.get("http://xythe.xyz:8080/musics/" + $("#selectedMusic option:selected").text().trim()).then(
+      $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
         function successCallback(response){
-          $rootScope.songName = $("#selectedMusic option:selected").text().trim();
+          $rootScope.songName = selectedMusic;
+          console.log(selectedMusic);
           console.log(response.data);
+
           $rootScope.pistes = response.data.musicFiles;
           parseStorage();
           $rootScope.pistes.forEach(function(p){

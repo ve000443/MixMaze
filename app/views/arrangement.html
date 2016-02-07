@@ -76,14 +76,20 @@
     <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
-    <select id="selectedMusic">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-sm">Available Samples</button>
+
+    <!--<select id="selectedMusic">
       <option ng-repeat="music in musics">
         {{music.musicName}}
       </option>
     </select>
 
-    <button class="btn btn-primary" id="loadSamples" ng-click="loadRemoteSamples()">Load Samples</button>
+    <button class="btn btn-primary" id="loadSamples" ng-click="loadRemoteSamples()">Load Samples</button>-->
     <button class="btn btn-primary" ng-click="loadLocalSamples()">Local Samples</button>
+    <!-- Button trigger modal -->
+    <!-- Small modal -->
+
+
 
     <!-- Split button -->
     <div class="btn-group" uib-dropdown dropdown-append-to-body>
@@ -288,8 +294,19 @@
     <!--<div class="col-lg-1">-->
       <!--<webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>-->
     <!--</div>-->
-</div>
 
+</div>
+<div class="modal fade bs-example-modal-sm" id="modalSamples" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div ng-repeat="music in musics">
+        <a class="samples" ng-click="loadRemoteSamples(music.musicName)">
+        {{music.musicName}}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
