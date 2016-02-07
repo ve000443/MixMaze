@@ -53,22 +53,12 @@
 
   <div class="col-lg-6">
     <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
+
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
     <button type="button" class="btn btn-primary" ng-click="openModal('modalMusic', 'ModalMusicCtrl')">Load Music...</button>
 
-    <!--<select id="selectedMusic">
-      <option ng-repeat="music in musics">
-        {{music.musicName}}
-      </option>
-    </select>
-
-    <button class="btn btn-primary" id="loadSamples" ng-click="loadRemoteSamples()">Load Samples</button>-->
     <button class="btn btn-primary" ng-click="loadLocalSamples()">Local Samples</button>
-    <!-- Button trigger modal -->
-    <!-- Small modal -->
-
-
 
     <!-- Split button -->
     <div class="btn-group" uib-dropdown dropdown-append-to-body>
@@ -86,11 +76,7 @@
       </ul>
     </div>
 
-    <button type="button" ng-if="progress !== null" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Available Mix</button>
-
-    <!--<select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
-      <option value="">&lt;Select a Mix&gt;</option>
-    </select>-->
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
   </div>
 
 
@@ -128,12 +114,6 @@
     <webaudio-knob id="filterLimiter" title="Limiter" sprites="30" src="img/fxknob2.png" step="0.1" min="0" max="10" value="0" width="40" height="40"></webaudio-knob>
   </div>
 </div>
-
-<style>
-  .track-selected{
-    background-color: #00b3ee;
-  }
-</style>
 
 <!-- WAVES -->
 <div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">
@@ -282,19 +262,6 @@
       <!--<webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>-->
     <!--</div>-->
 
-</div>
-
-<div class="modal fade bs-example-modal-lg" id="modalMix" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <label>Search: <input ng-model="searchText"></label>
-      <div ng-repeat="mix in listOfMix | filter:searchText">
-        <a ng-click="loadMix(mix)">
-        {{mix}}
-        </a>
-      </div>
-    </div>
-  </div>
 </div>
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>

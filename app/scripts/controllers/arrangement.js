@@ -55,9 +55,7 @@ angular.module('frontEndApp')
       $rootScope.progress = null;
       $rootScope.duration = 0;
 
-
       vm.isLoopingOnRegion = false;
-
 
       $rootScope.trackSelected = null;
       $rootScope.tracks = [];
@@ -528,10 +526,14 @@ angular.module('frontEndApp')
 
     $rootScope.deselectRegion = function(){
       if($rootScope.selectedRegion !== null){
-        $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-        $rootScope.selectedRegion = null;
-        $rootScope.selectedRegionName = "";
-        vm.isLoopingOnRegion = false;
+        try {
+          $rootScope.selectedRegion = null;
+          $rootScope.selectedRegionName = "";
+          vm.isLoopingOnRegion = false;
+          $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
+        } catch (ex){
+
+        }
       }
     };
 
@@ -638,6 +640,7 @@ angular.module('frontEndApp')
           wave.toggleInteraction();
         });
         $rootScope.progress = 0;
+        parseStorage();
 
         console.log(Math.ceil($rootScope.listOfWaves[0].getDuration()));
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
@@ -1121,7 +1124,6 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadMix = function(mixName) {
-      $('#modalMix').modal('hide');
       savePrevious();
       $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);

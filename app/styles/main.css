@@ -212,3 +212,7 @@ div {
 h4 {
   margin-bottom: 2px;
 }
+
+.track-selected{
+  background-color: #00b3ee;
+}
