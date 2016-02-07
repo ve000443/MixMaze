@@ -33,11 +33,11 @@ angular.module('frontEndApp')
           email: home.email,
           password: home.password
         };
-        home.http.get("http://localhost:8080/users/" + home.pseudo).then(
+        home.http.get("http://xythe.xyz:8080/users/" + home.pseudo).then(
           function successCallback(response) {
             home.userExists = (response.data !== "");
             if (!home.userExists) {
-              home.http.post('http://localhost:8080/users/', data).then(
+              home.http.post('http://xythe.xyz:8080/users/', data).then(
                 function successCallback(response) {
                   console.log(response);
                   $cookieStore.put("user", data.pseudo);
@@ -59,7 +59,7 @@ angular.module('frontEndApp')
     };
 
     home.connect = function(){
-      home.http.get("http://localhost:8080/users/"+home.pseudoConnection).then(
+      home.http.get("http://xythe.xyz:8080/users/"+home.pseudoConnection).then(
         function successCallback(response){
           var exists = (response.data !== "");
           var user = response.data;

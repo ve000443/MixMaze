@@ -100,7 +100,7 @@ angular.module('frontEndApp')
       //    $rootScope.listOfMix.push(key);
       //  }
       //});
-      $http.get("http://localhost:8080/mix/"+$rootScope.songName).then(
+      $http.get("http://xythe.xyz:8080/mix/"+$rootScope.songName).then(
         function successCallback(response){
           console.log(response);
           response.data.forEach(function (key){
@@ -969,7 +969,7 @@ angular.module('frontEndApp')
         var json = jsonifyRegions();
         var mix = {name : $rootScope.mixName, music: $rootScope.songName, data : json};
         //localStorage['MixMaze_' + $rootScope.mixName] = json;
-        $http.post('http://localhost:8080/mix/', mix).then(
+        $http.post('http://xythe.xyz:8080/mix/', mix).then(
           function successCallback(response) {
             console.log("mix stored");
             parseStorage();
