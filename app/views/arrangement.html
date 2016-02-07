@@ -48,12 +48,6 @@
   </div>
 </script>
 
-  <!--<button type="button" class="btn btn-default" ng-click="open()">Open me!</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="open('lg')">Large modal</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="open('sm')">Small modal</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="toggleAnimation()">Toggle Animation ({{ animationsEnabled }})</button>-->
-  <!--<div ng-show="selected">Selection from a modal: {{ selected }}</div>-->
-
 <!-- HEADER -->
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
@@ -174,6 +168,7 @@
 <!-- EFFECTS -->
 <div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="selectedRegion !== null">
   <div class="col-lg-12">&nbsp</div>
+
   <div class="col-lg-6">
     <button class="btn btn-primary">
       <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects()"> Effects</i>
@@ -202,7 +197,6 @@
     <div class="btn btn-primary" ng-click="deselectRegion()">Deselect &nbsp&nbsp<span class="shortcut" style="color:lightgray">Esc</span></div>
     <div class="btn btn-danger" ng-click="deleteRegion()">Remove &nbsp&nbsp<span class="shortcut" style="color:lightgray">Del</span></div>
   </div>
-
 </div>
 
 <!-- FOOTER LOADING -->

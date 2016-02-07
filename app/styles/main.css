@@ -147,6 +147,11 @@ div {
   padding-top:0.4em;
 }
 
+.simple{
+  margin:0;
+  padding:0;
+}
+
 .left{
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -167,6 +172,15 @@ div {
 
 .btn.active:hover{
   background-color: #2f5f2c;
+}
+
+.row{
+  border-radius: 10px;
+}
+
+.row:hover{
+  background-color: #48aaff;
+  color:white;
 }
 
 .debrief{

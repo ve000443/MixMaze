@@ -3,11 +3,11 @@
     <h3 class="modal-title">Select a music</h3>
   </div>
   <div class="modal-body">
-    <label>Search: <input type="text" ng-model="searchText" autofocus></label>
-    <div ng-repeat="music in musics | filter:searchText" style="cursor:pointer;">
-      <a class="samples" ng-click="loadRemoteSamples(music.musicName);ok()">
-        {{music.musicName}}
-      </a>
+    <div class="col-lg-2"><label>Search: </label></div>
+    <div class="col-lg-10"><input type="text" ng-model="searchText" autofocus style="width:100%;"></div>
+    <hr class="col-lg-12 simple" style="margin-bottom: 15px;margin-top: 15px">
+    <div class="simple jumbotron col-lg-12 row" ng-repeat="music in musics | filter:searchText" style="cursor:pointer;margin-bottom: 2px" ng-click="loadRemoteSamples(music.musicName);ok();">
+      <h4>{{music.musicName}}</h4>
     </div>
   </div>
 </div>
