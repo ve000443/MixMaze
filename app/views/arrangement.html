@@ -1,21 +1,6 @@
 <!-- Needed pour faire marcher les web components de cwilso -->
 <link rel="import" href="../scripts/components/controls.html" >
 
-<script type="text/ng-template" id="modalSave.html">
-  <div ng-keypress="keyPressed($event)">
-    <div class="modal-header">
-      <h3 class="modal-title">And thee name shall be ...</h3>
-    </div>
-    <div class="modal-body">
-      <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
-      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
-    </div>
-  </div>
-</script>
-
 <script type="text/ng-template" id="modalTrackEffects.html">
   <div class="modal-header">
     <h3 class="modal-title">Nom de la piste à mettre ici</h3>
@@ -63,12 +48,6 @@
   </div>
 </script>
 
-  <!--<button type="button" class="btn btn-default" ng-click="open()">Open me!</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="open('lg')">Large modal</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="open('sm')">Small modal</button>-->
-  <!--<button type="button" class="btn btn-default" ng-click="toggleAnimation()">Toggle Animation ({{ animationsEnabled }})</button>-->
-  <!--<div ng-show="selected">Selection from a modal: {{ selected }}</div>-->
-
 <!-- HEADER -->
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
@@ -76,7 +55,7 @@
     <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-sm">Available Samples</button>
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalMusic', 'ModalMusicCtrl')">Load Music...</button>
 
     <!--<select id="selectedMusic">
       <option ng-repeat="music in musics">
@@ -107,9 +86,11 @@
       </ul>
     </div>
 
-    <select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
+    <button type="button" ng-if="progress !== null" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Available Mix</button>
+
+    <!--<select ng-if="progress !== null" ng-model="selectedMix" ng-options="mix as mix.replace('MixMaze_', '') for mix in listOfMix" ng-change="loadMix(selectedMix)">
       <option value="">&lt;Select a Mix&gt;</option>
-    </select>
+    </select>-->
   </div>
 
 
@@ -187,6 +168,7 @@
 <!-- EFFECTS -->
 <div class="col-lg-12" style="height:10%;top:80%;position:fixed;background-color:lightblue;" ng-if="selectedRegion !== null">
   <div class="col-lg-12">&nbsp</div>
+
   <div class="col-lg-6">
     <button class="btn btn-primary">
       <i class="glyphicon glyphicon-edit" ng-click="openTrackEffects()"> Effects</i>
@@ -215,7 +197,6 @@
     <div class="btn btn-primary" ng-click="deselectRegion()">Deselect &nbsp&nbsp<span class="shortcut" style="color:lightgray">Esc</span></div>
     <div class="btn btn-danger" ng-click="deleteRegion()">Remove &nbsp&nbsp<span class="shortcut" style="color:lightgray">Del</span></div>
   </div>
-
 </div>
 
 <!-- FOOTER LOADING -->
@@ -302,19 +283,19 @@
     <!--</div>-->
 
 </div>
-<div class="modal fade bs-example-modal-sm" id="modalSamples" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-  <div class="modal-dialog modal-sm">
+
+<div class="modal fade bs-example-modal-lg" id="modalMix" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <label>Search: <input ng-model="searchText"></label>
-      <div ng-repeat="music in musics | filter:searchText">
-        <a class="samples" ng-click="loadRemoteSamples(music.musicName)">
-        {{music.musicName}}
+      <div ng-repeat="mix in listOfMix | filter:searchText">
+        <a ng-click="loadMix(mix)">
+        {{mix}}
         </a>
       </div>
     </div>
   </div>
 </div>
-
 <!--
 <webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
 <webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>

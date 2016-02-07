@@ -1,0 +1,12 @@
+<div ng-keypress="keyPressed($event)">
+  <div class="modal-header">
+    <h3 class="modal-title">And thee name shall be ...</h3>
+  </div>
+  <div class="modal-body">
+    <input type="text" ng-model="name" style="width:100%;" id="nameTextArea" autofocus>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+  </div>
+</div>
