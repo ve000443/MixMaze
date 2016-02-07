@@ -553,11 +553,11 @@ angular.module('frontEndApp')
     $rootScope.deselectRegion = function () {
       if ($rootScope.selectedRegion !== null) {
         try {
-          $rootScope.selectedRegion = null;
           $rootScope.selectedRegionName = "";
           vm.isLoopingOnRegion = false;
           $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-        } catch (ex) {
+          $rootScope.selectedRegion = null;
+        } catch (ex){
 
         }
       }
@@ -1148,7 +1148,7 @@ angular.module('frontEndApp')
       );
     };
 
-    // Modale for mix deletion
+    // Modale for mxix deletion
     $rootScope.deleteMixModal = function (size) {
 
       var modalInstance = $uibModal.open({
@@ -1230,6 +1230,20 @@ angular.module('frontEndApp')
       $rootScope.owner = $rootScope.mixOwner[mixName];
       $rootScope.loadRegions($rootScope.mixData[mixName]);
       //console.log(localStorage);
+    };
+
+    $rootScope.hasRights = function(level){
+      var res = false;
+      //noinspection FallThroughInSwitchStatementJS
+      switch(level){
+        case 0:
+              res = res || $rootScope.user.role === 'member';
+        case 1:
+              res = res || $rootScope.user.role === 'moderator';
+        default:
+              res = res || $rootScope.user.role === 'admin';
+      }
+      return res;
     };
 
     // <editor-fold desc="TOOLS">
