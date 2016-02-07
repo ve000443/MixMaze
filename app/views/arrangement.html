@@ -51,7 +51,18 @@
 <!-- HEADER -->
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
-  <div class="col-lg-6">
+  <div class="col-lg-12">
+    <!-- MENU -->
+    <div class="btn-group" uib-dropdown dropdown-append-to-body>
+      <button type="button" class="btn btn-success" uib-dropdown-toggle>
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+      </button>
+      <ul uib-dropdown-menu role="menu" style="cursor: pointer;">
+        <li role="menuitem" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')"><a><i class="glyphicon glyphicon-user"></i> Manage Users</a></li>
+        <li role="menuitem" ng-click="openModal('modalMixManagement', 'ModalMixManagementCtrl', null, undefined, undefined, 'lg')"><a><i class="glyphicon glyphicon-music"></i> Manage Mixes</a></li>
+      </ul>
+    </div>
+
     <button class="btn btn-primary" ng-click="saveRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-open"></i></button>
 
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
@@ -78,7 +89,7 @@
 
     <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
 
-    <button type="button" class="btn btn-primary" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')">Manage users</button>
+
   </div>
 </div>
 
