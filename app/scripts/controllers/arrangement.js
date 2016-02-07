@@ -307,18 +307,6 @@ angular.module('frontEndApp')
       ];
       $rootScope.songName = "Local mix";
       loadSamples();
-      for(var i = 0; i < $rootScope.listOfSound.length; i++) {
-        var trackEffects = {
-          'hardLimiterValue' : 2,
-          'delayTime' : 0,
-          'delayFeedbackGain' : 0,
-          'filterDetune' : 0,
-          'filterFrequency' : 0,
-          'filterGain' : 0
-        };
-        $rootScope.tracks.push(trackEffects);
-        console.log($rootScope.tracks[i]);
-      }
     };
 
     $rootScope.loadRemoteSamples = function(selectedMusic){
@@ -692,6 +680,16 @@ angular.module('frontEndApp')
           $rootScope.buffer += 1;
           checkReadiness();
           $rootScope.$digest();
+          // load effects values for each tracks
+          var trackEffects = {
+            'hardLimiterValue': 0,
+            'delayTime': 0,
+            'delayFeedbackGain': 0,
+            'filterDetune': 0,
+            'filterFrequency': 0,
+            'filterGain': 0
+          };
+          $rootScope.tracks.push(trackEffects);
         });
 
         $rootScope.listOfWaves[i].on('seek', function(progress){
