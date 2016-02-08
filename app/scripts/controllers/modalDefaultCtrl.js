@@ -1,4 +1,4 @@
-angular.module('frontEndApp').controller('ModalMusicCtrl', function ($scope, $uibModalInstance) {
+angular.module('frontEndApp').controller('ModalDefaultCtrl', function ($scope, $uibModalInstance) {
   $scope.ok = function () {
     $uibModalInstance.close();
   };

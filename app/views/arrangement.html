@@ -16,21 +16,6 @@
   </div>
 </script>
 
-<script type="text/ng-template" id="deleteMix.html">
-  <div ng-keypress="keyPressed($event)">
-    <div class="modal-header">
-      <h3 class="modal-title">Are you sure?</h3>
-    </div>
-    <div class="modal-body">
-      <span>Do you really want to delete this mix ?</span>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary btn-default" type="button" ng-click="ok()">OK</button>
-      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
-    </div>
-  </div>
-</script>
-
 <!-- HEADER -->
 <div class="col-lg-12" style="z-index:1000;height:10%;max-height: 10%;overflow: hidden;background-color: lightgrey;">
 
@@ -43,6 +28,8 @@
       <ul uib-dropdown-menu role="menu" style="cursor: pointer;">
         <li role="menuitem" ng-click="openModal('modalUser', 'ModalUserCtrl', null, undefined, undefined, 'lg')"><a><i class="glyphicon glyphicon-user"></i> Manage Users</a></li>
         <li role="menuitem" ng-click="openModal('modalMixManagement', 'ModalMixManagementCtrl', null, undefined, undefined, 'lg')"><a><i class="glyphicon glyphicon-music"></i> Manage Mixes</a></li>
+        <li class="divider"></li>
+        <li role="menuitem" ng-click="loadLocalSamples()"><a><i class="glyphicon glyphicon-floppy-disk"></i> Local Samples</a></li>
       </ul>
     </div>
 
@@ -50,18 +37,17 @@
 
     <button class="btn btn-primary" ng-click="loadRegions()" ng-disabled="progress === null"><i class="glyphicon glyphicon-floppy-save"></i></button>
 
-    <button type="button" class="btn btn-primary" ng-click="openModal('modalMusic', 'ModalMusicCtrl')">Load Music...</button>
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalMusic', 'ModalDefaultCtrl')">Load Music...</button>
 
-    <button class="btn btn-primary" ng-click="loadLocalSamples()">Local Samples</button>
+    <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalDefaultCtrl')" ng-if="progress !== null">Load Mix...</button>
 
     <!-- Split button -->
-    <div class="btn-group" uib-dropdown dropdown-append-to-body>
-      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()" ng-disabled="progress === null || user.role === 'guest'">
+    <div class="btn-group" uib-dropdown dropdown-append-to-body ng-if="hasRights(0) && progress !== null">
+      <button id="split-button" type="button" class="btn btn-danger" ng-click="saveAs()" ng-disabled="previous.length === 0;">
         <i class="glyphicon glyphicon-cloud-upload"></i>&nbspSave as...
       </button>
-      <button type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null || user.role === 'guest'">
+      <button type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="previous.length === 0;">
         <span class="caret"></span>
-        <span class="sr-only">Split button!</span>
       </button>
       <ul uib-dropdown-menu role="menu" aria-labelledby="split-button" style="cursor: pointer;">
         <li role="menuitem" ng-click="save()"><a>Save <span class="shortcut">Ctrl+S</span></a></li>
@@ -69,9 +55,8 @@
         <li role="menuitem" ng-click="clearStorage()"><a>Clear Storage</a></li>
       </ul>
     </div>
-    <button type="button" class="btn btn-primary" ng-click="openModal('modalMix', 'ModalMusicCtrl')" ng-if="progress !== null">Load Mix...</button>
 
-    <button ng-click="deleteMixModal()" ng-if="progress !== null" type="button" class="btn btn-danger" uib-dropdown-toggle ng-disabled="progress === null || user.role === 'guest' || user.name !== owner">
+    <button ng-click="deleteMixModal()" ng-if="progress !== null && (hasOwnership() || hasRights(1))" type="button" class="btn btn-danger" uib-dropdown-toggle>
       <i class="glyphicon glyphicon-trash"></i> Delete this mix
     </button>
 
@@ -94,7 +79,7 @@
 
 
 <!-- WAVES -->
-<div class="col-lg-12" style="overflow: auto; height:{{selectedRegion !== null ? '70' : '80'}}%;position: fixed;top:10%;">
+<div class="col-lg-12" style="overflow: auto;position: fixed;top:10%;" ng-style="{height:selectedRegion !== null || trackSelected !== null? '70%' : '80%'}">
   <div ng-repeat="track in listOfSound track by $index" class="col-lg-12" style="border:2px solid black; border-radius:10px;"
   ng-style="{'border-top':$index!==0?'0':'2px solid black'}">
     <div id="track{{$index}}" class="col-lg-1" data-ng-class="{'track-selected':trackSelected===$index}" style="border-radius:10px;border-right:2px solid black;height:128px;padding-right:0;margin-right:15px;margin-left:-15px;" ng-click="selectTrack($index)">
@@ -246,11 +231,11 @@
 
       <div class="col-lg-5">
         <!-- Panoramique -->
-        <div class="col-lg-6">
+        <div class="col-lg-6 simple">
           <webaudio-knob id="panGeneral" title="Pan" sprites="30" src="img/fxknob2.png" min="-100" max="100" value="0" width="40" height="40"></webaudio-knob>
         </div>
         <!-- Volume Knob -->
-        <div class="col-lg-6">
+        <div class="col-lg-6 simple">
           <webaudio-knob id="sliderGeneral" title="Volume" src="img/knob_med_red.png" sprites="30" min="0" max="100" value="{{generalVolume}}" width="50" height="50" ng-mousemove=""></webaudio-knob>
         </div>
       </div>
@@ -259,8 +244,8 @@
     <!-- PROGRESS -->
     <div class="col-lg-7" style="padding: 0;">
       <div class="col-lg-12">
-        <div class="col-lg-10"><h4 style="font-weight: bolder;">{{songName}}</h4></div>
-        <div class="col-lg-2" style="text-align: right"><h4>{{timeFormat(progress)}} / {{timeFormat(duration)}}</h4></div>
+        <div class="col-lg-9"><h4 style="font-weight: bolder;">{{songName}}<span style="font-style:italic; color: cadetblue" ng-if="mixName !== ''"> - {{mixName}}</span></h4></div>
+        <div class="col-lg-3" style="text-align: right"><h4>{{timeFormat(progress)}} / {{timeFormat(duration)}}</h4></div>
       </div>
       <div class="col-lg-12">
         <uib-progressbar class="progress-striped active" value="progress" max="duration"></uib-progressbar>
@@ -268,9 +253,10 @@
     </div>
 
 
-      <div class="col-lg-2 rating noselect" >
+      <div class="col-lg-2 rating noselect" ng-if="mixName !== ''">
+        <h4 class="simple">{{hasOwnership() ? 'Your rating :' : 'Rate it :'}}</h4>
         <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="false" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
-        <uib-rating style="font-size: x-small" ng-click="noteMix(rate)" ng-model="rate" max="max" readonly="isReadonly" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress !== null && mixName != null"></uib-rating>
+        <uib-rating style="font-size: x-small" ng-click="noteMix(rate)" ng-model="rate" max="max" readonly="!hasRights(0) || hasOwnership()" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress !== null && mixName != null"></uib-rating>
       </div>
 
 

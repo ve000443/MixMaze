@@ -189,14 +189,8 @@ div {
 }
 
 .rating span i{
-  font-size:50px;
+  font-size: 3em;
   color:goldenrod;
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;    /* Konqueror */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* IE/Edge */
-  user-select: none;
 }
 
 .noselect {

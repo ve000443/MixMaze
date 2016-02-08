@@ -68,14 +68,7 @@ angular.module('frontEndApp')
 
       $rootScope.rate = 0;
       $rootScope.max = 5;
-      if($rootScope.user.name === null){
-        $rootScope.isReadonly = true;
-      }
-      else{
-        $rootScope.isReadonly = false;
-      }
-
-    };
+    }
 
     initVar();
 
@@ -94,7 +87,6 @@ angular.module('frontEndApp')
         console.log("not connected");
       }
       else{
-
         var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
         $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
           function successCallback(response) {
@@ -121,7 +113,6 @@ angular.module('frontEndApp')
             console.log("Error : " + response);
           }
         );
-
       }
     };
 
@@ -218,13 +209,13 @@ angular.module('frontEndApp')
       $rootScope.listOfMix = [];
     };
 
+    // <editor-fold desc="KNOB EFFECTS">
     $rootScope.selectTrack = function (index) {
       $rootScope.deselectRegion();
       $rootScope.trackSelected = index;
-      console.log("track selected : " + $rootScope.trackSelected);
-      console.log($rootScope.tracks);
-      console.log($rootScope.tracks[$rootScope.trackSelected]);
-      // <editor-fold desc="KNOB EFFECTS MARCOOOOOOOOOO">
+      //console.log("track selected : " + $rootScope.trackSelected);
+      //console.log($rootScope.tracks);
+      //console.log($rootScope.tracks[$rootScope.trackSelected]);
 
       $timeout(function () {
 
@@ -415,14 +406,14 @@ angular.module('frontEndApp')
       $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
         function successCallback(response) {
           $rootScope.songName = selectedMusic;
-          console.log(selectedMusic);
-          console.log(response.data);
+          //console.log(selectedMusic);
+          //console.log(response.data);
 
           $rootScope.pistes = response.data.musicFiles;
           parseStorage();
           $rootScope.pistes.forEach(function (p) {
             $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
-            console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
+            //console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
 
           loadSamples();
@@ -946,7 +937,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.updateSm = function (track, value) {
-      console.log($rootScope.listOfWaves[track].isMuted);
+      //console.log($rootScope.listOfWaves[track].isMuted);
       if (value == 'solo' && $rootScope.nbSolo == 0 && $rootScope.smState[track] != 'solo') {
         $rootScope.smState[track] = 'solo';
         $rootScope.nbSolo++;
@@ -1126,12 +1117,12 @@ angular.module('frontEndApp')
       //localStorage['MixMaze_' + $rootScope.mixName] = json;
       $http.post('http://xythe.xyz:8080/mix/', mix).then(
         function successCallback(response) {
-          console.log("mix stored");
+          //console.log("mix stored");
           parseStorage();
         }, function errorCallback(response) {
           console.log("Error : " + response);
         });
-    }
+    };
 
     // <editor-fold desc="SAVE">
     $rootScope.save = function () {
@@ -1144,36 +1135,13 @@ angular.module('frontEndApp')
 
     /** MODAL */
     $rootScope.saveAs = function () {
-
-      //var modalInstance = $uibModal.open({
-      //  animation: true,
-      //  templateUrl: 'modalSave.html',
-      //  controller: 'ModalInstanceCtrl',
-      //  size: size,
-      //  resolve: {
-      //    items: function () {
-      //      return $rootScope.mixName;
-      //    }
-      //  }
-      //});
-
-      //modalInstance.result.then(function (name) {
-      //  $rootScope.mixName = name;
-      //  var json = jsonifyRegions();
-      //  var mix = {userRole : $rootScope.user.role, owner: $rootScope.user.name, name : $rootScope.mixName, music: $rootScope.songName, data : json};
-      //  //localStorage['MixMaze_' + $rootScope.mixName] = json;
-      //  $http.post('http://localhost:8080/mix/', mix).then(
-      //    function successCallback(response) {
-      //      console.log("mix stored");
-      //      parseStorage();
-      //    }, function errorCallback(response) {
-      //      console.log("Error : " + response);
-      //    }
-      //  );
       var thenFct = function (name) {
         $rootScope.hasModalOpen = false;
         $rootScope.mixName = name;
+        $rootScope.owner = $rootScope.user.name;
+        $rootScope.rate = 0;
         $rootScope.storeMixInDatabase(name);
+        $rootScope.hasModalOpen = false;
       };
 
       var resolve = {
@@ -1182,10 +1150,7 @@ angular.module('frontEndApp')
         }
       };
 
-      $rootScope.openModal('modalSave', 'ModalInstanceCtrl', resolve, thenFct);
-      //}, function () {
-      //  $log.info('Modal dismissed at: ' + new Date());
-      //});
+      $rootScope.openModal('modalSave', 'ModalSaveCtrl', resolve, thenFct);
     };
 
     $rootScope.openModal = function (template, controller, resolve, thenFct, otherwiseFct, size) {
@@ -1222,32 +1187,23 @@ angular.module('frontEndApp')
 
     // Modale for mxix deletion
     $rootScope.deleteMixModal = function (size) {
-
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'deleteMix.html',
-        controller: 'ModalInstanceCtrl',
-        size: size,
-        resolve: {
-          items: function () {
-            return $rootScope.mixName;
-          }
-        }
-      });
-
-      modalInstance.result.then(function (name) {
-        $rootScope.mixName = name;
+      var thenFct = function(){
         $rootScope.deleteMix();
-      }, function () {
-        //$log.info('Modal dismissed at: ' + new Date());
-      });
+      };
+      $rootScope.openModal('modalDeleteMix', 'ModalDefaultCtrl', null, thenFct());
     };
 
-    $rootScope.deleteMix = function () {
-      $http.delete('http://xythe.xyz:8080/mix/' + $rootScope.mixName + '/' + $rootScope.user.name).then(
+    $rootScope.deleteMix = function (mixName) {
+      mixName = mixName === undefined ? $rootScope.mixName : mixName;
+      $http.delete('http://xythe.xyz:8080/mix/' + mixName + '/' + $rootScope.user.name).then(
         function successCallback(response) {
           console.log("mix deleted");
           parseStorage();
+          if(mixName === $rootScope.mixName) {
+            $rootScope.mixName = '';
+            $rootScope.owner = '';
+            $rootScope.rating = 0;
+          }
         }, function errorCallback(response) {
           console.log("Error : " + response);
         }
@@ -1299,7 +1255,6 @@ angular.module('frontEndApp')
     };
 
     $rootScope.loadMix = function(mixName) {
-      $rootScope.mixName = mixName;
       savePrevious();
       $rootScope.mixName = mixName;
       $rootScope.owner = $rootScope.mixOwner[mixName];
@@ -1320,6 +1275,10 @@ angular.module('frontEndApp')
               res = res || $rootScope.user.role === 'admin';
       }
       return res;
+    };
+
+    $rootScope.hasOwnership = function(){
+      return $rootScope.user.name === $rootScope.owner;
     };
 
     // <editor-fold desc="TOOLS">
@@ -1361,18 +1320,3 @@ angular.module('frontEndApp')
     // </editor-fold>
   });
 
-angular.module('frontEndApp').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items) {
-  $scope.name = items;
-
-  $scope.ok = function () {
-    $uibModalInstance.close($scope.name);
-  };
-
-  $scope.cancel = function () {
-    $uibModalInstance.dismiss('cancel');
-  };
-
-  $scope.keyPressed = function(evt){
-    if(evt.keyCode === 13) $scope.ok();
-  };
-});
