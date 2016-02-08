@@ -3,6 +3,8 @@
 
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
+    var local = false;
+    $rootScope.endpoint = 'http://' + (local ? "localhost" : "xythe.xyz") + ':8080';
 
     // TOGGLERS
     $rootScope.hasModalOpen = false;
@@ -73,7 +75,7 @@ angular.module('frontEndApp')
     initVar();
 
     $rootScope.noteMix = function(mixName){
-      $http.get('http://xythe.xyz:8080/star/' + mixName).then(
+      $http.get($rootScope.endpoint + '/star/' + mixName).then(
         function successCallback(response) {
 
         }, function errorCallback(response) {
@@ -88,11 +90,11 @@ angular.module('frontEndApp')
       }
       else{
         var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
-        $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
+        $http.get($rootScope.endpoint + '/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
           function successCallback(response) {
             console.log(response.data);
             if(response.data.length === 0){
-              $http.post('http://xythe.xyz:8080/star', star).then(
+              $http.post($rootScope.endpoint + '/star', star).then(
                 function successCallback(response) {
                   console.log("star added");
                 }, function errorCallback(response) {
@@ -101,7 +103,7 @@ angular.module('frontEndApp')
               );
             }
             else{
-              $http.put('http://xythe.xyz:8080/star', star).then(
+              $http.put($rootScope.endpoint + '/star', star).then(
                 function successCallback(response) {
                   console.log("star modified");
                 }, function errorCallback(response) {
@@ -179,7 +181,7 @@ angular.module('frontEndApp')
             $rootScope.mixData[key.name] = key.data;
             $rootScope.mixOwner[key.name] = key.owner;
 
-              $http.get('http://xythe.xyz:8080/star/' + key.name).then(
+              $http.get($rootScope.endpoint + '/star/' + key.name).then(
                 function successCallback(response) {
                   var valueStar = 0;
                   response.data.forEach(function (mix){
@@ -1115,7 +1117,7 @@ angular.module('frontEndApp')
         data: json
       };
       //localStorage['MixMaze_' + $rootScope.mixName] = json;
-      $http.post('http://xythe.xyz:8080/mix/', mix).then(
+      $http.post($rootScope.endpoint + '/mix/', mix).then(
         function successCallback(response) {
           //console.log("mix stored");
           parseStorage();
@@ -1175,7 +1177,7 @@ angular.module('frontEndApp')
       console.log($rootScope.user.name);
       var mix = {owner: $rootScope.user.name, name: name, music: $rootScope.songName, data: json};
 
-      $http.put('http://xythe.xyz:8080/mix/', mix).then(
+      $http.put($rootScope.endpoint + '/mix/', mix).then(
         function successCallback(response) {
           console.log("mix updated");
           parseStorage();
@@ -1202,7 +1204,7 @@ angular.module('frontEndApp')
 
     $rootScope.deleteMix = function (mixName) {
       mixName = mixName === undefined ? $rootScope.mixName : mixName;
-      $http.delete('http://xythe.xyz:8080/mix/' + mixName + '/' + $rootScope.user.name).then(
+      $http.delete($rootScope.endpoint + '/mix/' + mixName + '/' + $rootScope.user.name).then(
         function successCallback(response) {
           console.log("mix deleted");
           parseStorage();
