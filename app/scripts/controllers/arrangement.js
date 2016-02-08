@@ -728,7 +728,7 @@ angular.module('frontEndApp')
           $rootScope.$digest();
           // load effects values for each tracks
           var trackEffects = {
-            'hardLimiterValue': 5,
+            'hardLimiterValue': 0,
             'delayTime': 0,
             'delayFeedbackGain': 0,
             'filterDetune': 0,
