@@ -31,7 +31,7 @@ var starSchema = {
     mixName: String,
     userName: String,
     star: Number
-}
+};
 
 var User = mongoose.model('User', userSchema, 'user');
 var Music = mongoose.model('Music', musicSchema, 'music');
@@ -77,7 +77,7 @@ app.use(bodyParser.json());
 
 app.get("/users", function(req, res){
     User.find(function (error, results) {
-        if (error) throw error
+        if (error) throw error;
         else{
             res.statusCode = 200;
             res.send(results);
@@ -225,24 +225,20 @@ app.post("/mix", function(req, res){
     });
 });
 
-app.delete("/mix/:mixname/:owner", function(req, res){
-    var query  = User.where({ pseudo: req.params.owner });
-    query.findOne(function (err, user) {
-        if (err) throw err;
-        if(user.role === "member" || user.role === "moderator" || user.role === "admin" && user.role !== undefined){
-            var query  = Mix.where({ name: req.params.mixname, owner: req.params.owner });
-            query.findOne(function(err, mix){
-                console.log(mix);
-                if(err || mix === null) res.sendStatus(403);
-                else{
-                    mix.remove();
-                    res.sendStatus(200);
-                }
-            });
+app.delete("/mix/:mixname/:user", function(req, res){
+    var userQ  = User.where({ pseudo: req.params.user });
+    var mixQ  = Mix.where({ name: req.params.mixname });
+    userQ.findOne(function(err, user){
+      if(err) throw err;
+      mixQ.findOne(function(err, mix){
+        if(mix === null || user === null) res.sendStatus(404);
+        else if (mix.owner === user.name || user.role === 'moderator' || user.role==='admin'){
+          mix.remove();
+          res.sendStatus(200);
+        } else {
+          res.sendStatus(403);
         }
-        else{
-            res.sendStatus(403);
-        }
+      });
     });
 });
 
