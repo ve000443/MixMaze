@@ -137,18 +137,21 @@ app.put("/users", function(req, res){
     });
 });
 
-app.delete("/users/:applicant/:pseudo", function(req, res){
-    var applicant = req.params.applicant;
+app.delete("/users/:pseudo/:applicant", function(req, res){
+    var applicantQ = User.where({pseudo: req.params.applicant});
     var query  = User.where({ pseudo: req.params.pseudo });
     query.findOne(function (err, user) {
         if (err) throw err;
-        if(applicant === "admin" && applicant !== undefined){
-            user.remove();
-            res.sendStatus(200);
+      applicantQ.findOne(function(err, applicant){
+        if (err) throw err;
+        if(applicant.role === "admin" || applicant.role === "moderator"){
+          user.remove();
+          res.sendStatus(200);
         }
         else{
-            res.sendStatus(403);
+          res.sendStatus(403);
         }
+      });
     });
 });
 

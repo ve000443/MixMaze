@@ -1064,15 +1064,24 @@ angular.module('frontEndApp')
       );
     };
 
-    // Modale for mxix deletion
+    // Modale for mix deletion
     $rootScope.deleteMixModal = function (mixName) {
+      $rootScope.openModalDelete('mix', mixName);
+    };
+
+    $rootScope.openModalDeleteUser = function (name) {
+      $rootScope.openModalDelete('user', name);
+    };
+
+    $rootScope.openModalDelete = function (targetType, name){
       var thenFct = function(name){
-        $rootScope.deleteMix(name);
+        if(targetType === 'user') $rootScope.deleteUser(name);
+        else  $rootScope.deleteMix(name);
       };
 
       var resolve = {
-        items: function () {
-          return mixName === undefined ? $rootScope.mixName : mixName;
+        items: function(){
+          return name === undefined ? (targetType === 'user' ? $rootScope.user.name : $rootScope.mixName) : name;
         }
       };
 
@@ -1090,6 +1099,17 @@ angular.module('frontEndApp')
             $rootScope.owner = '';
             $rootScope.rating = 0;
           }
+        }, function errorCallback(response) {
+          console.log("Error : " + response);
+        }
+      );
+    };
+
+    $rootScope.deleteUser = function(name){
+      if(name === undefined) return;
+      $http.delete($rootScope.endpoint + '/users/' + name + '/' + $rootScope.user.name).then(
+        function successCallback(response) {
+          console.log("user deleted");
         }, function errorCallback(response) {
           console.log("Error : " + response);
         }

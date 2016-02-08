@@ -56,7 +56,7 @@
       </ul>
     </div>
 
-    <button ng-click="deleteMixModal()" ng-if="progress !== null && (hasOwnership() || hasRights(1))" type="button" class="btn btn-danger" uib-dropdown-toggle>
+    <button ng-click="deleteMixModal()" ng-if="(progress !== null && mixName !== '') && (hasOwnership() || hasRights(1))" type="button" class="btn btn-danger" uib-dropdown-toggle>
       <i class="glyphicon glyphicon-trash"></i> Delete this mix
     </button>
 
