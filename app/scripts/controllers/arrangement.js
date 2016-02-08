@@ -169,11 +169,6 @@ angular.module('frontEndApp')
     // TODO : Change to match the song
     function parseStorage() {
       $rootScope.listOfMix = [];
-      //Object.keys(localStorage).forEach(function(key){
-      //  if(key.indexOf("MixMaze_") > -1){
-      //    $rootScope.listOfMix.push(key);
-      //  }
-      //});
       $http.get("http://xythe.xyz:8080/mix/" + $rootScope.songName).then(
         function successCallback(response) {
           response.data.forEach(function (key) {
@@ -215,9 +210,6 @@ angular.module('frontEndApp')
     $rootScope.selectTrack = function (index) {
       $rootScope.deselectRegion();
       $rootScope.trackSelected = index;
-      //console.log("track selected : " + $rootScope.trackSelected);
-      //console.log($rootScope.tracks);
-      //console.log($rootScope.tracks[$rootScope.trackSelected]);
 
       $timeout(function () {
 
@@ -336,9 +328,6 @@ angular.module('frontEndApp')
       if ($rootScope.trackSelected !== null) {
         try {
           $rootScope.trackSelected = null;
-          /*
-           $rootScope.selectedRegion.element.className = $rootScope.selectedRegion.element.className.replace(' selected', '');
-           */
         } catch (ex) {
 
         }
@@ -369,12 +358,9 @@ angular.module('frontEndApp')
         $rootScope.musics.forEach(function (o) {
         });
 
-        // this callback will be called asynchronously
-        // when the response is available
       }, function errorCallback(response) {
         console.error;
-        // called asynchronously if an error occurs
-        // or server returns response with an error status
+
       });
 
     function loadSamples() {
@@ -384,17 +370,6 @@ angular.module('frontEndApp')
 
       loadAllSoundSamples();
     }
-
-    $rootScope.loadLocalSamples = function () {
-      $rootScope.listOfSound = [];
-      $rootScope.listOfSound = [
-        'tracks/synth.mp3',
-        'tracks/vocal.mp3',
-        'tracks/drums.mp3'
-      ];
-      $rootScope.songName = "Local mix";
-      loadSamples();
-    };
 
     $rootScope.loadRemoteSamples = function (selectedMusic) {
       $rootScope.stopAllTracks();
@@ -408,37 +383,26 @@ angular.module('frontEndApp')
       $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
         function successCallback(response) {
           $rootScope.songName = selectedMusic;
-          //console.log(selectedMusic);
-          //console.log(response.data);
 
           $rootScope.pistes = response.data.musicFiles;
           parseStorage();
           $rootScope.pistes.forEach(function (p) {
             $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
-            //console.log("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
           });
 
           loadSamples();
-          // this callback will be called asynchronously
-          // when the response is available
         }, function errorCallback(response) {
           console.error;
-          // called asynchronously if an error occurs
-          // or server returns response with an error status
         });
 
     };
 
     function loadAllSoundSamples() {
-      // onSamplesDecoded will be called when all samples
-      // have been loaded and decoded, and the decoded sample will
-      // be its only parameter (see function above)
       bufferLoader = new BufferLoader(
         ctx,
         $rootScope.listOfSound
       );
 
-      // start loading and decoding the files
       bufferLoader.load();
     }
 
@@ -583,14 +547,10 @@ angular.module('frontEndApp')
             default:
           }
         });
-        //console.log($rootScope.activeEffects[key]);
       });
       $rootScope.$digest();
     }
 
-    // </editor-fold>
-
-    // <editor-fold desc="REGIONS">
     function undo() {
       if ($rootScope.previous.length === 0) return;
       $rootScope.next.push(jsonifyRegions());
@@ -723,7 +683,6 @@ angular.module('frontEndApp')
       });
       isTracking = true;
     };
-    // </editor-fold>
 
     function checkReadiness() {
       if ($rootScope.buffer === $rootScope.listOfSound.length) {
@@ -743,12 +702,6 @@ angular.module('frontEndApp')
         $rootScope.smState[i] = null;
       }
 
-      /*var biquadFilter = $rootScope.listOfWaves[1].backend.ac.createBiquadFilter();
-       biquadFilter.type = "lowshelf";
-       biquadFilter.frequency.value = 1000;
-       biquadFilter.gain.value = 25;
-       console.log(biquadFilter);
-       $rootScope.listOfWaves[1].backend.setFilter(biquadFilter);*/
     };
 
     $rootScope.initWaves = function () {
@@ -833,10 +786,7 @@ angular.module('frontEndApp')
 
         $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
           e.stopPropagation();
-          // Play on click, loop on shift click
-          //e.shiftKey ? region.playLoop() : region.play();
         });
-        //$rootScope.wavesurfer.on('region-click', editAnnotation);
 
         $rootScope.listOfWaves[i].on('region-updated', function (region, e) {
           if (!isMoving && (!isCreating || hasClicked)) {
@@ -864,16 +814,11 @@ angular.module('frontEndApp')
         $rootScope.listOfWaves[i].on('region-in', activateEffects);
         $rootScope.listOfWaves[i].on('region-out', deactivateEffects);
 
-        //$rootScope.wavesurfer.on('region-removed', saveRegions);
-        //$rootScope.wavesurfer.on('region-in', showNote);
-
         $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
 
-        //$rootScope.listOfWaves.push($rootScope.wavesurfer);
       }
     };
 
-    // <editor-fold desc="TRACKS MANIPULATION">
     $rootScope.playAllTracks = function () {
       for (var i = 0; i < $rootScope.listOfWaves.length; i++) {
         $rootScope.listOfWaves[i].playPause();
@@ -927,19 +872,15 @@ angular.module('frontEndApp')
     $rootScope.updateAllTracksVolume = function (value) {
       $rootScope.generalVolume = value;
       for (var i = 0; i < $rootScope.listOfWaves.length; i++) {
-        // gerer le volume
         $rootScope.updateTrackVolume(i);
       }
     };
-    // </editor-fold>
 
-    // <editor-fold desc="SOLO/MUTE">
     $rootScope.mute = function (track) {
       $rootScope.listOfWaves[track].toggleMute();
     };
 
     $rootScope.updateSm = function (track, value) {
-      //console.log($rootScope.listOfWaves[track].isMuted);
       if (value == 'solo' && $rootScope.nbSolo == 0 && $rootScope.smState[track] != 'solo') {
         $rootScope.smState[track] = 'solo';
         $rootScope.nbSolo++;
@@ -999,59 +940,14 @@ angular.module('frontEndApp')
         }
       }
     };
-    // </editor-fold>
 
-    // <editor-fold desc="PANNER">
     $rootScope.updatePan = function (track, value) {
 
       console.log("updatePan(" + track + "," + value + ")");
-      /*// Add panner
-       $rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
-       $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
 
-       // Bind panner slider
-       // @see http://stackoverflow.com/a/14412601/352796
-       var onChange = function () {
-       var xDeg = parseInt(slider.value);
-       var x = Math.sin(xDeg * (Math.PI / 180));
-       $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
-       };
-       var slider = document.querySelector('[data-action="pan"]');
-       slider.addEventListener('input', onChange);
-       slider.addEventListener('change', onChange);
-       onChange();*/
     };
 
-    // Panner
-    /*(function () {
-     // Add panner
-     $rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
-     $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
 
-     // Bind panner slider
-     // @see http://stackoverflow.com/a/14412601/352796
-     var onChange = function () {
-     var xDeg = parseInt(slider.value);
-     var x = Math.sin(xDeg * (Math.PI / 180));
-     $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
-     };
-     var slider = document.querySelector('[data-action="pan"]');
-     slider.addEventListener('input', onChange);
-     slider.addEventListener('change', onChange);
-     onChange();
-     }());*/
-
-    // Add panner
-    /*$rootScope.wavesurfer.panner = $rootScope.wavesurfer.backend.ac.createPanner();
-     $rootScope.wavesurfer.backend.setFilter($rootScope.wavesurfer.panner);
-
-     var pan1 = document.getElementById('pan1');
-     pan1.addEventListener('change', function(e){
-     console.log(e.target.value);
-     var xDeg = parseInt(pan1.value);
-     var x = Math.sin(xDeg * (Math.PI / 180));
-     $rootScope.wavesurfer.panner.setPosition(x, 0, 0);
-     });*/
 
     nx.onload = function () {
 
@@ -1059,36 +955,19 @@ angular.module('frontEndApp')
       nx.colorize("border", "#bbb");
       nx.colorize("fill", "#eee");
 
-      /*slider1.on('*', function (data) {
-       var value = data.value / 100;
-       $rootScope.updateVolume(1, value);
-       });
-       slider1.set({
-       value: 80
-       });
 
-       solo.on('*', function (data) {
-       console.log(data.value);
-       });
-
-       mute.on('*', function (data) {
-       console.log(data.value);
-       });*/
 
     };
-    // </editor-fold>
 
     var knobs = document.getElementsByTagName('webaudio-knob');
     for (var i = 0; i < knobs.length; i++) {
       var knob = knobs[i];
       knob.addEventListener('change', function (e) {
-        //console.log(e.target.value);
       });
     }
 
     var sliderGeneral = document.getElementById('sliderGeneral');
     sliderGeneral.addEventListener('change', function (e) {
-      //console.log("volume general : " + e.target.value);
       var value = e.target.value;
       $rootScope.updateAllTracksVolume(value);
     });
@@ -1116,10 +995,8 @@ angular.module('frontEndApp')
         music: $rootScope.songName,
         data: json
       };
-      //localStorage['MixMaze_' + $rootScope.mixName] = json;
       $http.post($rootScope.endpoint + '/mix/', mix).then(
         function successCallback(response) {
-          //console.log("mix stored");
           parseStorage();
         }, function errorCallback(response) {
           console.log("Error : " + response);
@@ -1234,7 +1111,6 @@ angular.module('frontEndApp')
         if(!fromRedo) $rootScope.next = [];
       }
     }
-    // </editor-fold>
 
     $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
       var defaultFct = function(){
@@ -1326,6 +1202,5 @@ angular.module('frontEndApp')
     function isSelected(region){
       return region.id === $rootScope.selectedRegionName;
     }
-    // </editor-fold>
   });
 

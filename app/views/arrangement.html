@@ -255,26 +255,7 @@
 
       <div class="col-lg-2 rating noselect" ng-if="mixName !== ''">
         <h4 class="simple">{{hasOwnership() ? 'Your rating :' : 'Rate it :'}}</h4>
-        <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="false" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
         <uib-rating style="font-size: x-small" ng-click="noteMix(rate)" ng-model="rate" max="max" readonly="!hasRights(0) || hasOwnership()" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress !== null && mixName != null"></uib-rating>
       </div>
 
-
-    <!-- TODO : Move to top frame-->
-    <!--<div class="col-lg-3 rating noselect">-->
-      <!--<uib-rating class="noselect" ng-model="rate" max="5" readonly="progress === null" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress!==null"></uib-rating>-->
-    <!--</div>-->
-
-    <!--<div class="col-lg-1">-->
-      <!--<webaudio-switch src="img/redbutton.png" sprites="2" width="64" height="64"></webaudio-switch>-->
-    <!--</div>-->
-
 </div>
-<!--
-<webaudio-knob src="img/LittlePhatty.png" sprites="100" min="0" max="100"></webaudio-knob>
-<webaudio-knob sprites="100" min="0" max="100"></webaudio-knob>
-<webaudio-slider src="img/hsliderbody.png"></webaudio-slider>
-<webaudio-switch src="img/switch_toggle.png" width="32" height="32"></webaudio-switch>
-<webaudio-param src="" link="knob-1"></webaudio-param>
-<webaudio-keyboard keys="25" ></webaudio-keyboard>
--->
