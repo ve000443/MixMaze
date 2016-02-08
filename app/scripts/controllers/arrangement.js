@@ -154,6 +154,7 @@ angular.module('frontEndApp')
           break;
         // SPACE
         case 32:
+          jsonifyTrackEffects();
           evt.preventDefault();
           break;
         // BACKSPACE
@@ -553,10 +554,11 @@ angular.module('frontEndApp')
 
     function undo() {
       if ($rootScope.previous.length === 0) return;
-      $rootScope.next.push(jsonifyRegions());
+      $rootScope.next.push(jsonify());
       $rootScope.deselectRegion();
       var previousState = $rootScope.previous.pop();
-      $rootScope.loadRegions(previousState);
+      //$rootScope.loadRegions(previousState);
+      loadAllEffects(previousState);
     }
 
     function redo() {
@@ -564,7 +566,8 @@ angular.module('frontEndApp')
       savePrevious(true);
       $rootScope.deselectRegion();
       var nextState = $rootScope.next.pop();
-      $rootScope.loadRegions(nextState);
+      //$rootScope.loadRegions(nextState);
+      loadAllEffects(nextState);
     }
 
     function selectRegion(region) {
@@ -617,6 +620,44 @@ angular.module('frontEndApp')
     $rootScope.hasEffect = function (effect) {
       if ($rootScope.effects[$rootScope.selectedRegionName] !== undefined)
         return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
+    };
+
+    function jsonify(){
+      var res = {};
+      res.tracks = JSON.parse(jsonifyTrackEffects());
+      res.regions = JSON.parse(jsonifyRegions());
+      return JSON.stringify(res);
+    }
+
+    function loadAllEffects(state){
+      state = state === undefined ? JSON.parse($rootScope.mixData) : JSON.parse(state);
+
+      $rootScope.loadTrackEffects(state.tracks);
+      $rootScope.loadRegions(state.regions);
+    }
+
+    function jsonifyTrackEffects(){
+      var res = [];
+      $rootScope.tracks.forEach(function(track){
+        res.push(track);
+      });
+      console.log(res);
+      return JSON.stringify(res);
+    }
+
+    $rootScope.loadTrackEffects = function(effects){
+      if (typeof effects === 'string')
+        effects = JSON.parse(effects);
+
+      $rootScope.tracks = effects;
+      if($rootScope.trackSelected !== null ){
+        document.getElementById('filterLimiter').setValue($rootScope.tracks[$rootScope.trackSelected].hardLimiterValue);
+        document.getElementById('delayTime').setValue($rootScope.tracks[$rootScope.trackSelected].delayTime);
+        document.getElementById('feedbackGain').setValue($rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain);
+        document.getElementById('filterDetune').setValue($rootScope.tracks[$rootScope.trackSelected].filterDetune);
+        document.getElementById('filterFrequency').setValue($rootScope.tracks[$rootScope.trackSelected].filterFrequency);
+        document.getElementById('filterGain').setValue($rootScope.tracks[$rootScope.trackSelected].filterGain);
+      }
     };
 
     function jsonifyRegions() {
@@ -988,7 +1029,8 @@ angular.module('frontEndApp')
 
     $rootScope.storeMixInDatabase = function (name) {
       $rootScope.mixName = name;
-      var json = jsonifyRegions();
+      //var json = jsonifyRegions();
+      var json = jsonify();
       var mix = {
         owner: $rootScope.user.name,
         name: $rootScope.mixName,
@@ -1050,7 +1092,8 @@ angular.module('frontEndApp')
     };
 
     $rootScope.updateMix = function (name) {
-      var json = jsonifyRegions();
+      //var json = jsonifyRegions();
+      var json = jsonify();
       console.log($rootScope.user.name);
       var mix = {owner: $rootScope.user.name, name: name, music: $rootScope.songName, data: json};
 
@@ -1127,7 +1170,8 @@ angular.module('frontEndApp')
 
     function savePrevious(fromRedo){
       if (isTracking) {
-        $rootScope.previous.push(jsonifyRegions());
+        //$rootScope.previous.push(jsonifyRegions());
+        $rootScope.previous.push(jsonify());
         if(!fromRedo) $rootScope.next = [];
       }
     }
@@ -1163,7 +1207,8 @@ angular.module('frontEndApp')
       savePrevious();
       $rootScope.mixName = mixName;
       $rootScope.owner = $rootScope.mixOwner[mixName];
-      $rootScope.loadRegions($rootScope.mixData[mixName]);
+      //$rootScope.loadRegions($rootScope.mixData[mixName]);
+      loadAllEffects($rootScope.mixData[mixName]);
       $rootScope.rate = $rootScope.mixStar[mixName];
       //console.log(localStorage);
     };
