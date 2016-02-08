@@ -1250,6 +1250,8 @@ angular.module('frontEndApp')
       $cookieStore.put('role', undefined);
       $rootScope.user.name = null;
       $rootScope.user.role = 'guest';
+      $rootScope.stopAllTracks();
+      initVar();
     };
 
     function savePrevious(fromRedo){
