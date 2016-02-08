@@ -68,8 +68,14 @@ angular.module('frontEndApp')
 
       $rootScope.rate = 0;
       $rootScope.max = 5;
-      $rootScope.isReadonly = false;
-    }
+      if($rootScope.user.name === null){
+        $rootScope.isReadonly = true;
+      }
+      else{
+        $rootScope.isReadonly = false;
+      }
+
+    };
 
     initVar();
 
@@ -84,34 +90,39 @@ angular.module('frontEndApp')
     };
 
     $rootScope.noteMix = function(rate){
-      var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
-      console.log(star);
-      $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
-        function successCallback(response) {
-          console.log(response.data);
-          if(response.data.length === 0){
-            $http.post('http://xythe.xyz:8080/star', star).then(
-              function successCallback(response) {
-                console.log("star added");
-              }, function errorCallback(response) {
-                console.log("Error : " + response);
-              }
-            );
-          }
-          else{
-            $http.put('http://xythe.xyz:8080/star', star).then(
-              function successCallback(response) {
-                console.log("star modified");
-              }, function errorCallback(response) {
-                console.log("Error : " + response);
-              }
-            );
-          }
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
-        }
-      );
+      if($rootScope.user.name === null){
+        console.log("not connected");
+      }
+      else{
 
+        var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
+        $http.get('http://xythe.xyz:8080/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
+          function successCallback(response) {
+            console.log(response.data);
+            if(response.data.length === 0){
+              $http.post('http://xythe.xyz:8080/star', star).then(
+                function successCallback(response) {
+                  console.log("star added");
+                }, function errorCallback(response) {
+                  console.log("Error : " + response);
+                }
+              );
+            }
+            else{
+              $http.put('http://xythe.xyz:8080/star', star).then(
+                function successCallback(response) {
+                  console.log("star modified");
+                }, function errorCallback(response) {
+                  console.log("Error : " + response);
+                }
+              );
+            }
+          }, function errorCallback(response) {
+            console.log("Error : " + response);
+          }
+        );
+
+      }
     };
 
     $rootScope.hoveringOver = function(value) {
@@ -158,7 +169,6 @@ angular.module('frontEndApp')
         //      evt.preventDefault();
         //      break;
         default:
-          console.log(evt.keyCode);
       }
       $rootScope.$digest();
     });
@@ -730,7 +740,6 @@ angular.module('frontEndApp')
         $rootScope.progress = 0;
         parseStorage();
 
-        console.log(Math.ceil($rootScope.listOfWaves[0].getDuration()));
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
       }
     }
@@ -1295,6 +1304,7 @@ angular.module('frontEndApp')
       $rootScope.mixName = mixName;
       $rootScope.owner = $rootScope.mixOwner[mixName];
       $rootScope.loadRegions($rootScope.mixData[mixName]);
+      $rootScope.rate = $rootScope.mixStar[mixName];
       //console.log(localStorage);
     };
 

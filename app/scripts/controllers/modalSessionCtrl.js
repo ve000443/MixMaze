@@ -38,6 +38,7 @@ angular.module('frontEndApp').controller('ModalSessionCtrl', function ($scope, $
                 $cookieStore.put("role", 'member');
                 $rootScope.user.name= data.pseudo;
                 $rootScope.user.role= 'member';
+                $rootScope.isReadonly = false;
                 $scope.ok();
               }, function errorCallback(response) {
               }
@@ -60,6 +61,7 @@ angular.module('frontEndApp').controller('ModalSessionCtrl', function ($scope, $
           $cookieStore.put("role", user.role);
           $rootScope.user.name= user.pseudo;
           $rootScope.user.role= user.role;
+          $rootScope.isReadonly = false;
           $scope.ok();
         }
       }, function errorCallback(response) {
