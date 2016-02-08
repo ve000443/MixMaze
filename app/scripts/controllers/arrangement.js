@@ -43,6 +43,7 @@ angular.module('frontEndApp')
 
       $rootScope.mixData = {};
       $rootScope.mixOwner = {};
+      $rootScope.mixStar = {};
       $rootScope.owner = "";
 
       // LOADING
@@ -71,6 +72,16 @@ angular.module('frontEndApp')
     }
 
     initVar();
+
+    $rootScope.noteMix = function(mixName){
+      $http.get('http://xythe.xyz:8080/star/' + mixName).then(
+        function successCallback(response) {
+
+        }, function errorCallback(response) {
+          console.log("Error : " + response);
+        }
+      );
+    };
 
     $rootScope.noteMix = function(rate){
       var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
@@ -162,13 +173,24 @@ angular.module('frontEndApp')
       //});
       $http.get("http://xythe.xyz:8080/mix/" + $rootScope.songName).then(
         function successCallback(response) {
-          console.log(response);
           response.data.forEach(function (key) {
             $rootScope.listOfMix.push(key.name);
             $rootScope.mixData[key.name] = key.data;
             $rootScope.mixOwner[key.name] = key.owner;
+
+              $http.get('http://xythe.xyz:8080/star/' + key.name).then(
+                function successCallback(response) {
+                  var valueStar = 0;
+                  response.data.forEach(function (mix){
+                    valueStar += mix.star;
+                  });
+                  $rootScope.mixStar[key.name] = valueStar / response.data.length;
+
+                }, function errorCallback(response) {
+                  console.log("Error : " + response);
+                }
+              );
           });
-          console.log($rootScope.mixData);
         }, function errorCallback(response) {
           console.error;
           // called asynchronously if an error occurs

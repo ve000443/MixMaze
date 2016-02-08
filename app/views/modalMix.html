@@ -7,7 +7,7 @@
     <div class="col-lg-10"><input type="text" ng-model="searchText" autofocus style="width:100%;"></div>
     <hr class="col-lg-12 simple" style="margin-bottom: 15px;margin-top: 15px">
     <div class="simple jumbotron col-lg-12 row" ng-repeat="mix in listOfMix | filter:searchText track by $index" style="cursor:pointer;margin-bottom: 2px" ng-click="loadMix(mix);ok();">
-      <h4>{{mix}} <uib-rating ng-click="" ng-model="rate" max="max" readonly="true" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating" ng-if="progress !== null && mixName != null"></uib-rating></h4>
+      <h4>{{mix}}</h4> <span style="font-style: italic; font-size: small"> by {{mixOwner[mix]}} </span> <uib-rating ng-model="mixStar[mix]" ng-init="3" max="max" readonly="true" on-hover="hoveringOver(value)" on-leave="overStar = null" aria-labelledby="default-rating"></uib-rating>
     </div>
   </div>
 </div>
