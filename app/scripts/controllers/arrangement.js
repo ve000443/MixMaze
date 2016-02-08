@@ -1186,11 +1186,18 @@ angular.module('frontEndApp')
     };
 
     // Modale for mxix deletion
-    $rootScope.deleteMixModal = function (size) {
-      var thenFct = function(){
-        $rootScope.deleteMix();
+    $rootScope.deleteMixModal = function (mixName) {
+      var thenFct = function(name){
+        $rootScope.deleteMix(name);
       };
-      $rootScope.openModal('modalDeleteMix', 'ModalDefaultCtrl', null, thenFct());
+
+      var resolve = {
+        items: function () {
+          return mixName === undefined ? $rootScope.mixName : mixName;
+        }
+      };
+
+      $rootScope.openModal('modalDeleteMix', 'ModalSaveCtrl', resolve, thenFct);
     };
 
     $rootScope.deleteMix = function (mixName) {
