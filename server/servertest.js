@@ -53,7 +53,7 @@ var starAPI = "";
 
 describe('Serveur-side Tests', function() {
 	before(function(done) {
-		url = "http://localhost:8080";
+		url = "http://xythe.xyz:8080";
 		user.pseudo = "lovemocha";
 		user.email = "test@mocha.test";
 		user.password = "lovemocha";
