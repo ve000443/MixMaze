@@ -28,7 +28,7 @@ angular.module('frontEndApp').controller('ModalSessionCtrl', function ($scope, $
         email: $scope.email,
         password: $scope.password
       };
-      $scope.http.get("http://xythe.xyz:8080/users/" + $scope.pseudo).then(
+      $scope.http.get($rootScope.endpoint + "/users/" + $scope.pseudo).then(
         function successCallback(response) {
           $scope.userExists = (response.data !== "");
           if (!$scope.userExists) {
@@ -51,7 +51,7 @@ angular.module('frontEndApp').controller('ModalSessionCtrl', function ($scope, $
   };
 
   $scope.connect = function () {
-    $scope.http.get("http://xythe.xyz:8080/users/" + $scope.pseudo).then(
+    $scope.http.get($rootScope.endpoint + "/users/" + $scope.pseudo).then(
       function successCallback(response) {
         var exists = (response.data !== "");
         var user = response.data;

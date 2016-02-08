@@ -137,6 +137,17 @@ app.put("/users", function(req, res){
     });
 });
 
+app.get("/users/:user/mixes", function(req, res){
+  var query  = Mix.where({ owner: req.params.user });
+  query.find(function (err, mix) {
+    if (err) throw err;
+    if (mix) {
+      res.statusCode = 200;
+      res.send(mix);
+    }
+  });
+});
+
 app.delete("/users/:pseudo/:applicant", function(req, res){
     var applicantQ = User.where({pseudo: req.params.applicant});
     var query  = User.where({ pseudo: req.params.pseudo });

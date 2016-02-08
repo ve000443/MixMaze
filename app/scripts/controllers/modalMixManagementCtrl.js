@@ -2,7 +2,7 @@ angular.module('frontEndApp').controller('ModalMixManagementCtrl', function ($sc
   $scope.details = [];
   $scope.mixes = {};
 
-  $http.get("http://xythe.xyz:8080/musics").then(
+  $http.get($rootScope.endpoint + "/musics").then(
     function successCallback(response){
       $rootScope.musics = response.data;
     }, function errorCallback(response) {
@@ -10,8 +10,7 @@ angular.module('frontEndApp').controller('ModalMixManagementCtrl', function ($sc
   );
 
   $scope.getSongMixes = function(songName){
-    console.log("http://xythe.xyz:8080/mix/"+songName);
-    $http.get("http://xythe.xyz:8080/mix/"+songName).then(
+    $http.get($rootScope.endpoint + "/mix/"+songName).then(
       function successCallback(response){
         $scope.details = response.data;
       }, function errorCallback(response) {

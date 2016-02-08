@@ -3,7 +3,7 @@
 
 angular.module('frontEndApp')
   .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
-    var local = false;
+    var local = true;
     $rootScope.endpoint = 'http://' + (local ? "localhost" : "xythe.xyz") + ':8080';
 
     // TOGGLERS
@@ -169,7 +169,7 @@ angular.module('frontEndApp')
     // TODO : Change to match the song
     function parseStorage() {
       $rootScope.listOfMix = [];
-      $http.get("http://xythe.xyz:8080/mix/" + $rootScope.songName).then(
+      $http.get($rootScope.endpoint + "/mix/" + $rootScope.songName).then(
         function successCallback(response) {
           response.data.forEach(function (key) {
             $rootScope.listOfMix.push(key.name);
@@ -352,7 +352,7 @@ angular.module('frontEndApp')
     };
 
     // <editor-fold desc="MUSIC LOADER">
-    $http.get("http://xythe.xyz:8080/musics").then(
+    $http.get($rootScope.endpoint + "/musics").then(
       function successCallback(response) {
         $rootScope.musics = response.data;
         $rootScope.musics.forEach(function (o) {
@@ -380,7 +380,7 @@ angular.module('frontEndApp')
       hasClicked = false;
       isLoopingOnTrack = false;
 
-      $http.get("http://xythe.xyz:8080/musics/" + selectedMusic).then(
+      $http.get($rootScope.endpoint + "/musics/" + selectedMusic).then(
         function successCallback(response) {
           $rootScope.songName = selectedMusic;
 

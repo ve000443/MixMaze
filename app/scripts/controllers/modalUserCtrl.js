@@ -1,7 +1,8 @@
 angular.module('frontEndApp').controller('ModalUserCtrl', function ($scope, $uibModalInstance, $rootScope, $http) {
   $scope.details = {};
+  $scope.mixes = {};
 
-  $http.get("http://xythe.xyz:8080/users").then(
+  $http.get($rootScope.endpoint + "/users").then(
     function successCallback(response){
       $rootScope.listOfUsers = response.data;
     }, function errorCallback(response) {
@@ -9,13 +10,34 @@ angular.module('frontEndApp').controller('ModalUserCtrl', function ($scope, $uib
   );
 
   $scope.getUserDetails = function(pseudo){
-    $http.get("http://xythe.xyz:8080/users/" + pseudo).then(
+    $http.get($rootScope.endpoint + "/users/" + pseudo).then(
       function successCallback(response){
         $scope.details = response.data;
       }, function errorCallback(response) {
       }
     );
+    $http.get($rootScope.endpoint + "/users/" + pseudo + "/mixes").then(
+      function successCallback(response){
+        $scope.mixes = response.data;
+        $scope.mixes.forEach(function(mix, index){
+          getRating(mix.name, index);
+        })
+      }, function errorCallback(response){
+      }
+    )
   };
+
+  function getRating(mixName, index){
+    $http.get($rootScope.endpoint + "/star/" + mixName).then(
+      function successCallback(response) {
+        var valueStar = 0;
+        response.data.forEach(function (mix){
+          valueStar += mix.star;
+        });
+        $scope.mixes[index].rating = valueStar / response.data.length;
+      }
+    )
+  }
 
   $scope.ok = function () {
     $uibModalInstance.close();
