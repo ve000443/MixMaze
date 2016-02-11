@@ -98,7 +98,7 @@ angular.module('frontEndApp')
         }
       };
 
-      Tools.openModal('modalDeleteMix', 'ModalSaveCtrl', resolve, thenFct);
+      Tools.openModal('modalDelete', 'ModalSaveCtrl', resolve, thenFct);
     };
 
     $rootScope.deleteMix = function (mixName) {
