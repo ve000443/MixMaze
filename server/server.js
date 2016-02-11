@@ -211,7 +211,7 @@ app.get("/musics/:musicname", function(req, res){
 
 
 app.post("/mix", function(req, res){
-    if (!req.body) return res.sendStatus(400)
+    if (!req.body) return res.sendStatus(400);
     var json = req.body;
     var query  = User.where({ pseudo: json.owner });
     query.findOne(function (err, user) {
@@ -246,7 +246,7 @@ app.delete("/mix/:mixname/:user", function(req, res){
       if(err) throw err;
       mixQ.findOne(function(err, mix){
         if(mix === null || user === null) res.sendStatus(404);
-        else if (mix.owner === user.name || user.role === 'moderator' || user.role==='admin'){
+        else if (mix.owner === user.pseudo || user.role === 'moderator' || user.role==='admin'){
           mix.remove();
           res.sendStatus(200);
         } else {
@@ -257,7 +257,7 @@ app.delete("/mix/:mixname/:user", function(req, res){
 });
 
 app.put("/mix", function(req, res){
-    if (!req.body) return res.sendStatus(400)
+    if (!req.body) return res.sendStatus(400);
     var json = req.body;
     var query  = User.where({ pseudo: json.owner });
     query.findOne(function (err, user) {

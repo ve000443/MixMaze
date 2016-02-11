@@ -12,7 +12,7 @@ angular.module('frontEndApp')
     $rootScope.bufferLoader = undefined;
     $rootScope.ctx = undefined;
 
-    $rootScope.loadMusics = function(){
+    this.loadMusics = function(){
       $http.get($rootScope.endpoint + "/musics").then(
         function successCallback(response) {
           $rootScope.musics = response.data;
@@ -98,7 +98,7 @@ angular.module('frontEndApp')
             loader.bufferList[index] = buffer;
 
             if (++loader.loadCount == loader.urlList.length)
-              $rootScope.init();
+              $rootScope.initWaves();
 
           },
           function (error) {

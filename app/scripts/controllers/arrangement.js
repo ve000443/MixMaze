@@ -2,18 +2,23 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore, Session, Persistence, Tools, Rating, MusicLoader) {
+  .controller('ArrangementCtrl', function ($timeout, $rootScope, Session, Persistence, Tools, Rating, MusicLoader, Effects, SoloMute) {
     var vm = this;
+
+    // Boolean to switch from local to distant Web Service
     var local = false;
     $rootScope.endpoint = 'http://' + (local ? "localhost" : "xythe.xyz") + ':8080';
 
     // Services for HTML
-    $rootScope.Tools =  Tools;
-    $rootScope.Session =  Session;
-    $rootScope.Persistence =  Persistence;
-    $rootScope.Rating =  Rating;
-    $rootScope.MusicLoader =  MusicLoader;
+    $rootScope.Tools = Tools;
+    $rootScope.Session = Session;
+    $rootScope.Persistence = Persistence;
+    $rootScope.Rating = Rating;
+    $rootScope.MusicLoader = MusicLoader;
+    $rootScope.Effects = Effects;
+    $rootScope.SoloMute = SoloMute;
 
+    // (Re)Initialise every variables
     $rootScope.initVar = function() {
       $rootScope.listOfSound = [];
       $rootScope.listOfMix = [];
@@ -76,13 +81,133 @@ angular.module('frontEndApp')
       $rootScope.isLoopingOnTrack = false;
     };
 
+    // Initialise the waves for each registered songs
+    $rootScope.initWaves = function () {
+      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
+        $rootScope.smState[i] = null;
+        var cont = '#wave' + i;
+
+        $rootScope.listOfWaves.push(WaveSurfer.create({
+          container: cont,
+          waveColor: '#bbb',
+          progressColor: '#347',
+          cursorColor: '#000'
+        }));
+        $rootScope.listOfWaves[i].toggleInteraction();
+        $rootScope.listOfWaves[i].color = Tools.randomColor(0.5);
+
+        if (i === 0) {
+          $rootScope.listOfWaves[i].on('audioprocess', $rootScope.evolveEffects);
+        }
+
+        $rootScope.listOfWaves[i].on('ready', function () {
+          console.log("song ready");
+          $rootScope.buffer += 1;
+          $rootScope.checkReadiness();
+          $rootScope.$digest();
+          // load effects values for each tracks
+          var trackEffects = {
+            'hardLimiterValue': 0,
+            'delayTime': 0,
+            'delayFeedbackGain': 0,
+            'filterDetune': 0,
+            'filterFrequency': 0,
+            'filterGain': 0
+          };
+          $rootScope.tracks.push(trackEffects);
+        });
+
+        $rootScope.listOfWaves[i].on('seek', function (progress) {
+          if ($rootScope.seeking === true) return;
+          $rootScope.seeking = true;
+          var willPlay = false;
+          $rootScope.listOfWaves.forEach(function (wave) {
+            willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
+          });
+          $rootScope.listOfWaves.forEach(function (wave, index) {
+            wave.seekTo(progress);
+            if (index === 0) {
+              $rootScope.progress = Math.ceil(progress * $rootScope.duration);
+            } else if (index === $rootScope.listOfWaves.length - 1) {
+              try {
+                $rootScope.$digest();
+              } catch (ex) {
+
+              }
+            }
+            if (willPlay) wave.play();
+          });
+          $rootScope.seeking = false;
+        });
+
+        $rootScope.listOfWaves[i].on('finish', function () {
+          $rootScope.listOfWaves.forEach(function (wave) {
+            // Double stop as a workaround for Wavesurfer caveat
+            wave.stop();
+            wave.stop();
+            if ($rootScope.isLoopingOnTrack) {
+              wave.play();
+            }
+          });
+        });
+
+        $rootScope.listOfWaves[i].enableDragSelection({
+          color: $rootScope.listOfWaves[i].color
+        });
+
+        $rootScope.listOfWaves[i].on('region-click', function (region, e) {
+          if (!Tools.isSelected(region)) {
+            e.stopPropagation();
+            $rootScope.selectRegion(region);
+            $rootScope.$digest();
+          }
+          $rootScope.hasClicked = true;
+        });
+
+        $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
+          e.stopPropagation();
+        });
+
+        $rootScope.listOfWaves[i].on('region-updated', function (region, e) {
+          if (!$rootScope.isMoving && (!$rootScope.isCreating || $rootScope.hasClicked)) {
+            $rootScope.savePrevious();
+            $rootScope.isMoving = true;
+          }
+          if (region.end - region.start < 0.5) return;
+          $rootScope.selectRegion(region);
+          if ($rootScope.effects[region.id] === undefined)
+            $rootScope.effects[region.id] = {};
+          $rootScope.$digest();
+        });
+
+        $rootScope.listOfWaves[i].on('region-update-end', function (region) {
+          $rootScope.isMoving = false;
+          $rootScope.isCreating = false;
+          $rootScope.hasClicked = false;
+        });
+
+        $rootScope.listOfWaves[i].on('region-created', function (region, e) {
+          $rootScope.isCreating = true;
+          $rootScope.savePrevious();
+        });
+
+        $rootScope.listOfWaves[i].on('region-in', $rootScope.activateEffects);
+        $rootScope.listOfWaves[i].on('region-out', $rootScope.deactivateEffects);
+
+        $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
+
+      }
+    };
+
     $rootScope.initVar();
-    $rootScope.loadMusics();
+
+    // Get the music list from the Web Service
+    MusicLoader.loadMusics();
 
     // SHORTCUTS
     document.addEventListener("keydown", function (evt) {
+      // If a modal is open, we don't catch the event
       if ($rootScope.hasModalOpen) return;
-      //console.log(evt.keyCode);
       switch (evt.keyCode) {
         // DELETE
         case 46:
@@ -109,22 +234,17 @@ angular.module('frontEndApp')
           if (evt.ctrlKey && evt.shiftKey) Tools.redo();
           else if (evt.ctrlKey) Tools.undo();
           break;
-        // SPACE
+        // SPACE - Used for debug
         case 32:
-          $rootScope.jsonifyTrackEffects();
-          evt.preventDefault();
+          //$rootScope.jsonifyTrackEffects();
+          //evt.preventDefault();
           break;
-        // BACKSPACE
-        //case 8:
-        //      undo();
-        //      evt.preventDefault();
-        //      break;
         default:
       }
       $rootScope.$digest();
     });
 
-    // <editor-fold desc="KNOB EFFECTS">
+    // <editor-fold desc="SELECTION">
     $rootScope.selectTrack = function (index) {
       $rootScope.deselectRegion();
       $rootScope.trackSelected = index;
@@ -252,96 +372,6 @@ angular.module('frontEndApp')
       }
     };
 
-    $rootScope.zoom = function (zoomLevel) {
-      $rootScope.listOfWaves.forEach(function (wave) {
-        wave.zoom(zoomLevel);
-      });
-    };
-
-    $rootScope.toggled = function (open) {
-      $log.log('Dropdown is now: ', open);
-    };
-
-    $rootScope.toggleDropdown = function ($event) {
-      $event.preventDefault();
-      $event.stopPropagation();
-      $rootScope.status.isopen = !$rootScope.status.isopen;
-    };
-
-    // <editor-fold desc="EFFECTS">
-    function activateEffects(region) {
-      var effects = $rootScope.effects[region.id];
-      var keys = Object.keys(effects);
-      var effect = {region: region};
-      keys.forEach(function (key) {
-        switch (key) {
-          case 'mute':
-            if ($rootScope.effects[region.id].mute && !region.wavesurfer.isMuted) {
-              region.wavesurfer.toggleMute();
-            }
-            else if (!$rootScope.effects[region.id].mute && region.wavesurfer.isMuted) {
-              region.wavesurfer.toggleMute();
-            }
-            break;
-          default:
-            effect[key] = effects[key];
-        }
-      });
-      $rootScope.activeEffects[region.id] = effect;
-    }
-
-    function deactivateEffects(region) {
-      if (region.id === $rootScope.selectedRegionName) checkLoop();
-      var waveId = region.wavesurfer.container.id.split("wave")[1];
-
-      if ($rootScope.effects[region.id].mute && region.wavesurfer.isMuted) {
-        region.wavesurfer.toggleMute();
-      }
-      else if (!$rootScope.effects[region.id].mute && !region.wavesurfer.isMuted) {
-        region.wavesurfer.toggleMute();
-      }
-
-      delete $rootScope.activeEffects[region.id];
-
-      if ($rootScope.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
-      else if ($rootScope.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
-
-      if ($rootScope.effects[region.id].fadeout) {
-        region.wavesurfer.setVolume($rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100);
-      }
-    }
-
-    function evolveEffects(progress) {
-      $rootScope.progress = Math.ceil(progress);
-
-      var keys = Object.keys($rootScope.activeEffects);
-      var region;
-      keys.forEach(function (key) {
-        region = $rootScope.activeEffects[key].region;
-        var subKeys = Object.keys($rootScope.activeEffects[key]);
-        subKeys.forEach(function (subKey) {
-          switch (subKey) {
-            case "fadein":
-              var start = region.start;
-              var end = region.end;
-              var volume = $rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100;
-              var res = Math.min((progress - start) * volume / (end - start), volume);
-              region.wavesurfer.setVolume(res);
-              break;
-            case "fadeout":
-              var start = region.start;
-              var end = region.end;
-              var volume = $rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100;
-              var res = Math.max(volume - volume * ((progress - start) / (end - start)), 0);
-              region.wavesurfer.setVolume(res);
-              break;
-            default:
-          }
-        });
-      });
-      $rootScope.$digest();
-    }
-
     $rootScope.selectRegion = function(region) {
       $rootScope.deselectRegion();
       $rootScope.deselectTrack();
@@ -372,29 +402,16 @@ angular.module('frontEndApp')
         $rootScope.selectedRegionName = "";
       }
     };
+    // </editor-fold>
 
-    $rootScope.toggleEffect = function (effect) {
-      $rootScope.savePrevious();
-      $rootScope.effects[$rootScope.selectedRegionName][effect] = !$rootScope.effects[$rootScope.selectedRegionName][effect];
-
-    };
-
-    $rootScope.toggleSoundEffect = function (effect) {
-      $rootScope.toggleEffect(effect);
-      var tmp = ['fadein', 'fadeout', 'mute'];
-      Object.keys($rootScope.effects[$rootScope.selectedRegionName]).forEach(function (key) {
-        if (key !== effect && tmp.indexOf(key) > -1) {
-          $rootScope.effects[$rootScope.selectedRegionName][key] = false;
-        }
+    // DEPRECATED - Zoom on track, original behavior seems erratic
+    $rootScope.zoom = function (zoomLevel) {
+      $rootScope.listOfWaves.forEach(function (wave) {
+        wave.zoom(zoomLevel);
       });
     };
 
-    $rootScope.hasEffect = function (effect) {
-      if ($rootScope.effects[$rootScope.selectedRegionName] !== undefined)
-        return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
-    };
-    // </editor-fold>
-
+    // Check whether every tracks are loaded
     $rootScope.checkReadiness = function() {
       if ($rootScope.buffer === $rootScope.listOfSound.length) {
         $rootScope.listOfWaves.forEach(function (wave) {
@@ -407,125 +424,10 @@ angular.module('frontEndApp')
       }
     };
 
-    $rootScope.init = function () {
-      $rootScope.initWaves();
-      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
-        $rootScope.smState[i] = null;
-      }
-    };
-
-    $rootScope.initWaves = function () {
-      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
-        var cont = '#wave' + i;
-
-        $rootScope.listOfWaves.push(WaveSurfer.create({
-          container: cont,
-          waveColor: '#bbb',
-          progressColor: '#347',
-          cursorColor: '#000'
-        }));
-        $rootScope.listOfWaves[i].toggleInteraction();
-        $rootScope.listOfWaves[i].color = Tools.randomColor(0.5);
-
-        if (i === 0) {
-          $rootScope.listOfWaves[i].on('audioprocess', evolveEffects);
-        }
-
-        $rootScope.listOfWaves[i].on('ready', function () {
-          console.log("song ready");
-          $rootScope.buffer += 1;
-          $rootScope.checkReadiness();
-          $rootScope.$digest();
-          // load effects values for each tracks
-          var trackEffects = {
-            'hardLimiterValue': 0,
-            'delayTime': 0,
-            'delayFeedbackGain': 0,
-            'filterDetune': 0,
-            'filterFrequency': 0,
-            'filterGain': 0
-          };
-          $rootScope.tracks.push(trackEffects);
-        });
-
-        $rootScope.listOfWaves[i].on('seek', function (progress) {
-          if ($rootScope.seeking === true) return;
-          $rootScope.seeking = true;
-          var willPlay = false;
-          $rootScope.listOfWaves.forEach(function (wave) {
-            willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
-          });
-          $rootScope.listOfWaves.forEach(function (wave, index) {
-            wave.seekTo(progress);
-            if (index === 0) {
-              $rootScope.progress = Math.ceil(progress * $rootScope.duration);
-            } else if (index === $rootScope.listOfWaves.length - 1) {
-              try {
-                $rootScope.$digest();
-              } catch (ex) {
-
-              }
-            }
-            if (willPlay) wave.play();
-          });
-          $rootScope.seeking = false;
-        });
-
-        $rootScope.listOfWaves[i].on('finish', function () {
-          $rootScope.listOfWaves.forEach(function (wave) {
-            wave.stop();
-            wave.stop();
-            if (isLoopingOnTrack) {
-              wave.play();
-            }
-          });
-        });
-
-        $rootScope.listOfWaves[i].enableDragSelection({
-          color: $rootScope.listOfWaves[i].color
-        });
-
-        $rootScope.listOfWaves[i].on('region-click', function (region, e) {
-          if (!Tools.isSelected(region)) {
-            e.stopPropagation();
-            $rootScope.selectRegion(region);
-            $rootScope.$digest();
-          }
-          $rootScope.hasClicked = true;
-        });
-
-        $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
-          e.stopPropagation();
-        });
-
-        $rootScope.listOfWaves[i].on('region-updated', function (region, e) {
-          if (!$rootScope.isMoving && (!$rootScope.isCreating || $rootScope.hasClicked)) {
-            $rootScope.savePrevious();
-            $rootScope.isMoving = true;
-          }
-          if (region.end - region.start < 0.5) return;
-          $rootScope.selectRegion(region);
-          if ($rootScope.effects[region.id] === undefined)
-            $rootScope.effects[region.id] = {};
-          $rootScope.$digest();
-        });
-
-        $rootScope.listOfWaves[i].on('region-update-end', function (region) {
-          $rootScope.isMoving = false;
-          $rootScope.isCreating = false;
-          $rootScope.hasClicked = false;
-        });
-
-        $rootScope.listOfWaves[i].on('region-created', function (region, e) {
-          $rootScope.isCreating = true;
-          $rootScope.savePrevious();
-        });
-
-        $rootScope.listOfWaves[i].on('region-in', activateEffects);
-        $rootScope.listOfWaves[i].on('region-out', deactivateEffects);
-
-        $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
-
+    // Check whether the track should loop on the selected region when leaving it
+    $rootScope.checkLoop = function() {
+      if (vm.isLoopingOnRegion) {
+        $rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
       }
     };
 
@@ -566,12 +468,6 @@ angular.module('frontEndApp')
       event.target.blur();
     };
 
-    function checkLoop() {
-      if (vm.isLoopingOnRegion) {
-        $rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
-      }
-    }
-
     $rootScope.updateTrackVolume = function (index) {
       if ($rootScope.smState[index] == "mute") {
         $rootScope.smState[index] = null;
@@ -583,72 +479,6 @@ angular.module('frontEndApp')
       $rootScope.generalVolume = value;
       for (var i = 0; i < $rootScope.listOfWaves.length; i++) {
         $rootScope.updateTrackVolume(i);
-      }
-    };
-
-    $rootScope.mute = function (track) {
-      $rootScope.listOfWaves[track].toggleMute();
-    };
-
-    $rootScope.updateSm = function (track, value, event) {
-      event.stopPropagation();
-      if (value == 'solo' && $rootScope.nbSolo == 0 && $rootScope.smState[track] != 'solo') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-        for (var i = 0; i < $rootScope.smState.length; i++) {
-          if (i != track) {
-            $rootScope.smState[i] = 'mute';
-          }
-        }
-      } else if (value == 'solo' && $rootScope.nbSolo > 0 && $rootScope.smState[track] != 'solo') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-      } else if (value == 'mute' && $rootScope.nbSolo > 0 && $rootScope.smState[track] == 'mute') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-      } else if (value == 'mute' && $rootScope.smState[track] == 'solo') {
-        $rootScope.smState[track] = 'mute';
-        $rootScope.nbSolo--;
-      } else if (value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo > 1) {
-        $rootScope.smState[track] = 'mute';
-        $rootScope.nbSolo--;
-      } else if (value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo == 1) {
-        for (var i = 0; i < $rootScope.smState.length; i++) {
-          $rootScope.smState[i] = null;
-        }
-        $rootScope.nbSolo--;
-      } else if (value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == null) {
-        $rootScope.smState[track] = 'mute';
-      } else if (value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == 'mute') {
-        $rootScope.smState[track] = null;
-      }
-      $rootScope.manageSoloMute($rootScope.smState);
-    };
-
-    $rootScope.reinitSm = function () {
-      for (var i = 0; i < $rootScope.smState.length; i++) {
-        $rootScope.smState[i] = null;
-        $rootScope.nbSolo = 0;
-      }
-      $rootScope.manageSoloMute($rootScope.smState);
-    };
-
-    $rootScope.manageSoloMute = function (smState) {
-      for (var i = 0; i < smState.length; i++) {
-        if (smState[i] == 'mute' && $rootScope.listOfWaves[i].isMuted != true) {
-          $rootScope.listOfWaves[i].toggleMute();
-        } else if (smState[i] == 'solo' && $rootScope.listOfWaves[i].isMuted == true
-          || smState[i] == null && $rootScope.listOfWaves[i].isMuted == true) {
-          $rootScope.listOfWaves[i].toggleMute();
-        }
-      }
-    };
-
-    $rootScope.solo = function (track) {
-      for (var i = 0; i < $rootScope.listOfWaves.length; i++) {
-        if (i != track) {
-          $rootScope.listOfWaves[i].toggleMute();
-        }
       }
     };
 
@@ -665,6 +495,7 @@ angular.module('frontEndApp')
       $rootScope.updateAllTracksVolume(value);
     });
 
+    // Initialise the volume change listeners at runtime
     $rootScope.volumeStart = function () {
       if ($rootScope.slidersInitialized) return;
       $rootScope.slidersInitialized = true;
