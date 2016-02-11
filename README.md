@@ -7,6 +7,8 @@
 
 `npm install -g grunt-cli bower`
 
+#### All musics are hosted on xythe.xyz, except for the one called `marco` which is a local preview in this repository
+
 ## Back End
 
 #### To install the required dependencies, place yourself in the `server` directory and use :
@@ -41,17 +43,17 @@ Default value :
 ## Work Distribution
 
 #### Zied BENZARTI aka Zied10 (zied.benzarti@gmail.com)
-`Ratings
-Music loading`
+`Ratings`
+`Music loading`
 
 #### Marc DESTEFANIS (marc.destefanis.etu@gmail.com)
-`Track Effects
-Web Audio`
+`Track Effects`
+`Web Audio`
 
 #### Kevin VARANDAS (kevin.varandas@gmail.com)
-`Web Service
-Testing`
+`Web Service`
+`Testing`
 
 #### Etienne VIVIEN aka Waerth (vivien.etienne@gmail.com)
-`GUI
-Region Effects`
+`GUI`
+`Region Effects`

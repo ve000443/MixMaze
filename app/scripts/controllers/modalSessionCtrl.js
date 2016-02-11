@@ -32,7 +32,7 @@ angular.module('frontEndApp').controller('ModalSessionCtrl', function ($scope, $
         function successCallback(response) {
           $scope.userExists = (response.data !== "");
           if (!$scope.userExists) {
-            $scope.http.post('http://xythe.xyz:8080/users/', data).then(
+            $scope.http.post($rootScope.endpoint + '/users/', data).then(
               function successCallback(response) {
                 $cookieStore.put("user", data.pseudo);
                 $cookieStore.put("role", 'member');

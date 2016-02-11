@@ -6,7 +6,7 @@ angular.module('frontEndApp')
     var vm = this;
 
     // Boolean to switch from local to distant Web Service
-    var local = false;
+    var local = true;
     $rootScope.endpoint = 'http://' + (local ? "localhost" : "xythe.xyz") + ':8080';
 
     // Services for HTML
