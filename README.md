@@ -7,7 +7,7 @@
 
 `npm install -g grunt-cli bower`
 
-#### All musics are hosted on xythe.xyz, except for the one called `marco` which is a local preview in this repository
+#### All musics are hosted on xythe.xyz, except for the one called `marco` which is a local preview available in this repository
 
 ## Back End
 
@@ -30,8 +30,7 @@
 `npm install`
 `bower install`
 
-#### You can change whether you want to use the Web Service in local mod or use the one provided on xythe.xyz
-#### by change the `local` boolean in the file `[MixMaze_Folder]\app\scripts\controllers\arrangement.js`
+#### You can change whether you want to use the Web Service in local mod or use the one provided on xythe.xyz by changing the `local` boolean in the file `[MixMaze_Folder]\app\scripts\controllers\arrangement.js`
 
 Default value : 
 `var local = true`
