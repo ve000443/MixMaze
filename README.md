@@ -1,12 +1,19 @@
-# front-end
+# Front End
 
-This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular)
-version 0.15.1.
+Se placer à la racine du projet et lancer les commandes suivantes:
+  npm install
+  bower install
+  grunt serve
 
-## Build & development
+#Server
 
-Run `grunt` for building and `grunt serve` for preview.
-
+Le côté serveur est déjà executé sur un serveur distant mais si vous voulez le lancer en local :
+  Plcaez vous dans le dossier /server
+  npm install
+  npm start
+  
 ## Testing
-
-Running `grunt test` will run the unit tests with karma.
+Pour executer les tests :
+  Se placer dans le dossier /server
+  npm install
+  npm test
