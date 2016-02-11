@@ -2,48 +2,49 @@
 
 
 angular.module('frontEndApp')
-  .controller('ArrangementCtrl', function ($http, $timeout, $rootScope, $uibModal, $log, $cookies, $cookieStore) {
-    var local = true;
+  .controller('ArrangementCtrl', function ($timeout, $rootScope, Session, Persistence, Tools, Rating, MusicLoader, Effects, SoloMute) {
+    var vm = this;
+
+    // Boolean to switch from local to distant Web Service
+    var local = false;
     $rootScope.endpoint = 'http://' + (local ? "localhost" : "xythe.xyz") + ':8080';
 
-    // TOGGLERS
-    $rootScope.hasModalOpen = false;
-    var isTracking = true;
-    var isMoving = false;
-    var isCreating = false;
-    var hasClicked = false;
-    var isLoopingOnTrack = false;
-    var vm = this;
-    var bufferLoader;
-    var ctx;
+    // Services for HTML
+    $rootScope.Tools = Tools;
+    $rootScope.Session = Session;
+    $rootScope.Persistence = Persistence;
+    $rootScope.Rating = Rating;
+    $rootScope.MusicLoader = MusicLoader;
+    $rootScope.Effects = Effects;
+    $rootScope.SoloMute = SoloMute;
 
-    $rootScope.user = {
-      name: ($cookieStore.get("user") !== undefined) ? $cookieStore.get("user") : null,
-      role: ($cookieStore.get("role") !== undefined) ? $cookieStore.get("role") : "guest"
-    };
-
-    function initVar() {
-
+    // (Re)Initialise every variables
+    $rootScope.initVar = function() {
       $rootScope.listOfSound = [];
       $rootScope.listOfMix = [];
       $rootScope.listOfWaves = [];
 
+      // EFFECTS
       $rootScope.delayTime = 0;
       $rootScope.feedbackGain = 0;
       $rootScope.filterDetune = 0;
       $rootScope.filterDrequency = 0;
       $rootScope.filterGain = 0;
       $rootScope.generalVolume = 100;
-
       $rootScope.effects = {};
       $rootScope.activeEffects = {};
+
+      // STATE
       $rootScope.smState = [];
       $rootScope.nbSolo = 0;
       $rootScope.songName = "";
-      $rootScope.mixName = "";
       $rootScope.sliders = {};
+      $rootScope.progress = null;
+      $rootScope.duration = 0;
 
+      // MIX INFOS
       $rootScope.mixData = {};
+      $rootScope.mixName = "";
       $rootScope.mixOwner = {};
       $rootScope.mixStar = {};
       $rootScope.owner = "";
@@ -58,74 +59,155 @@ angular.module('frontEndApp')
       $rootScope.previous = [];
       $rootScope.next = [];
 
+      // REGION SELECTION
       $rootScope.selectedRegionName = "";
       $rootScope.selectedRegion = null;
-      $rootScope.progress = null;
-      $rootScope.duration = 0;
-
       vm.isLoopingOnRegion = false;
 
+      // TRACK SELECTION
       $rootScope.trackSelected = null;
       $rootScope.tracks = [];
 
+      // RATING
       $rootScope.rate = 0;
       $rootScope.max = 5;
-    }
 
-    initVar();
+      // TOGGLERS
+      $rootScope.hasModalOpen = false;
+      $rootScope.isTracking = true;
+      $rootScope.isMoving = false;
+      $rootScope.isCreating = false;
+      $rootScope.hasClicked = false;
+      $rootScope.isLoopingOnTrack = false;
+    };
 
-    $rootScope.noteMix = function(mixName){
-      $http.get($rootScope.endpoint + '/star/' + mixName).then(
-        function successCallback(response) {
+    // Initialise the waves for each registered songs
+    $rootScope.initWaves = function () {
+      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
+        $rootScope.smState[i] = null;
+        var cont = '#wave' + i;
 
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
+        $rootScope.listOfWaves.push(WaveSurfer.create({
+          container: cont,
+          waveColor: '#bbb',
+          progressColor: '#347',
+          cursorColor: '#000'
+        }));
+        $rootScope.listOfWaves[i].toggleInteraction();
+        $rootScope.listOfWaves[i].color = Tools.randomColor(0.5);
+
+        if (i === 0) {
+          $rootScope.listOfWaves[i].on('audioprocess', $rootScope.evolveEffects);
         }
-      );
-    };
 
-    $rootScope.noteMix = function(rate){
-      if($rootScope.user.name === null){
-        console.log("not connected");
-      }
-      else{
-        var star = {mixName : $rootScope.mixName, userName: $rootScope.user.name, star : rate};
-        $http.get($rootScope.endpoint + '/star/' + $rootScope.mixName + "/" + $rootScope.user.name).then(
-          function successCallback(response) {
-            console.log(response.data);
-            if(response.data.length === 0){
-              $http.post($rootScope.endpoint + '/star', star).then(
-                function successCallback(response) {
-                  console.log("star added");
-                }, function errorCallback(response) {
-                  console.log("Error : " + response);
-                }
-              );
+        $rootScope.listOfWaves[i].on('ready', function () {
+          console.log("song ready");
+          $rootScope.buffer += 1;
+          $rootScope.checkReadiness();
+          $rootScope.$digest();
+          // load effects values for each tracks
+          var trackEffects = {
+            'hardLimiterValue': 0,
+            'delayTime': 0,
+            'delayFeedbackGain': 0,
+            'filterDetune': 0,
+            'filterFrequency': 0,
+            'filterGain': 0
+          };
+          $rootScope.tracks.push(trackEffects);
+        });
+
+        $rootScope.listOfWaves[i].on('seek', function (progress) {
+          if ($rootScope.seeking === true) return;
+          $rootScope.seeking = true;
+          var willPlay = false;
+          $rootScope.listOfWaves.forEach(function (wave) {
+            willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
+          });
+          $rootScope.listOfWaves.forEach(function (wave, index) {
+            wave.seekTo(progress);
+            if (index === 0) {
+              $rootScope.progress = Math.ceil(progress * $rootScope.duration);
+            } else if (index === $rootScope.listOfWaves.length - 1) {
+              try {
+                $rootScope.$digest();
+              } catch (ex) {
+
+              }
             }
-            else{
-              $http.put($rootScope.endpoint + '/star', star).then(
-                function successCallback(response) {
-                  console.log("star modified");
-                }, function errorCallback(response) {
-                  console.log("Error : " + response);
-                }
-              );
+            if (willPlay) wave.play();
+          });
+          $rootScope.seeking = false;
+        });
+
+        $rootScope.listOfWaves[i].on('finish', function () {
+          $rootScope.listOfWaves.forEach(function (wave) {
+            // Double stop as a workaround for Wavesurfer caveat
+            wave.stop();
+            wave.stop();
+            if ($rootScope.isLoopingOnTrack) {
+              wave.play();
             }
-          }, function errorCallback(response) {
-            console.log("Error : " + response);
+          });
+        });
+
+        $rootScope.listOfWaves[i].enableDragSelection({
+          color: $rootScope.listOfWaves[i].color
+        });
+
+        $rootScope.listOfWaves[i].on('region-click', function (region, e) {
+          if (!Tools.isSelected(region)) {
+            e.stopPropagation();
+            $rootScope.selectRegion(region);
+            $rootScope.$digest();
           }
-        );
+          $rootScope.hasClicked = true;
+        });
+
+        $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
+          e.stopPropagation();
+        });
+
+        $rootScope.listOfWaves[i].on('region-updated', function (region, e) {
+          if (!$rootScope.isMoving && (!$rootScope.isCreating || $rootScope.hasClicked)) {
+            $rootScope.savePrevious();
+            $rootScope.isMoving = true;
+          }
+          if (region.end - region.start < 0.5) return;
+          $rootScope.selectRegion(region);
+          if ($rootScope.effects[region.id] === undefined)
+            $rootScope.effects[region.id] = {};
+          $rootScope.$digest();
+        });
+
+        $rootScope.listOfWaves[i].on('region-update-end', function (region) {
+          $rootScope.isMoving = false;
+          $rootScope.isCreating = false;
+          $rootScope.hasClicked = false;
+        });
+
+        $rootScope.listOfWaves[i].on('region-created', function (region, e) {
+          $rootScope.isCreating = true;
+          $rootScope.savePrevious();
+        });
+
+        $rootScope.listOfWaves[i].on('region-in', $rootScope.activateEffects);
+        $rootScope.listOfWaves[i].on('region-out', $rootScope.deactivateEffects);
+
+        $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
+
       }
     };
 
-    $rootScope.hoveringOver = function(value) {
-      $rootScope.overStar = value;
-    };
+    $rootScope.initVar();
+
+    // Get the music list from the Web Service
+    MusicLoader.loadMusics();
 
     // SHORTCUTS
     document.addEventListener("keydown", function (evt) {
+      // If a modal is open, we don't catch the event
       if ($rootScope.hasModalOpen) return;
-      //console.log(evt.keyCode);
       switch (evt.keyCode) {
         // DELETE
         case 46:
@@ -149,65 +231,20 @@ angular.module('frontEndApp')
           break;
         // Z
         case 90:
-          if (evt.ctrlKey && evt.shiftKey) redo();
-          else if (evt.ctrlKey) undo();
+          if (evt.ctrlKey && evt.shiftKey) Tools.redo();
+          else if (evt.ctrlKey) Tools.undo();
           break;
-        // SPACE
+        // SPACE - Used for debug
         case 32:
-          jsonifyTrackEffects();
-          evt.preventDefault();
+          //$rootScope.jsonifyTrackEffects();
+          //evt.preventDefault();
           break;
-        // BACKSPACE
-        //case 8:
-        //      undo();
-        //      evt.preventDefault();
-        //      break;
         default:
       }
       $rootScope.$digest();
     });
 
-    // TODO : Change to match the song
-    function parseStorage() {
-      $rootScope.listOfMix = [];
-      $http.get($rootScope.endpoint + "/mix/" + $rootScope.songName).then(
-        function successCallback(response) {
-          response.data.forEach(function (key) {
-            $rootScope.listOfMix.push(key.name);
-            $rootScope.mixData[key.name] = key.data;
-            $rootScope.mixOwner[key.name] = key.owner;
-
-              $http.get($rootScope.endpoint + '/star/' + key.name).then(
-                function successCallback(response) {
-                  var valueStar = 0;
-                  response.data.forEach(function (mix){
-                    valueStar += mix.star;
-                  });
-                  $rootScope.mixStar[key.name] = valueStar / response.data.length;
-
-                }, function errorCallback(response) {
-                  console.log("Error : " + response);
-                }
-              );
-          });
-        }, function errorCallback(response) {
-          console.error;
-          // called asynchronously if an error occurs
-          // or server returns response with an error status
-        }
-      )
-    }
-
-    $rootScope.clearStorage = function () {
-      Object.keys(localStorage).forEach(function (key) {
-        if (key.indexOf("MixMaze_") > -1) {
-          delete localStorage[key];
-        }
-      });
-      $rootScope.listOfMix = [];
-    };
-
-    // <editor-fold desc="KNOB EFFECTS">
+    // <editor-fold desc="SELECTION">
     $rootScope.selectTrack = function (index) {
       $rootScope.deselectRegion();
       $rootScope.trackSelected = index;
@@ -335,248 +372,13 @@ angular.module('frontEndApp')
       }
     };
 
-
-    $rootScope.zoom = function (zoomLevel) {
-      $rootScope.listOfWaves.forEach(function (wave) {
-        wave.zoom(zoomLevel);
-      });
-    };
-
-    $rootScope.toggled = function (open) {
-      $log.log('Dropdown is now: ', open);
-    };
-
-    $rootScope.toggleDropdown = function ($event) {
-      $event.preventDefault();
-      $event.stopPropagation();
-      $rootScope.status.isopen = !$rootScope.status.isopen;
-    };
-
-    // <editor-fold desc="MUSIC LOADER">
-    $http.get($rootScope.endpoint + "/musics").then(
-      function successCallback(response) {
-        $rootScope.musics = response.data;
-        $rootScope.musics.forEach(function (o) {
-        });
-
-      }, function errorCallback(response) {
-        console.error;
-
-      });
-
-    function loadSamples() {
-      var audioContext = window.AudioContext || window.webkitAudioContext;
-
-      ctx = new audioContext();
-
-      loadAllSoundSamples();
-    }
-
-    $rootScope.loadRemoteSamples = function (selectedMusic) {
-      $rootScope.stopAllTracks();
-      initVar();
-      isTracking = true;
-      isMoving = false;
-      isCreating = false;
-      hasClicked = false;
-      isLoopingOnTrack = false;
-
-      $http.get($rootScope.endpoint + "/musics/" + selectedMusic).then(
-        function successCallback(response) {
-          $rootScope.songName = selectedMusic;
-
-          $rootScope.pistes = response.data.musicFiles;
-          parseStorage();
-          $rootScope.pistes.forEach(function (p) {
-            $rootScope.listOfSound.push("http://xythe.xyz/mixmaze" + response.data.musicPath + "/" + p);
-          });
-
-          loadSamples();
-        }, function errorCallback(response) {
-          console.error;
-        });
-
-    };
-
-    function loadAllSoundSamples() {
-      bufferLoader = new BufferLoader(
-        ctx,
-        $rootScope.listOfSound
-      );
-
-      bufferLoader.load();
-    }
-
-    function BufferLoader(context, urlList) {
-      this.context = context;
-      this.urlList = urlList;
-      this.bufferList = [];
-      this.loadCount = 0;
-    }
-
-    BufferLoader.prototype.loadBuffer = function (url, index) {
-      // Load buffer asynchronously
-      console.log('file : ' + url + " loading and decoding");
-
-      var request = new XMLHttpRequest();
-      request.open("GET", url, true);
-
-      request.responseType = "arraybuffer";
-
-      var loader = this;
-
-      request.onload = function () {
-
-        // Asynchronously decode the audio file data in request.response
-        loader.context.decodeAudioData(
-          request.response,
-          function (buffer) {
-            $rootScope.decode += 1;
-            $rootScope.$digest();
-            console.log("Loaded and decoded track " + (loader.loadCount + 1) +
-              "/" + loader.urlList.length + "...");
-
-            if (!buffer) {
-              alert('error decoding file data: ' + url);
-              return;
-            }
-            loader.bufferList[index] = buffer;
-
-            if (++loader.loadCount == loader.urlList.length)
-              $rootScope.init();
-
-          },
-          function (error) {
-            console.error('decodeAudioData error', error);
-          }
-        );
-      };
-
-      request.onprogress = function (e) {
-        if (e.total !== 0) {
-          var percent = (e.loaded * 100) / e.total;
-          if (percent === 100) {
-            $rootScope.download += 1;
-            $rootScope.$digest();
-          }
-          console.log("loaded " + percent + " % of file " + index);
-        }
-      };
-
-      request.onerror = function () {
-        alert('BufferLoader: XHR error');
-      };
-
-      request.send();
-    };
-
-    BufferLoader.prototype.load = function () {
-      console.log("Loading " + this.urlList.length + "track(s)... please wait...");
-      $rootScope.nbTrack = this.urlList.length;
-      for (var i = 0; i < this.urlList.length; ++i)
-        this.loadBuffer(this.urlList[i], i);
-    };
-    // </editor-fold>
-
-    // <editor-fold desc="EFFECTS">
-    function activateEffects(region) {
-      var effects = $rootScope.effects[region.id];
-      var keys = Object.keys(effects);
-      var effect = {region: region};
-      keys.forEach(function (key) {
-        switch (key) {
-          case 'mute':
-            if ($rootScope.effects[region.id].mute && !region.wavesurfer.isMuted) {
-              region.wavesurfer.toggleMute();
-            }
-            else if (!$rootScope.effects[region.id].mute && region.wavesurfer.isMuted) {
-              region.wavesurfer.toggleMute();
-            }
-            break;
-          default:
-            effect[key] = effects[key];
-        }
-      });
-      $rootScope.activeEffects[region.id] = effect;
-    }
-
-    function deactivateEffects(region) {
-      if (region.id === $rootScope.selectedRegionName) checkLoop();
-      var waveId = region.wavesurfer.container.id.split("wave")[1];
-
-      if ($rootScope.effects[region.id].mute && region.wavesurfer.isMuted) {
-        region.wavesurfer.toggleMute();
-      }
-      else if (!$rootScope.effects[region.id].mute && !region.wavesurfer.isMuted) {
-        region.wavesurfer.toggleMute();
-      }
-
-      delete $rootScope.activeEffects[region.id];
-
-      if ($rootScope.smState[waveId] === "mute" && !region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
-      else if ($rootScope.smState[waveId] !== "mute" && region.wavesurfer.isMuted) region.wavesurfer.toggleMute();
-
-      if ($rootScope.effects[region.id].fadeout) {
-        region.wavesurfer.setVolume($rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100);
-      }
-    }
-
-    function evolveEffects(progress) {
-      $rootScope.progress = Math.ceil(progress);
-
-      var keys = Object.keys($rootScope.activeEffects);
-      var region;
-      keys.forEach(function (key) {
-        region = $rootScope.activeEffects[key].region;
-        var subKeys = Object.keys($rootScope.activeEffects[key]);
-        subKeys.forEach(function (subKey) {
-          switch (subKey) {
-            case "fadein":
-              var start = region.start;
-              var end = region.end;
-              var volume = $rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100;
-              var res = Math.min((progress - start) * volume / (end - start), volume);
-              region.wavesurfer.setVolume(res);
-              break;
-            case "fadeout":
-              var start = region.start;
-              var end = region.end;
-              var volume = $rootScope.sliders['slider' + region.wavesurfer.container.id.split("wave")[1]] / 100 * $rootScope.generalVolume / 100;
-              var res = Math.max(volume - volume * ((progress - start) / (end - start)), 0);
-              region.wavesurfer.setVolume(res);
-              break;
-            default:
-          }
-        });
-      });
-      $rootScope.$digest();
-    }
-
-    function undo() {
-      if ($rootScope.previous.length === 0) return;
-      $rootScope.next.push(jsonify());
-      $rootScope.deselectRegion();
-      var previousState = $rootScope.previous.pop();
-      //$rootScope.loadRegions(previousState);
-      loadAllEffects(previousState);
-    }
-
-    function redo() {
-      if ($rootScope.next.length === 0) return;
-      savePrevious(true);
-      $rootScope.deselectRegion();
-      var nextState = $rootScope.next.pop();
-      //$rootScope.loadRegions(nextState);
-      loadAllEffects(nextState);
-    }
-
-    function selectRegion(region) {
+    $rootScope.selectRegion = function(region) {
       $rootScope.deselectRegion();
       $rootScope.deselectTrack();
       $rootScope.selectedRegion = region;
       $rootScope.selectedRegionName = region.id;
       region.element.className += " selected";
-    }
+    };
 
     $rootScope.deselectRegion = function () {
       if ($rootScope.selectedRegion !== null) {
@@ -592,7 +394,7 @@ angular.module('frontEndApp')
     };
 
     $rootScope.deleteRegion = function () {
-      savePrevious();
+      $rootScope.savePrevious();
       if ($rootScope.selectedRegion !== null) {
         delete $rootScope.effects[$rootScope.selectedRegionName];
         $rootScope.selectedRegion.remove();
@@ -600,263 +402,32 @@ angular.module('frontEndApp')
         $rootScope.selectedRegionName = "";
       }
     };
+    // </editor-fold>
 
-    $rootScope.toggleEffect = function (effect) {
-      savePrevious();
-      $rootScope.effects[$rootScope.selectedRegionName][effect] = !$rootScope.effects[$rootScope.selectedRegionName][effect];
-
-    };
-
-    $rootScope.toggleSoundEffect = function (effect) {
-      $rootScope.toggleEffect(effect);
-      var tmp = ['fadein', 'fadeout', 'mute'];
-      Object.keys($rootScope.effects[$rootScope.selectedRegionName]).forEach(function (key) {
-        if (key !== effect && tmp.indexOf(key) > -1) {
-          $rootScope.effects[$rootScope.selectedRegionName][key] = false;
-        }
+    // DEPRECATED - Zoom on track, original behavior seems erratic
+    $rootScope.zoom = function (zoomLevel) {
+      $rootScope.listOfWaves.forEach(function (wave) {
+        wave.zoom(zoomLevel);
       });
     };
 
-    $rootScope.hasEffect = function (effect) {
-      if ($rootScope.effects[$rootScope.selectedRegionName] !== undefined)
-        return $rootScope.effects[$rootScope.selectedRegionName][effect] === true;
-    };
-
-    function jsonify(){
-      var res = {};
-      res.tracks = JSON.parse(jsonifyTrackEffects());
-      res.regions = JSON.parse(jsonifyRegions());
-      return JSON.stringify(res);
-    }
-
-    function loadAllEffects(state){
-      state = state === undefined ? JSON.parse($rootScope.mixData) : JSON.parse(state);
-
-      $rootScope.loadTrackEffects(state.tracks);
-      $rootScope.loadRegions(state.regions);
-    }
-
-    function jsonifyTrackEffects(){
-      var res = [];
-      $rootScope.tracks.forEach(function(track){
-        res.push(track);
-      });
-      console.log(res);
-      return JSON.stringify(res);
-    }
-
-    $rootScope.loadTrackEffects = function(effects){
-      if (typeof effects === 'string')
-        effects = JSON.parse(effects);
-
-      $rootScope.tracks = effects;
-      if($rootScope.trackSelected !== null ){
-        document.getElementById('filterLimiter').setValue($rootScope.tracks[$rootScope.trackSelected].hardLimiterValue);
-        document.getElementById('delayTime').setValue($rootScope.tracks[$rootScope.trackSelected].delayTime);
-        document.getElementById('feedbackGain').setValue($rootScope.tracks[$rootScope.trackSelected].delayFeedbackGain);
-        document.getElementById('filterDetune').setValue($rootScope.tracks[$rootScope.trackSelected].filterDetune);
-        document.getElementById('filterFrequency').setValue($rootScope.tracks[$rootScope.trackSelected].filterFrequency);
-        document.getElementById('filterGain').setValue($rootScope.tracks[$rootScope.trackSelected].filterGain);
-      }
-    };
-
-    function jsonifyRegions() {
-      var res = {};
-      $rootScope.listOfWaves.forEach(function (wavesurfer, index) {
-        res[$rootScope.nameRecover($rootScope.listOfSound[index])] = Object.keys(wavesurfer.regions.list).map(function (id) {
-          var region = wavesurfer.regions.list[id];
-          var effects = {};
-          try {
-            Object.keys($rootScope.effects[region.id]).forEach(function (key) {
-              effects[key] = $rootScope.effects[region.id][key];
-            });
-          } catch (ex) {
-          }
-          return {
-            start: region.start,
-            end: region.end,
-            attributes: region.attributes,
-            data: region.data,
-            effects: effects,
-            id: region.id,
-            isSelected: region.id === $rootScope.selectedRegionName
-          };
-        });
-      });
-      return JSON.stringify(res);
-    }
-
-    /**
-     * Save regions to localStorage.
-     */
-    $rootScope.saveRegions = function () {
-      localStorage[$rootScope.songName] = jsonifyRegions();
-    };
-
-    /**
-     * Load regions from localStorage.
-     */
-    $rootScope.loadRegions = function (regions) {
-      isTracking = false;
-      if (regions === undefined) {
-        if (localStorage[$rootScope.songName] === undefined) return;
-        $rootScope.deselectRegion();
-        regions = JSON.parse(localStorage[$rootScope.songName]);
-      }
-      else if (typeof regions === 'string')
-        regions = JSON.parse(regions);
-      $rootScope.effects = {};
-      $rootScope.listOfWaves.forEach(function (wavesurfer, index) {
-        wavesurfer.clearRegions();
-        var piste = $rootScope.nameRecover($rootScope.listOfSound[index]);
-        if (regions[piste] !== undefined) {
-          regions[piste].forEach(function (region) {
-            region.color = wavesurfer.color;
-            wavesurfer.addRegion(region);
-            var keys = Object.keys(wavesurfer.regions.list);
-            var newRegion = wavesurfer.regions.list[keys[keys.length - 1]];
-            if (region.isSelected) {
-              selectRegion(newRegion);
-            }
-            $rootScope.effects[newRegion.id] = region.effects;
-          });
-        }
-      });
-      isTracking = true;
-    };
-
-    function checkReadiness() {
+    // Check whether every tracks are loaded
+    $rootScope.checkReadiness = function() {
       if ($rootScope.buffer === $rootScope.listOfSound.length) {
         $rootScope.listOfWaves.forEach(function (wave) {
           wave.toggleInteraction();
         });
         $rootScope.progress = 0;
-        parseStorage();
+        $rootScope.parseStorage();
 
         $rootScope.duration = Math.ceil($rootScope.listOfWaves[0].getDuration());
       }
-    }
-
-    $rootScope.init = function () {
-      $rootScope.initWaves();
-      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
-        $rootScope.smState[i] = null;
-      }
-
     };
 
-    $rootScope.initWaves = function () {
-      for (var i = 0; i < $rootScope.listOfSound.length; i++) {
-        var cont = '#wave' + i;
-
-        $rootScope.listOfWaves.push(WaveSurfer.create({
-          container: cont,
-          waveColor: '#bbb',
-          progressColor: '#347',
-          cursorColor: '#000'
-        }));
-        $rootScope.listOfWaves[i].toggleInteraction();
-        $rootScope.listOfWaves[i].color = randomColor(0.5);
-
-        if (i === 0) {
-          $rootScope.listOfWaves[i].on('audioprocess', evolveEffects);
-        }
-
-        $rootScope.listOfWaves[i].on('ready', function () {
-          console.log("song ready");
-          $rootScope.buffer += 1;
-          checkReadiness();
-          $rootScope.$digest();
-          // load effects values for each tracks
-          var trackEffects = {
-            'hardLimiterValue': 0,
-            'delayTime': 0,
-            'delayFeedbackGain': 0,
-            'filterDetune': 0,
-            'filterFrequency': 0,
-            'filterGain': 0
-          };
-          $rootScope.tracks.push(trackEffects);
-        });
-
-        $rootScope.listOfWaves[i].on('seek', function (progress) {
-          if ($rootScope.seeking === true) return;
-          $rootScope.seeking = true;
-          var willPlay = false;
-          $rootScope.listOfWaves.forEach(function (wave) {
-            willPlay = wave.getCurrentTime() - wave.getDuration() === 0 || willPlay;
-          });
-          $rootScope.listOfWaves.forEach(function (wave, index) {
-            wave.seekTo(progress);
-            if (index === 0) {
-              $rootScope.progress = Math.ceil(progress * $rootScope.duration);
-            } else if (index === $rootScope.listOfWaves.length - 1) {
-              try {
-                $rootScope.$digest();
-              } catch (ex) {
-
-              }
-            }
-            if (willPlay) wave.play();
-          });
-          $rootScope.seeking = false;
-        });
-
-        $rootScope.listOfWaves[i].on('finish', function () {
-          $rootScope.listOfWaves.forEach(function (wave) {
-            wave.stop();
-            wave.stop();
-            if (isLoopingOnTrack) {
-              wave.play();
-            }
-          });
-        });
-
-        $rootScope.listOfWaves[i].enableDragSelection({
-          color: $rootScope.listOfWaves[i].color
-        });
-
-        $rootScope.listOfWaves[i].on('region-click', function (region, e) {
-          if (!isSelected(region)) {
-            e.stopPropagation();
-            selectRegion(region);
-            $rootScope.$digest();
-          }
-          hasClicked = true;
-        });
-
-        $rootScope.listOfWaves[i].on('region-dblclick', function (region, e) {
-          e.stopPropagation();
-        });
-
-        $rootScope.listOfWaves[i].on('region-updated', function (region, e) {
-          if (!isMoving && (!isCreating || hasClicked)) {
-            savePrevious();
-            isMoving = true;
-          }
-          if (region.end - region.start < 0.5) return;
-          selectRegion(region);
-          if ($rootScope.effects[region.id] === undefined)
-            $rootScope.effects[region.id] = {};
-          $rootScope.$digest();
-        });
-
-        $rootScope.listOfWaves[i].on('region-update-end', function (region) {
-          isMoving = false;
-          isCreating = false;
-          hasClicked = false;
-        });
-
-        $rootScope.listOfWaves[i].on('region-created', function (region, e) {
-          isCreating = true;
-          savePrevious();
-        });
-
-        $rootScope.listOfWaves[i].on('region-in', activateEffects);
-        $rootScope.listOfWaves[i].on('region-out', deactivateEffects);
-
-        $rootScope.listOfWaves[i].load($rootScope.listOfSound[i]);
-
+    // Check whether the track should loop on the selected region when leaving it
+    $rootScope.checkLoop = function() {
+      if (vm.isLoopingOnRegion) {
+        $rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
       }
     };
 
@@ -881,12 +452,12 @@ angular.module('frontEndApp')
         $rootScope.listOfWaves[0].seekTo(nextProgress);
       }
       else {
-        $rootScope.progress = 0;
+        if($rootScope.progress !== null) $rootScope.progress = 0;
       }
     };
 
     $rootScope.loopTrack = function (isLooping, event) {
-      isLoopingOnTrack = isLooping;
+      $rootScope.isLoopingOnTrack = isLooping;
       event.target.blur();
     };
 
@@ -896,12 +467,6 @@ angular.module('frontEndApp')
       }
       event.target.blur();
     };
-
-    function checkLoop() {
-      if (vm.isLoopingOnRegion) {
-        $rootScope.listOfWaves[0].seekTo($rootScope.selectedRegion.start / $rootScope.listOfWaves[0].getDuration());
-      }
-    }
 
     $rootScope.updateTrackVolume = function (index) {
       if ($rootScope.smState[index] == "mute") {
@@ -917,89 +482,6 @@ angular.module('frontEndApp')
       }
     };
 
-    $rootScope.mute = function (track) {
-      $rootScope.listOfWaves[track].toggleMute();
-    };
-
-    $rootScope.updateSm = function (track, value) {
-      if (value == 'solo' && $rootScope.nbSolo == 0 && $rootScope.smState[track] != 'solo') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-        for (var i = 0; i < $rootScope.smState.length; i++) {
-          if (i != track) {
-            $rootScope.smState[i] = 'mute';
-          }
-        }
-      } else if (value == 'solo' && $rootScope.nbSolo > 0 && $rootScope.smState[track] != 'solo') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-      } else if (value == 'mute' && $rootScope.nbSolo > 0 && $rootScope.smState[track] == 'mute') {
-        $rootScope.smState[track] = 'solo';
-        $rootScope.nbSolo++;
-      } else if (value == 'mute' && $rootScope.smState[track] == 'solo') {
-        $rootScope.smState[track] = 'mute';
-        $rootScope.nbSolo--;
-      } else if (value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo > 1) {
-        $rootScope.smState[track] = 'mute';
-        $rootScope.nbSolo--;
-      } else if (value == 'solo' && $rootScope.smState[track] == 'solo' && $rootScope.nbSolo == 1) {
-        for (var i = 0; i < $rootScope.smState.length; i++) {
-          $rootScope.smState[i] = null;
-        }
-        $rootScope.nbSolo--;
-      } else if (value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == null) {
-        $rootScope.smState[track] = 'mute';
-      } else if (value == 'mute' && $rootScope.nbSolo == 0 && $rootScope.smState[track] == 'mute') {
-        $rootScope.smState[track] = null;
-      }
-      $rootScope.manageSoloMute($rootScope.smState);
-    };
-
-    $rootScope.reinitSm = function () {
-      for (var i = 0; i < $rootScope.smState.length; i++) {
-        $rootScope.smState[i] = null;
-        $rootScope.nbSolo = 0;
-      }
-      $rootScope.manageSoloMute($rootScope.smState);
-    };
-
-    $rootScope.manageSoloMute = function (smState) {
-      for (var i = 0; i < smState.length; i++) {
-        if (smState[i] == 'mute' && $rootScope.listOfWaves[i].isMuted != true) {
-          $rootScope.listOfWaves[i].toggleMute();
-        } else if (smState[i] == 'solo' && $rootScope.listOfWaves[i].isMuted == true
-          || smState[i] == null && $rootScope.listOfWaves[i].isMuted == true) {
-          $rootScope.listOfWaves[i].toggleMute();
-        }
-      }
-    };
-
-    $rootScope.solo = function (track) {
-      for (var i = 0; i < $rootScope.listOfWaves.length; i++) {
-        if (i != track) {
-          $rootScope.listOfWaves[i].toggleMute();
-        }
-      }
-    };
-
-    $rootScope.updatePan = function (track, value) {
-
-      console.log("updatePan(" + track + "," + value + ")");
-
-    };
-
-
-
-    nx.onload = function () {
-
-      nx.colorize("accent", "#347");
-      nx.colorize("border", "#bbb");
-      nx.colorize("fill", "#eee");
-
-
-
-    };
-
     var knobs = document.getElementsByTagName('webaudio-knob');
     for (var i = 0; i < knobs.length; i++) {
       var knob = knobs[i];
@@ -1013,6 +495,7 @@ angular.module('frontEndApp')
       $rootScope.updateAllTracksVolume(value);
     });
 
+    // Initialise the volume change listeners at runtime
     $rootScope.volumeStart = function () {
       if ($rootScope.slidersInitialized) return;
       $rootScope.slidersInitialized = true;
@@ -1026,246 +509,5 @@ angular.module('frontEndApp')
         });
       });
     };
-
-    $rootScope.storeMixInDatabase = function (name) {
-      $rootScope.mixName = name;
-      //var json = jsonifyRegions();
-      var json = jsonify();
-      var mix = {
-        owner: $rootScope.user.name,
-        name: $rootScope.mixName,
-        music: $rootScope.songName,
-        data: json
-      };
-      $http.post($rootScope.endpoint + '/mix/', mix).then(
-        function successCallback(response) {
-          parseStorage();
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
-        });
-    };
-
-    // <editor-fold desc="SAVE">
-    $rootScope.save = function () {
-      if (!Boolean($rootScope.mixName)) {
-        $rootScope.saveAs();
-      } else {
-        $rootScope.updateMix($rootScope.mixName);
-      }
-    };
-
-    /** MODAL */
-    $rootScope.saveAs = function () {
-      var thenFct = function (name) {
-        $rootScope.hasModalOpen = false;
-        $rootScope.mixName = name;
-        $rootScope.owner = $rootScope.user.name;
-        $rootScope.rate = 0;
-        $rootScope.storeMixInDatabase(name);
-        $rootScope.hasModalOpen = false;
-      };
-
-      var resolve = {
-        items: function () {
-          return $rootScope.mixName;
-        }
-      };
-
-      $rootScope.openModal('modalSave', 'ModalSaveCtrl', resolve, thenFct);
-    };
-
-    $rootScope.openModal = function (template, controller, resolve, thenFct, otherwiseFct, size) {
-      var defaultFct = function () {
-        $rootScope.hasModalOpen = false;
-      };
-      $rootScope.hasModalOpen = true;
-
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'views/' + template + '.html',
-        controller: controller,
-        size: size,
-        resolve: resolve
-      });
-
-      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
-    };
-
-    $rootScope.updateMix = function (name) {
-      //var json = jsonifyRegions();
-      var json = jsonify();
-      console.log($rootScope.user.name);
-      var mix = {owner: $rootScope.user.name, name: name, music: $rootScope.songName, data: json};
-
-      $http.put($rootScope.endpoint + '/mix/', mix).then(
-        function successCallback(response) {
-          console.log("mix updated");
-          parseStorage();
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
-        }
-      );
-    };
-
-    // Modale for mix deletion
-    $rootScope.deleteMixModal = function (mixName) {
-      $rootScope.openModalDelete('mix', mixName);
-    };
-
-    $rootScope.openModalDeleteUser = function (name) {
-      $rootScope.openModalDelete('user', name);
-    };
-
-    $rootScope.openModalDelete = function (targetType, name){
-      var thenFct = function(name){
-        if(targetType === 'user') $rootScope.deleteUser(name);
-        else  $rootScope.deleteMix(name);
-      };
-
-      var resolve = {
-        items: function(){
-          return name === undefined ? (targetType === 'user' ? $rootScope.user.name : $rootScope.mixName) : name;
-        }
-      };
-
-      $rootScope.openModal('modalDeleteMix', 'ModalSaveCtrl', resolve, thenFct);
-    };
-
-    $rootScope.deleteMix = function (mixName) {
-      mixName = mixName === undefined ? $rootScope.mixName : mixName;
-      $http.delete($rootScope.endpoint + '/mix/' + mixName + '/' + $rootScope.user.name).then(
-        function successCallback(response) {
-          console.log("mix deleted");
-          parseStorage();
-          if(mixName === $rootScope.mixName) {
-            $rootScope.mixName = '';
-            $rootScope.owner = '';
-            $rootScope.rating = 0;
-          }
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
-        }
-      );
-    };
-
-    $rootScope.deleteUser = function(name){
-      if(name === undefined) return;
-      $http.delete($rootScope.endpoint + '/users/' + name + '/' + $rootScope.user.name).then(
-        function successCallback(response) {
-          console.log("user deleted");
-        }, function errorCallback(response) {
-          console.log("Error : " + response);
-        }
-      );
-    };
-
-    $rootScope.logOut = function(){
-      $cookieStore.put('user', undefined);
-      $cookieStore.put('role', undefined);
-      $rootScope.user.name = null;
-      $rootScope.user.role = 'guest';
-      $rootScope.stopAllTracks();
-      initVar();
-    };
-
-    function savePrevious(fromRedo){
-      if (isTracking) {
-        //$rootScope.previous.push(jsonifyRegions());
-        $rootScope.previous.push(jsonify());
-        if(!fromRedo) $rootScope.next = [];
-      }
-    }
-
-    $rootScope.openModal = function(template, controller, resolve, thenFct, otherwiseFct, size){
-      var defaultFct = function(){
-        $rootScope.hasModalOpen = false;
-      };
-      $rootScope.hasModalOpen = true;
-
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'views/' + template + '.html',
-        controller: controller,
-        size: size,
-        resolve: resolve
-      });
-
-      modalInstance.result.then(thenFct === undefined ? defaultFct : thenFct, otherwiseFct === undefined ? defaultFct : otherwiseFct);
-    };
-
-    $rootScope.openModalLogIn = function(){
-      var resolve = {operation:function(){return 'login';}};
-      $rootScope.openModal('modalSession', 'ModalSessionCtrl', resolve);
-    };
-
-    $rootScope.openModalSignUp = function(){
-      var resolve = {operation:function(){return 'signup';}};
-      $rootScope.openModal('modalSession', 'ModalSessionCtrl', resolve);
-    };
-
-    $rootScope.loadMix = function(mixName) {
-      savePrevious();
-      $rootScope.mixName = mixName;
-      $rootScope.owner = $rootScope.mixOwner[mixName];
-      //$rootScope.loadRegions($rootScope.mixData[mixName]);
-      loadAllEffects($rootScope.mixData[mixName]);
-      $rootScope.rate = $rootScope.mixStar[mixName];
-      //console.log(localStorage);
-    };
-
-    $rootScope.hasRights = function(level){
-      var res = false;
-      //noinspection FallThroughInSwitchStatementJS
-      switch(level){
-        case 0:
-              res = res || $rootScope.user.role === 'member';
-        case 1:
-              res = res || $rootScope.user.role === 'moderator';
-        default:
-              res = res || $rootScope.user.role === 'admin';
-      }
-      return res;
-    };
-
-    $rootScope.hasOwnership = function(){
-      return $rootScope.user.name === $rootScope.owner;
-    };
-
-    // <editor-fold desc="TOOLS">
-    $rootScope.blur = function(event){
-      event.target.blur();
-    };
-
-    $rootScope.getPercent = function(current, total){
-      return Math.round(current/total*100);
-    };
-
-    $rootScope.timeFormat = function (duration){
-      return pad(Math.floor(duration/60), 2) + ":" + pad(Math.floor(duration%60), 2);
-    };
-
-    $rootScope.nameRecover = function(str){
-      var splitted = str.split("/");
-      return splitted[splitted.length - 1].split(".")[0];
-    };
-
-    function randomColor(alpha) {
-      return 'rgba(' + [
-          ~~(Math.random() * 255),
-          ~~(Math.random() * 255),
-          ~~(Math.random() * 255),
-          alpha || 1
-        ] + ')';
-    }
-
-    function pad(num, size) {
-      var s = num+"";
-      while (s.length < size) s = "0" + s;
-      return s;
-    }
-
-    function isSelected(region){
-      return region.id === $rootScope.selectedRegionName;
-    }
   });
 
